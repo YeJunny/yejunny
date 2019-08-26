@@ -11,7 +11,7 @@ void Framework::update()
 	GameLoop();
 }
 
-Stage stage;
+Stage stage("stageData.txt", "stageImage.dds");
 
 void GameLoop()
 {

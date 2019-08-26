@@ -1,9 +1,9 @@
 #pragma once
 
-#define STR_LEN 256
-#include <cstring>
-#include <fstream>
+#include "File.h"
 #include "GameLib/Framework.h"
+#include "Image.h"
+#include <cstring>
 
 using namespace GameLib;
 using namespace std;
@@ -11,7 +11,17 @@ using namespace std;
 class Stage
 {
 public:
-	Stage();
+	enum EDraw
+	{
+		Player,
+		Wall,
+		Box,
+		Target,
+		Goal,
+		Space
+	};
+
+	Stage(const char* stage, const char* image);
 	virtual ~Stage();
 	int Input();
 	void Update(int move);
@@ -24,7 +34,8 @@ private:
 	int mNumOfBox;
 	int mP;
 	char* mStage;
-	int* mDrawStage;
+	EDraw* mDrawStage;
 	int* mO;
 	int* mQ;
+	Image* mImage;
 };

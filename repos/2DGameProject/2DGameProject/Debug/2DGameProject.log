@@ -1,4 +1,17 @@
 ﻿  Stage.cpp
-  main.cpp
-  Generating Code...
+c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(289): warning C4482: nonstandard extension used: enum 'Stage::EDraw' used in qualified name
+c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(294): warning C4482: nonstandard extension used: enum 'Stage::EDraw' used in qualified name
+c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(299): warning C4482: nonstandard extension used: enum 'Stage::EDraw' used in qualified name
+c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(304): warning C4482: nonstandard extension used: enum 'Stage::EDraw' used in qualified name
+c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(317): warning C4482: nonstandard extension used: enum 'Stage::EDraw' used in qualified name
+c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(325): warning C4482: nonstandard extension used: enum 'Stage::EDraw' used in qualified name
+c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(331): warning C4482: nonstandard extension used: enum 'Stage::EDraw' used in qualified name
+c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(337): warning C4018: '<' : signed/unsigned mismatch
+c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(339): warning C4018: '<' : signed/unsigned mismatch
+c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(345): warning C4482: nonstandard extension used: enum 'Stage::EDraw' used in qualified name
+c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(357): warning C4482: nonstandard extension used: enum 'Stage::EDraw' used in qualified name
+c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(369): warning C4482: nonstandard extension used: enum 'Stage::EDraw' used in qualified name
+c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(381): warning C4482: nonstandard extension used: enum 'Stage::EDraw' used in qualified name
+c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(393): warning C4482: nonstandard extension used: enum 'Stage::EDraw' used in qualified name
+c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(275): warning C4189: 'windowHeight' : local variable is initialized but not referenced
   2DGameProject.vcxproj -> C:\Users\yejun\source\repos\2DGameProject\Debug\2DGameProject.exe

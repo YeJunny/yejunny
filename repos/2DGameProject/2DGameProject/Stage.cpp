@@ -2,19 +2,11 @@
 
 #include "Stage.h"
 
-Stage::Stage()
+Stage::Stage(const char* stage, const char* image)
 {
-	ifstream fin;
-	char* str = new char[STR_LEN];
-
-	fin.open("stageData.txt", ios::binary);
-
-	fin.seekg(0, ifstream::end);
-	int fileSize = static_cast<int>(fin.tellg());
-	fin.seekg(0, ifstream::beg);
-
-	fin.read(str, fileSize);
-	str[fileSize] = 0;
+	// 맵 데이터 읽어오기
+	File* file = new File(stage);
+	char* str = file->GetReadingFile();
 
 	char* token = strtok(str, "\n\r");
 	mWidth = atoi(token);
@@ -35,13 +27,17 @@ Stage::Stage()
 
 	size_t length = strlen(temp);
 	mStage = new char[length + 1];
-	mDrawStage = new int[length];
+	mDrawStage = new EDraw[length];
 	memcpy(mStage, temp, length);
 
-	delete[] str;
 	delete[] temp;
-	fin.close();
+	delete file;
 
+	// 이미지 데이터 읽어오기
+	mImage = new Image(image);
+
+
+	// 멤버변수 초기화
 	int count = 0;
 	for (int i = 0; i < mHeight; i++)
 	{
@@ -55,7 +51,6 @@ Stage::Stage()
 	}
 	mNumOfBox = count;
 
-	// Goal 초기화
 	mQ = new int[mNumOfBox];
 	for (int i = 0; i < mNumOfBox; i++)
 	{
@@ -95,6 +90,7 @@ Stage::~Stage()
 	delete[] mQ;
 	delete[] mStage;
 	delete[] mDrawStage;
+	delete mImage;
 }
 
 int Stage::Input()
@@ -274,42 +270,39 @@ void Stage::Update(int move)
 
 void Stage::Draw() const
 {
-	unsigned int* vram = Framework::instance().videoMemory();
-	unsigned int windowWidth = Framework::instance().width();
-
 	for (int i = 0; i < mHeight; i++)
 	{
 		for (int j = 0; j < mWidth; j++)
 		{
 			char data = mStage[i * mWidth + j];
-			unsigned int color;
+			EDraw image;
 
 			switch (data)
 			{
 			case ' ':
 			case '.':
 			{
-				color = 0x000000;
+				image = EDraw::Space;
 				break;
 			}
 			case 'w':
 			{
-				color = 0xffffff;
+				image = EDraw::Wall;
 				break;
 			}
 			case 'x':
 			{
-				color = 0x0000ff;
+				image = EDraw::Target;
 				break;
 			}
 			default:
 			{
-				color = 0x000000;
+				image = EDraw::Space;
 				break;
 			}
 			}
 
-			mDrawStage[i * mWidth + j] = color;
+			mDrawStage[i * mWidth + j] = image;
 		}
 	}
 
@@ -317,7 +310,7 @@ void Stage::Draw() const
 	{
 		if (mO[i] >= 0 && mO[i] < mWidth * mHeight)
 		{
-			*(mDrawStage + mO[i]) = 0xff0000; //'O';
+			*(mDrawStage + mO[i]) = EDraw::Box; //'O';
 		}
 	}
 
@@ -325,32 +318,103 @@ void Stage::Draw() const
 	{
 		if (mQ[i] >= 0 && mQ[i] < mWidth * mHeight)
 		{
-			*(mDrawStage + mQ[i]) = 0xff00ff; // 'Q';
+			*(mDrawStage + mQ[i]) = EDraw::Goal; // 'Q';
 		}
 	}
 
 	if (mP >= 0 && mP < mWidth * mHeight)
 	{
-		*(mDrawStage + mP) = 0x00ff00; // 'p';
+		*(mDrawStage + mP) = EDraw::Player; // 'p';
 	}
 
-	for (int y = 0; y < mHeight; y++)
+	unsigned int* vram = Framework::instance().videoMemory();
+	unsigned int windowWidth = Framework::instance().width();
+	unsigned int windowHeight = Framework::instance().height();
+	const unsigned int tileSize = 32;
+
+	for (int i = 0; i < mHeight * tileSize; i += tileSize)
 	{
-		for (int x = 0; x < mWidth; x++)
+		for (int j = 0; j < mWidth * tileSize; j += tileSize)
 		{
-			for (int i = 0; i < 16; ++i)
+			EDraw drawStage = mDrawStage[(i / tileSize) * mWidth + (j / tileSize)];
+
+			switch (drawStage)
 			{
-				for (int j = 0; j < 16; ++j)
+			case EDraw::Player:
+			{
+				for (int dy = 0; dy < tileSize; dy++)
 				{
-					vram[(y * 16 + i) * windowWidth + (x * 16 + j)] = mDrawStage[y * mWidth + x];
+					for (int dx = 0; dx < tileSize; dx++)
+					{
+						unsigned int* vramRef = &vram[(i + dy) * windowWidth + j + dx];
+						*vramRef = mImage->GetData(dy * mImage->GetWidth() + dx);
+					}
 				}
+				break;
+			}
+			case EDraw::Wall:
+			{
+				for (int dy = 0; dy < tileSize; dy++)
+				{
+					for (int dx = tileSize; dx < tileSize * 2; dx++)
+					{
+						unsigned int* vramRef = &vram[(i + dy) * windowWidth + j + (dx - tileSize)];
+						*vramRef = mImage->GetData(dy * mImage->GetWidth() + dx);
+					}
+				}
+				break;
+			}
+			case EDraw::Box:
+			{
+				for (int dy = 0; dy < tileSize; dy++)
+				{
+					for (int dx = tileSize * 2; dx < tileSize * 3; dx++)
+					{
+						unsigned int* vramRef = &vram[(i + dy) * windowWidth + j + (dx - tileSize * 2)];
+						*vramRef = mImage->GetData(dy * mImage->GetWidth() + dx);
+					}
+				}
+				break;
+			}
+			case EDraw::Goal:
+			{
+				for (int dy = 0; dy < tileSize; dy++)
+				{
+					for (int dx = tileSize * 3; dx < tileSize * 4; dx++)
+					{
+						unsigned int& vramRef = vram[(i + dy) * windowWidth + j + (dx - tileSize * 3)];
+						vramRef = mImage->GetData(dy * mImage->GetWidth() + dx);
+					}
+				}
+				break;
+			}
+			case EDraw::Target:
+			{
+				for (int dy = 0; dy < tileSize; dy++)
+				{
+					for (int dx = tileSize * 4; dx < tileSize * 5; dx++)
+					{
+						unsigned int& vramRef = vram[(i + dy) * windowWidth + j + (dx - tileSize * 4)];
+						vramRef = mImage->GetData(dy * mImage->GetWidth() + dx);
+					}
+				}
+				break;
+			}
+			default:
+			{
+				for (int dy = 0; dy < tileSize; dy++)
+				{
+					for (int dx = tileSize * 5; dx < tileSize * 6; dx++)
+					{
+						unsigned int& vramRef = vram[(i + dy) * windowWidth + j + (dx - tileSize * 5)];
+						vramRef = mImage->GetData(dy * mImage->GetWidth() + dx);
+					}
+				}
+				break;
+			}
 			}
 		}
-
-		cout << endl;
 	}
-
-	cout << endl;
 }
 
 bool Stage::IsClear() const
