@@ -25,7 +25,7 @@ char* File::GetReadingFile() const
 	return mData;
 }
 
-unsigned int File::GetUnsignedInt(const char* p)
+unsigned int File::GetUnsignedInt(const char* p) const
 {
 	const unsigned char* up;
 	up = reinterpret_cast<const unsigned char*>(p);

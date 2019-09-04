@@ -4,6 +4,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Cat.cpp" />
     <ClCompile Include="MyString.cpp" />
+    <ClCompile Include="BinarySearchTree.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cat.h" />
@@ -11,5 +12,6 @@
     <ClInclude Include="Person.h" />
     <ClInclude Include="Pet.h" />
     <ClInclude Include="MyString.h" />
+    <ClInclude Include="BinarySearchTree.h" />
   </ItemGroup>
 </Project>

@@ -11,7 +11,7 @@ public:
 	File(const char* fileName);
 	~File();
 	char* GetReadingFile() const;
-	unsigned int GetUnsignedInt(const char* p);
+	unsigned int GetUnsignedInt(const char* p) const;
 
 private:
 	char* mData;
