@@ -1,12 +1,13 @@
 #pragma once
 
-#include "File.h"
 #include "GameLib/Framework.h"
-#include "Image.h"
 #include <cstring>
 
 using namespace GameLib;
 using namespace std;
+
+class Image;
+struct PreInput;
 
 class Stage
 {
@@ -25,7 +26,8 @@ public:
 	virtual ~Stage();
 	int Input();
 	void Update(int move);
-	void Draw() const;
+	void Draw();
+	void DrawTile(int x, int y, int pos, int tileSize) const;
 	bool IsClear() const;
 
 private:
@@ -33,9 +35,16 @@ private:
 	int mHeight;
 	int mNumOfBox;
 	int mP;
+	int mPreP;
+	int mCountOfO;
+	int mCountOfP;
 	char* mStage;
 	EDraw* mDrawStage;
 	int* mO;
+	int* mPreO;
 	int* mQ;
 	Image* mImage;
+	PreInput* mPreInput;
+	bool mDrawP;
+	bool mDrawO;
 };

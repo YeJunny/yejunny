@@ -1,8 +1,15 @@
 #define _CRT_SECURE_NO_WARNINGS
 
+#include "File.h"
+#include "Image.h"
+#include "PreInput.h"
 #include "Stage.h"
 
 Stage::Stage(const char* stage, const char* image)
+	: mCountOfO(0)
+	, mCountOfP(0)
+	, mDrawP(false)
+	, mDrawO(false)
 {
 	// 맵 데이터 읽어오기
 	File* file = new File(stage);
@@ -57,7 +64,6 @@ Stage::Stage(const char* stage, const char* image)
 		mQ[i] = -1;
 	}
 
-	mO = new int[mNumOfBox];
 	for (int i = 0; i < mHeight; i++)
 	{
 		for (int j = 0; j < mWidth; j++)
@@ -70,6 +76,8 @@ Stage::Stage(const char* stage, const char* image)
 		}
 	}
 
+	mO = new int[mNumOfBox];
+	mPreO = new int[mNumOfBox];
 	int k = 0;
 	for (int i = 0; i < mHeight; i++)
 	{
@@ -78,59 +86,76 @@ Stage::Stage(const char* stage, const char* image)
 			if (mStage[i * mWidth + j] == 'O')
 			{
 				mStage[i * mWidth + j] = ' ';
-				mO[k++] = j + mWidth * i;
+				mO[k] = j + mWidth * i;
+				mPreO[k] = j + mWidth * i;
+				++k;
 			}
 		}
 	}
+
+	// 이전 입력 초기화
+	mPreInput = new PreInput();
+	mPreInput->PreInputA = false;
+	mPreInput->PreInputD = false;
+	mPreInput->PreInputS = false;
+	mPreInput->PreInputW = false;
 }
 
 Stage::~Stage()
 {
 	delete[] mO;
+	delete[] mPreO;
 	delete[] mQ;
 	delete[] mStage;
 	delete[] mDrawStage;
 	delete mImage;
+	delete mPreInput;
 }
 
 int Stage::Input()
 {
-	char input;
-	cin >> input;
+	if (mDrawO == true || mDrawP == true)
+	{
+		return 0;
+	}
 
 	int move;
+	auto f = Framework::instance();
+	bool inputW = f.isKeyOn('w') || f.isKeyOn('W');
+	bool inputS = f.isKeyOn('s') || f.isKeyOn('S');
+	bool inputA = f.isKeyOn('a') || f.isKeyOn('A');
+	bool inputD = f.isKeyOn('d') || f.isKeyOn('D');
 
-	switch (input)
-	{
-	case 'A':
-	case 'a':
+	if (inputA && (!mPreInput->PreInputA))
 	{
 		move = -1;
-		break;
 	}
-	case 'D':
-	case 'd':
+	else if (inputD && (!mPreInput->PreInputD))
 	{
 		move = +1;
-		break;
 	}
-	case 'W':
-	case 'w':
+	else if (inputW && (!mPreInput->PreInputW))
 	{
 		move = -mWidth;
-		break;
 	}
-	case 'S':
-	case 's':
+	else if (inputS && (!mPreInput->PreInputS))
 	{
 		move = +mWidth;
-		break;
 	}
-	default:
+	else
 	{
 		move = 0;
-		break;
 	}
+	mPreInput->PreInputA = inputA;
+	mPreInput->PreInputD = inputD;
+	mPreInput->PreInputW = inputW;
+	mPreInput->PreInputS = inputS;
+
+	// 이전 위치 기억
+	mPreP = mP;
+	for (int i = 0; i < mNumOfBox; i++)
+	{
+		mPreO[i] = mO[i];
 	}
 
 	mP += move;
@@ -139,6 +164,11 @@ int Stage::Input()
 
 void Stage::Update(int move)
 {
+	if (mDrawO == true || mDrawP == true)
+	{
+		return;
+	}
+
 	for (int i = 0; i < mNumOfBox; i++)
 	{
 		if (mQ[i] == mP) // Q에 같은 넘버가 있는지 확인
@@ -220,6 +250,14 @@ void Stage::Update(int move)
 
 				if (*(mStage + j) == 'x' && j == indexOfo)	// O가 x와 충돌했는지 확인
 				{
+					for (int k = 0; k < mNumOfBox; k++)
+					{
+						if (mO[k] == indexOfo)
+						{
+							mP -= move;
+							return;
+						}
+					}
 					mO[i] += move;
 
 					for (int k = 0; k < mNumOfBox; k++)
@@ -268,11 +306,8 @@ void Stage::Update(int move)
 	}
 }
 
-void Stage::Draw() const
+void Stage::Draw()
 {
-	unsigned int* vram = Framework::instance().videoMemory();
-	unsigned int windowWidth = Framework::instance().width();
-	unsigned int windowHeight = Framework::instance().height();
 	const unsigned int tileSize = 32;
 
 	// 공백, 벽, 타켓 먼저 그리기
@@ -321,50 +356,17 @@ void Stage::Draw() const
 			{
 			case EDraw::Wall:
 			{
-				for (int dy = 0; dy < tileSize; dy++)
-				{
-					for (int dx = tileSize; dx < tileSize * 2; dx++)
-					{
-						unsigned int imageData = mImage->GetData(dy * mImage->GetWidth() + dx);
-						if (imageData & 0x80000000)
-						{
-							unsigned int* vramPtr = &vram[(y + dy) * windowWidth + x + (dx - tileSize)];
-							*vramPtr = imageData;
-						}
-					}
-				}
+				DrawTile(x, y, 1, tileSize);
 				break;
 			}
 			case EDraw::Target:
 			{
-				for (int dy = 0; dy < tileSize; dy++)
-				{
-					for (int dx = tileSize * 3; dx < tileSize * 4; dx++)
-					{
-						unsigned int imageData = mImage->GetData(dy * mImage->GetWidth() + dx);
-						if (imageData & 0x80000000)
-						{
-							unsigned int* vramPtr = &vram[(y + dy) * windowWidth + x + (dx - tileSize * 3)];
-							*vramPtr = imageData;
-						}
-					}
-				}
+				DrawTile(x, y, 3, tileSize);
 				break;
 			}
 			default:
 			{
-				for (int dy = 0; dy < tileSize; dy++)
-				{
-					for (int dx = tileSize * 4; dx < tileSize * 5; dx++)
-					{
-						unsigned int imageData = mImage->GetData(dy * mImage->GetWidth() + dx);
-						if (imageData & 0x80000000)
-						{
-							unsigned int* vramPtr = &vram[(y + dy) * windowWidth + x + (dx - tileSize * 4)];
-							*vramPtr = imageData;
-						}
-					}
-				}
+				DrawTile(x, y, 4, tileSize);
 				break;
 			}
 			}
@@ -376,55 +378,165 @@ void Stage::Draw() const
 	{
 		if (mO[i] >= 0 && mO[i] < mWidth * mHeight)
 		{
-			*(mDrawStage + mO[i]) = EDraw::Box; //'O';
+			int oX, oY;
+			for (int y = 0; y < mHeight; y++)
+			{
+				for (int x = 0; x < mWidth; x++)
+				{
+					if (mPreO[i] == y * mWidth + x)
+					{
+						oX = x;
+						oY = y;
+					}
+				}
+			}
+
+			int diff = mO[i] - mPreO[i];
+			if (diff == -mWidth) // 위
+			{
+				mDrawO = true;
+				DrawTile(oX * tileSize, oY * tileSize - mCountOfO, 2, tileSize);
+				mCountOfO += 1;
+				if (mCountOfO > tileSize)
+				{
+					mDrawO = false;
+					mCountOfO = 0;
+				}
+			}
+			else if (diff == +mWidth) // 아래
+			{
+				mDrawO = true;
+				DrawTile(oX * tileSize, oY * tileSize + mCountOfO, 2, tileSize);
+				mCountOfO += 1;
+				if (mCountOfO > tileSize)
+				{
+					mDrawO = false;
+					mCountOfO = 0;
+				}
+			}
+			else if (diff == -1) // 왼쪽
+			{
+				mDrawO = true;
+				DrawTile(oX * tileSize - mCountOfO, oY * tileSize, 2, tileSize);
+				mCountOfO += 1;
+				if (mCountOfO > tileSize)
+				{
+					mDrawO = false;
+					mCountOfO = 0;
+				}
+			}
+			else if (diff == +1) // 오른쪽
+			{
+				mDrawO = true;
+				DrawTile(oX * tileSize + mCountOfO, oY * tileSize, 2, tileSize);
+				mCountOfO += 1;
+				if (mCountOfO > tileSize)
+				{
+					mDrawO = false;
+					mCountOfO = 0;
+				}
+			}
+			else
+			{
+				DrawTile(oX* tileSize, oY * tileSize, 2, tileSize);
+			}
 		}
 	}
 
 	if (mP >= 0 && mP < mWidth * mHeight)
 	{
-		*(mDrawStage + mP) = EDraw::Player; // 'p';
-	}
-	
-	for (int y = 0; y < mHeight * tileSize; y += tileSize)
-	{
-		for (int x = 0; x < mWidth * tileSize; x += tileSize)
+		int diff = mP - mPreP;
+		int pX, pY;
+		for (int y = 0; y < mHeight; y++)
 		{
-			EDraw drawStage = mDrawStage[(y / tileSize) * mWidth + (x / tileSize)];
-			switch (drawStage)
+			for (int x = 0; x < mWidth; x++)
 			{
-			case EDraw::Player:
-			{
-				for (int dy = 0; dy < tileSize; dy++)
+				if (mPreP == y * mWidth + x)
 				{
-					for (int dx = 0; dx < tileSize; dx++)
-					{
-						unsigned int imageData = mImage->GetData(dy * mImage->GetWidth() + dx);
-						if (imageData & 0x80000000)
-						{
-							unsigned int* vramPtr = &vram[(y + dy) * windowWidth + x + dx];
-							*vramPtr = imageData;
-						}
-					}
+					pX = x;
+					pY = y;
 				}
-				break;
 			}
-			case EDraw::Box:
+		}
+
+		if (diff == -mWidth) // 위
+		{
+			mDrawP = true;
+			DrawTile(pX * tileSize, pY * tileSize - mCountOfP, 0, tileSize);
+			mCountOfP += 1;
+			if (mCountOfP > tileSize)
 			{
-				for (int dy = 0; dy < tileSize; dy++)
-				{
-					for (int dx = tileSize * 2; dx < tileSize * 3; dx++)
-					{
-						unsigned int imageData = mImage->GetData(dy * mImage->GetWidth() + dx);
-						if (imageData & 0x80000000)
-						{
-							unsigned int* vramPtr = &vram[(y + dy) * windowWidth + x + (dx - tileSize * 2)];
-							*vramPtr = imageData;
-						}
-					}
-				}
-				break;
+				mDrawP = false;
+				mCountOfP = 0;
 			}
+		}
+		else if (diff == +mWidth) // 아래
+		{
+			mDrawP = true;
+			DrawTile(pX * tileSize, pY * tileSize + mCountOfP, 0, tileSize);
+			mCountOfP += 1;
+			if (mCountOfP > tileSize)
+			{
+				mDrawP = false;
+				mCountOfP = 0;
 			}
+		}
+		else if (diff == -1) // 왼쪽
+		{
+			mDrawP = true;
+			DrawTile(pX * tileSize - mCountOfP, pY * tileSize, 0, tileSize);
+			mCountOfP += 1;
+			if (mCountOfP > tileSize)
+			{
+				mDrawP = false;
+				mCountOfP = 0;
+			}
+		}
+		else if (diff == +1) // 오른쪽
+		{
+			mDrawP = true;
+			DrawTile(pX * tileSize + mCountOfP, pY * tileSize, 0, tileSize);
+			mCountOfP += 1;
+			if (mCountOfP > tileSize)
+			{
+				mDrawP = false;
+				mCountOfP = 0;
+			}
+		}
+		else
+		{
+			DrawTile(pX * tileSize, pY * tileSize, 0, tileSize);
+		}
+	}
+}
+
+void Stage::DrawTile(int x, int y, int pos, int tileSize) const
+{
+	unsigned int* vram = Framework::instance().videoMemory();
+	unsigned int windowWidth = Framework::instance().width();
+	unsigned int windowHeight = Framework::instance().height();
+
+	for (int dy = 0; dy < tileSize; dy++)
+	{
+		for (int dx = tileSize * pos; dx < tileSize * (pos + 1); dx++)
+		{
+			unsigned int src = mImage->GetData(dy * mImage->GetWidth() + dx);
+			unsigned int* dst = &vram[(y + dy) * windowWidth + x + (dx - tileSize * pos)];
+
+			unsigned int srcA = (src & 0xff000000) >> 24;
+			unsigned int srcR = src & 0x00ff0000;
+			unsigned int srcG = src & 0x0000ff00;
+			unsigned int srcB = src & 0x000000ff;
+
+			unsigned int dstR = *dst & 0x00ff0000;
+			unsigned int dstG = *dst & 0x0000ff00;
+			unsigned int dstB = *dst & 0x000000ff;
+
+			unsigned int r = (srcR - dstR) * srcA / 255 + dstR;
+			unsigned int g = (srcG - dstG) * srcA / 255 + dstG;
+			unsigned int b = (srcB - dstB) * srcA / 255 + dstB;
+
+			*dst = (r & 0x00ff0000) | (g & 0x0000ff00) | b;
 		}
 	}
 }
