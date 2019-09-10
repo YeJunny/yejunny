@@ -13,17 +13,12 @@ void Framework::update()
 
 Stage gStage("stageData.txt", "stageImage.dds");
 unsigned int gPreTime[10];
-const int gFrameTime = 16;
 
 void GameLoop()
 {
 	auto f = Framework::instance();
-	while (f.time() - gPreTime[9] < gFrameTime)
-	{
-		f.sleep(1);
-	}
-
 	unsigned int currentTime = f.time();
+	unsigned int diffTime = currentTime - gPreTime[9];	// 현재시각 - 최근시각
 	unsigned int frameTime10 = currentTime - gPreTime[0];
 	cout << "frameTime10 : " << frameTime10 / 10;
 	cout << " FrameRate: " << 10 * 1000 / frameTime10 << endl;
@@ -33,10 +28,11 @@ void GameLoop()
 		gPreTime[i] = gPreTime[i + 1];
 	}
 	gPreTime[9] = currentTime;
+	f.sleep(1);
 
 	int move = gStage.Input();
 	gStage.Update(move);
-	gStage.Draw();
+	gStage.Draw(diffTime);
 
 	bool bIsClear = gStage.IsClear();
 	if (bIsClear == true)

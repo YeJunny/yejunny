@@ -26,7 +26,7 @@ public:
 	virtual ~Stage();
 	int Input();
 	void Update(int move);
-	void Draw();
+	void Draw(unsigned int diffTime);
 	void DrawTile(int x, int y, int pos, int tileSize) const;
 	bool IsClear() const;
 
@@ -36,8 +36,8 @@ private:
 	int mNumOfBox;
 	int mP;
 	int mPreP;
-	int mCountOfO;
-	int mCountOfP;
+	double mCountOfO;
+	double mCountOfP;
 	char* mStage;
 	EDraw* mDrawStage;
 	int* mO;

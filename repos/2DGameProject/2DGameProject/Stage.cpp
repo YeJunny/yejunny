@@ -2,12 +2,11 @@
 
 #include "File.h"
 #include "Image.h"
-#include "PreInput.h"
 #include "Stage.h"
 
 Stage::Stage(const char* stage, const char* image)
-	: mCountOfO(0)
-	, mCountOfP(0)
+	: mCountOfO(0.)
+	, mCountOfP(0.)
 	, mDrawP(false)
 	, mDrawO(false)
 {
@@ -294,9 +293,10 @@ void Stage::Update(int move)
 	}
 }
 
-void Stage::Draw()
+void Stage::Draw(unsigned int diffTime)
 {
-	const unsigned int tileSize = 32;
+	const unsigned int TILE_SIZE = 32;
+	double movedPixel = diffTime / 16.;
 
 	// 공백, 벽, 타켓 먼저 그리기
 	for (int i = 0; i < mHeight; i++)
@@ -335,26 +335,26 @@ void Stage::Draw()
 		}
 	}
 	
-	for (int y = 0; y < mHeight * tileSize; y += tileSize)
+	for (int y = 0; y < mHeight * TILE_SIZE; y += TILE_SIZE)
 	{
-		for (int x = 0; x < mWidth * tileSize; x += tileSize)
+		for (int x = 0; x < mWidth * TILE_SIZE; x += TILE_SIZE)
 		{
-			EDraw drawStage = mDrawStage[(y / tileSize) * mWidth + (x / tileSize)];
+			EDraw drawStage = mDrawStage[(y / TILE_SIZE) * mWidth + (x / TILE_SIZE)];
 			switch (drawStage)
 			{
 			case EDraw::Wall:
 			{
-				DrawTile(x, y, 1, tileSize);
+				DrawTile(x, y, 1, TILE_SIZE);
 				break;
 			}
 			case EDraw::Target:
 			{
-				DrawTile(x, y, 3, tileSize);
+				DrawTile(x, y, 3, TILE_SIZE);
 				break;
 			}
 			default:
 			{
-				DrawTile(x, y, 4, tileSize);
+				DrawTile(x, y, 4, TILE_SIZE);
 				break;
 			}
 			}
@@ -373,8 +373,8 @@ void Stage::Draw()
 				{
 					if (mPreO[i] == y * mWidth + x)
 					{
-						oX = x;
-						oY = y;
+						oX = x * TILE_SIZE;
+						oY = y * TILE_SIZE;
 					}
 				}
 			}
@@ -383,9 +383,9 @@ void Stage::Draw()
 			if (diff == -mWidth) // 위
 			{
 				mDrawO = true;
-				DrawTile(oX * tileSize, oY * tileSize - mCountOfO, 2, tileSize);
-				mCountOfO += 1;
-				if (mCountOfO > tileSize)
+				DrawTile(oX, oY - mCountOfO, 2, TILE_SIZE);
+				mCountOfO += movedPixel;
+				if (mCountOfO > TILE_SIZE)
 				{
 					mDrawO = false;
 					mCountOfO = 0;
@@ -394,9 +394,9 @@ void Stage::Draw()
 			else if (diff == +mWidth) // 아래
 			{
 				mDrawO = true;
-				DrawTile(oX * tileSize, oY * tileSize + mCountOfO, 2, tileSize);
-				mCountOfO += 1;
-				if (mCountOfO > tileSize)
+				DrawTile(oX, oY + mCountOfO, 2, TILE_SIZE);
+				mCountOfO += movedPixel;
+				if (mCountOfO > TILE_SIZE)
 				{
 					mDrawO = false;
 					mCountOfO = 0;
@@ -405,9 +405,9 @@ void Stage::Draw()
 			else if (diff == -1) // 왼쪽
 			{
 				mDrawO = true;
-				DrawTile(oX * tileSize - mCountOfO, oY * tileSize, 2, tileSize);
-				mCountOfO += 1;
-				if (mCountOfO > tileSize)
+				DrawTile(oX - mCountOfO, oY, 2, TILE_SIZE);
+				mCountOfO += movedPixel;
+				if (mCountOfO > TILE_SIZE)
 				{
 					mDrawO = false;
 					mCountOfO = 0;
@@ -416,9 +416,9 @@ void Stage::Draw()
 			else if (diff == +1) // 오른쪽
 			{
 				mDrawO = true;
-				DrawTile(oX * tileSize + mCountOfO, oY * tileSize, 2, tileSize);
-				mCountOfO += 1;
-				if (mCountOfO > tileSize)
+				DrawTile(oX + mCountOfO, oY, 2, TILE_SIZE);
+				mCountOfO += movedPixel;
+				if (mCountOfO > TILE_SIZE)
 				{
 					mDrawO = false;
 					mCountOfO = 0;
@@ -426,7 +426,7 @@ void Stage::Draw()
 			}
 			else
 			{
-				DrawTile(oX* tileSize, oY * tileSize, 2, tileSize);
+				DrawTile(oX, oY, 2, TILE_SIZE);
 			}
 		}
 	}
@@ -441,8 +441,8 @@ void Stage::Draw()
 			{
 				if (mPreP == y * mWidth + x)
 				{
-					pX = x;
-					pY = y;
+					pX = x * TILE_SIZE;
+					pY = y * TILE_SIZE;
 				}
 			}
 		}
@@ -450,9 +450,9 @@ void Stage::Draw()
 		if (diff == -mWidth) // 위
 		{
 			mDrawP = true;
-			DrawTile(pX * tileSize, pY * tileSize - mCountOfP, 0, tileSize);
-			mCountOfP += 1;
-			if (mCountOfP > tileSize)
+			DrawTile(pX, pY - mCountOfP, 0, TILE_SIZE);
+			mCountOfP += movedPixel;
+			if (mCountOfP > TILE_SIZE)
 			{
 				mDrawP = false;
 				mCountOfP = 0;
@@ -461,9 +461,9 @@ void Stage::Draw()
 		else if (diff == +mWidth) // 아래
 		{
 			mDrawP = true;
-			DrawTile(pX * tileSize, pY * tileSize + mCountOfP, 0, tileSize);
-			mCountOfP += 1;
-			if (mCountOfP > tileSize)
+			DrawTile(pX, pY + mCountOfP, 0, TILE_SIZE);
+			mCountOfP += movedPixel;
+			if (mCountOfP > TILE_SIZE)
 			{
 				mDrawP = false;
 				mCountOfP = 0;
@@ -472,9 +472,9 @@ void Stage::Draw()
 		else if (diff == -1) // 왼쪽
 		{
 			mDrawP = true;
-			DrawTile(pX * tileSize - mCountOfP, pY * tileSize, 0, tileSize);
-			mCountOfP += 1;
-			if (mCountOfP > tileSize)
+			DrawTile(pX - mCountOfP, pY, 0, TILE_SIZE);
+			mCountOfP += movedPixel;
+			if (mCountOfP > TILE_SIZE)
 			{
 				mDrawP = false;
 				mCountOfP = 0;
@@ -483,9 +483,9 @@ void Stage::Draw()
 		else if (diff == +1) // 오른쪽
 		{
 			mDrawP = true;
-			DrawTile(pX * tileSize + mCountOfP, pY * tileSize, 0, tileSize);
-			mCountOfP += 1;
-			if (mCountOfP > tileSize)
+			DrawTile(pX + mCountOfP, pY, 0, TILE_SIZE);
+			mCountOfP += movedPixel;
+			if (mCountOfP > TILE_SIZE)
 			{
 				mDrawP = false;
 				mCountOfP = 0;
@@ -493,7 +493,7 @@ void Stage::Draw()
 		}
 		else
 		{
-			DrawTile(pX * tileSize, pY * tileSize, 0, tileSize);
+			DrawTile(pX, pY, 0, TILE_SIZE);
 		}
 	}
 }
