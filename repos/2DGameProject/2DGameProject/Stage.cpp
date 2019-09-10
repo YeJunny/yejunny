@@ -92,13 +92,6 @@ Stage::Stage(const char* stage, const char* image)
 			}
 		}
 	}
-
-	// 이전 입력 초기화
-	mPreInput = new PreInput();
-	mPreInput->PreInputA = false;
-	mPreInput->PreInputD = false;
-	mPreInput->PreInputS = false;
-	mPreInput->PreInputW = false;
 }
 
 Stage::~Stage()
@@ -109,7 +102,6 @@ Stage::~Stage()
 	delete[] mStage;
 	delete[] mDrawStage;
 	delete mImage;
-	delete mPreInput;
 }
 
 int Stage::Input()
@@ -126,19 +118,19 @@ int Stage::Input()
 	bool inputA = f.isKeyOn('a') || f.isKeyOn('A');
 	bool inputD = f.isKeyOn('d') || f.isKeyOn('D');
 
-	if (inputA && (!mPreInput->PreInputA))
+	if (inputA)
 	{
 		move = -1;
 	}
-	else if (inputD && (!mPreInput->PreInputD))
+	else if (inputD)
 	{
 		move = +1;
 	}
-	else if (inputW && (!mPreInput->PreInputW))
+	else if (inputW)
 	{
 		move = -mWidth;
 	}
-	else if (inputS && (!mPreInput->PreInputS))
+	else if (inputS)
 	{
 		move = +mWidth;
 	}
@@ -146,10 +138,6 @@ int Stage::Input()
 	{
 		move = 0;
 	}
-	mPreInput->PreInputA = inputA;
-	mPreInput->PreInputD = inputD;
-	mPreInput->PreInputW = inputW;
-	mPreInput->PreInputS = inputS;
 
 	// 이전 위치 기억
 	mPreP = mP;

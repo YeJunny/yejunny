@@ -44,7 +44,6 @@ private:
 	int* mPreO;
 	int* mQ;
 	Image* mImage;
-	PreInput* mPreInput;
 	bool mDrawP;
 	bool mDrawO;
 };

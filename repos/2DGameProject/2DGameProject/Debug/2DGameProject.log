@@ -1,16 +1,5 @@
-﻿  Stage.cpp
-c:\users\yejun\downloads\gamelib2010\gamelib\realtime\include\gamelib\framework.h : warning C4819: The file contains a character that cannot be represented in the current code page (949). Save the file in Unicode format to prevent data loss
-c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(326): warning C4482: nonstandard extension used: enum 'Stage::EDraw' used in qualified name
-c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(331): warning C4482: nonstandard extension used: enum 'Stage::EDraw' used in qualified name
-c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(336): warning C4482: nonstandard extension used: enum 'Stage::EDraw' used in qualified name
-c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(341): warning C4482: nonstandard extension used: enum 'Stage::EDraw' used in qualified name
-c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(350): warning C4018: '<' : signed/unsigned mismatch
-c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(352): warning C4018: '<' : signed/unsigned mismatch
-c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(357): warning C4482: nonstandard extension used: enum 'Stage::EDraw' used in qualified name
-c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(362): warning C4482: nonstandard extension used: enum 'Stage::EDraw' used in qualified name
-c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(517): warning C4189: 'windowHeight' : local variable is initialized but not referenced
-c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(398): warning C4701: potentially uninitialized local variable 'oX' used
-c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(398): warning C4701: potentially uninitialized local variable 'oY' used
-c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(465): warning C4701: potentially uninitialized local variable 'pX' used
-c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(465): warning C4701: potentially uninitialized local variable 'pY' used
+﻿  main.cpp
+  Generating Code...
+  Skipping... (no relevant changes detected)
+  Stage.cpp
   2DGameProject.vcxproj -> C:\Users\yejun\source\repos\2DGameProject\Debug\2DGameProject.exe

@@ -11,15 +11,34 @@ void Framework::update()
 	GameLoop();
 }
 
-Stage stage("stageData.txt", "stageImage.dds");
+Stage gStage("stageData.txt", "stageImage.dds");
+unsigned int gPreTime[10];
+const int gFrameTime = 16;
 
 void GameLoop()
 {
-	int move = stage.Input();
-	stage.Update(move);
-	stage.Draw();
+	auto f = Framework::instance();
+	while (f.time() - gPreTime[9] < gFrameTime)
+	{
+		f.sleep(1);
+	}
 
-	bool bIsClear = stage.IsClear();
+	unsigned int currentTime = f.time();
+	unsigned int frameTime10 = currentTime - gPreTime[0];
+	cout << "frameTime10 : " << frameTime10 / 10;
+	cout << " FrameRate: " << 10 * 1000 / frameTime10 << endl;
+
+	for (int i = 0; i < 9; ++i)
+	{
+		gPreTime[i] = gPreTime[i + 1];
+	}
+	gPreTime[9] = currentTime;
+
+	int move = gStage.Input();
+	gStage.Update(move);
+	gStage.Draw();
+
+	bool bIsClear = gStage.IsClear();
 	if (bIsClear == true)
 	{
 		return;
