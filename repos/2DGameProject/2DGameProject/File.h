@@ -1,6 +1,6 @@
 #pragma once
 
-#define STR_LEN (1024 * 30)
+#define STR_LEN (400000)
 #include <fstream>
 
 using namespace std;

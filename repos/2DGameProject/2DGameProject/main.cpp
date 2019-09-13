@@ -1,42 +1,36 @@
 #include "GameLib/Framework.h"
+#include "Image.h"
+#include "Sequence.h"
 #include "Stage.h"
 
-using namespace std;
 using namespace GameLib;
 
-void GameLoop();
+Sequence* gSeq = nullptr;
+int gCounter = 0;
 
 void Framework::update()
 {
-	GameLoop();
-}
+	auto i = Framework::instance();
 
-Stage gStage("stageData.txt", "stageImage.dds");
-unsigned int gPreTime[10];
-
-void GameLoop()
-{
-	auto f = Framework::instance();
-	unsigned int currentTime = f.time();
-	unsigned int diffTime = currentTime - gPreTime[9];	// 현재시각 - 최근시각
-	unsigned int frameTime10 = currentTime - gPreTime[0];
-	cout << "frameTime10 : " << frameTime10 / 10;
-	cout << " FrameRate: " << 10 * 1000 / frameTime10 << endl;
-
-	for (int i = 0; i < 9; ++i)
+	if (!gSeq)
 	{
-		gPreTime[i] = gPreTime[i + 1];
+		gSeq = new Sequence();
 	}
-	gPreTime[9] = currentTime;
-	f.sleep(1);
 
-	int move = gStage.Input();
-	gStage.Update(move);
-	gStage.Draw(diffTime);
-
-	bool bIsClear = gStage.IsClear();
-	if (bIsClear == true)
+	setFrameRate(60);
+	if (gCounter % 60 == 0)
 	{
+		cout << " FrameRate:" << frameRate() << endl;
+	}
+	++gCounter;
+
+
+	gSeq->Update();
+
+
+	if (i.isKeyTriggered('q') || i.isKeyTriggered('Q'))
+	{
+		delete gSeq;
 		return;
 	}
 }

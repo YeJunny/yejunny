@@ -1,8 +1,12 @@
 #define _CRT_SECURE_NO_WARNINGS
 
 #include "File.h"
+#include "GameLib/Framework.h"
 #include "Image.h"
 #include "Stage.h"
+
+using namespace GameLib;
+using namespace std;
 
 Stage::Stage(const char* stage, const char* image)
 	: mCountOfO(0.)
@@ -17,18 +21,18 @@ Stage::Stage(const char* stage, const char* image)
 	char* token = strtok(str, "\n\r");
 	mWidth = atoi(token);
 
-	token = strtok(nullptr, "\n\r");
+	token = strtok(NULL, "\n\r");
 	mHeight = atoi(token);
 
-	char* temp = new char[STR_LEN];
-	token = strtok(nullptr, "\n\r");
+	char* temp = new char[64];
+	token = strtok(NULL, "\n\r");
 	strcpy(temp, token);
-	token = strtok(nullptr, "\n\r");
+	token = strtok(NULL, "\n\r");
 
-	while (token != nullptr)
+	while (token != NULL)
 	{
 		strcat(temp, token);
-		token = strtok(nullptr, "\n\r");
+		token = strtok(NULL, "\n\r");
 	}
 
 	size_t length = strlen(temp);
@@ -293,17 +297,17 @@ void Stage::Update(int move)
 	}
 }
 
-void Stage::Draw(unsigned int diffTime)
+void Stage::Draw()
 {
 	const unsigned int TILE_SIZE = 32;
-	double movedPixel = diffTime / 16.;
+	double movedPixel = 1.;
 
 	// 공백, 벽, 타켓 먼저 그리기
-	for (int i = 0; i < mHeight; i++)
+	for (int y = 0; y < mHeight; y++)
 	{
-		for (int j = 0; j < mWidth; j++)
+		for (int x = 0; x < mWidth; x++)
 		{
-			char data = mStage[i * mWidth + j];
+			char data = mStage[y * mWidth + x];
 			EDraw image;
 
 			switch (data)
@@ -316,7 +320,7 @@ void Stage::Draw(unsigned int diffTime)
 			}
 			case 'w':
 			{
-				image = EDraw::Wall;
+				image =EDraw::Wall;
 				break;
 			}
 			case 'x':
@@ -331,30 +335,33 @@ void Stage::Draw(unsigned int diffTime)
 			}
 			}
 
-			mDrawStage[i * mWidth + j] = image;
+			mDrawStage[y * mWidth + x] = image;
 		}
 	}
-	
-	for (int y = 0; y < mHeight * TILE_SIZE; y += TILE_SIZE)
+
+	for (int y = 0; y < mHeight; y++)
 	{
-		for (int x = 0; x < mWidth * TILE_SIZE; x += TILE_SIZE)
+		for (int x = 0; x < mWidth; x++)
 		{
-			EDraw drawStage = mDrawStage[(y / TILE_SIZE) * mWidth + (x / TILE_SIZE)];
+			int tX = x * TILE_SIZE;
+			int tY = y * TILE_SIZE;
+			EDraw drawStage = mDrawStage[y * mWidth + x];
+
 			switch (drawStage)
 			{
 			case EDraw::Wall:
 			{
-				DrawTile(x, y, 1, TILE_SIZE);
+				mImage->Draw(tX, tY, TILE_SIZE * 1, 0, TILE_SIZE * 2, TILE_SIZE);
 				break;
 			}
 			case EDraw::Target:
 			{
-				DrawTile(x, y, 3, TILE_SIZE);
+				mImage->Draw(tX, tY, TILE_SIZE * 3, 0, TILE_SIZE * 4, TILE_SIZE);
 				break;
 			}
 			default:
 			{
-				DrawTile(x, y, 4, TILE_SIZE);
+				mImage->Draw(tX, tY, TILE_SIZE * 4, 0, TILE_SIZE * 5, TILE_SIZE);
 				break;
 			}
 			}
@@ -366,7 +373,7 @@ void Stage::Draw(unsigned int diffTime)
 	{
 		if (mO[i] >= 0 && mO[i] < mWidth * mHeight)
 		{
-			int oX, oY;
+			int oX = 0, oY = 0;
 			for (int y = 0; y < mHeight; y++)
 			{
 				for (int x = 0; x < mWidth; x++)
@@ -383,7 +390,7 @@ void Stage::Draw(unsigned int diffTime)
 			if (diff == -mWidth) // 위
 			{
 				mDrawO = true;
-				DrawTile(oX, oY - mCountOfO, 2, TILE_SIZE);
+				mImage->Draw(oX, oY - mCountOfO, TILE_SIZE * 2, 0, TILE_SIZE * 3, TILE_SIZE);
 				mCountOfO += movedPixel;
 				if (mCountOfO > TILE_SIZE)
 				{
@@ -394,7 +401,7 @@ void Stage::Draw(unsigned int diffTime)
 			else if (diff == +mWidth) // 아래
 			{
 				mDrawO = true;
-				DrawTile(oX, oY + mCountOfO, 2, TILE_SIZE);
+				mImage->Draw(oX, oY + mCountOfO, TILE_SIZE * 2, 0, TILE_SIZE * 3, TILE_SIZE);
 				mCountOfO += movedPixel;
 				if (mCountOfO > TILE_SIZE)
 				{
@@ -405,7 +412,7 @@ void Stage::Draw(unsigned int diffTime)
 			else if (diff == -1) // 왼쪽
 			{
 				mDrawO = true;
-				DrawTile(oX - mCountOfO, oY, 2, TILE_SIZE);
+				mImage->Draw(oX - mCountOfO, oY, TILE_SIZE * 2, 0, TILE_SIZE * 3, TILE_SIZE);
 				mCountOfO += movedPixel;
 				if (mCountOfO > TILE_SIZE)
 				{
@@ -416,7 +423,7 @@ void Stage::Draw(unsigned int diffTime)
 			else if (diff == +1) // 오른쪽
 			{
 				mDrawO = true;
-				DrawTile(oX + mCountOfO, oY, 2, TILE_SIZE);
+				mImage->Draw(oX + mCountOfO, oY, TILE_SIZE * 2, 0, TILE_SIZE * 3, TILE_SIZE);
 				mCountOfO += movedPixel;
 				if (mCountOfO > TILE_SIZE)
 				{
@@ -426,7 +433,7 @@ void Stage::Draw(unsigned int diffTime)
 			}
 			else
 			{
-				DrawTile(oX, oY, 2, TILE_SIZE);
+				mImage->Draw(oX, oY, TILE_SIZE * 2, 0, TILE_SIZE * 3, TILE_SIZE);
 			}
 		}
 	}
@@ -434,7 +441,7 @@ void Stage::Draw(unsigned int diffTime)
 	if (mP >= 0 && mP < mWidth * mHeight)
 	{
 		int diff = mP - mPreP;
-		int pX, pY;
+		int pX = 0, pY = 0;
 		for (int y = 0; y < mHeight; y++)
 		{
 			for (int x = 0; x < mWidth; x++)
@@ -450,7 +457,7 @@ void Stage::Draw(unsigned int diffTime)
 		if (diff == -mWidth) // 위
 		{
 			mDrawP = true;
-			DrawTile(pX, pY - mCountOfP, 0, TILE_SIZE);
+			mImage->Draw(pX, pY - mCountOfP, TILE_SIZE * 0, 0, TILE_SIZE * 1, TILE_SIZE);
 			mCountOfP += movedPixel;
 			if (mCountOfP > TILE_SIZE)
 			{
@@ -461,7 +468,7 @@ void Stage::Draw(unsigned int diffTime)
 		else if (diff == +mWidth) // 아래
 		{
 			mDrawP = true;
-			DrawTile(pX, pY + mCountOfP, 0, TILE_SIZE);
+			mImage->Draw(pX, pY + mCountOfP, TILE_SIZE * 0, 0, TILE_SIZE * 1, TILE_SIZE);
 			mCountOfP += movedPixel;
 			if (mCountOfP > TILE_SIZE)
 			{
@@ -472,7 +479,7 @@ void Stage::Draw(unsigned int diffTime)
 		else if (diff == -1) // 왼쪽
 		{
 			mDrawP = true;
-			DrawTile(pX - mCountOfP, pY, 0, TILE_SIZE);
+			mImage->Draw(pX - mCountOfP, pY, TILE_SIZE * 0, 0, TILE_SIZE * 1, TILE_SIZE);
 			mCountOfP += movedPixel;
 			if (mCountOfP > TILE_SIZE)
 			{
@@ -483,7 +490,7 @@ void Stage::Draw(unsigned int diffTime)
 		else if (diff == +1) // 오른쪽
 		{
 			mDrawP = true;
-			DrawTile(pX + mCountOfP, pY, 0, TILE_SIZE);
+			mImage->Draw(pX + mCountOfP, pY, TILE_SIZE * 0, 0, TILE_SIZE * 1, TILE_SIZE);
 			mCountOfP += movedPixel;
 			if (mCountOfP > TILE_SIZE)
 			{
@@ -493,38 +500,7 @@ void Stage::Draw(unsigned int diffTime)
 		}
 		else
 		{
-			DrawTile(pX, pY, 0, TILE_SIZE);
-		}
-	}
-}
-
-void Stage::DrawTile(int x, int y, int pos, int tileSize) const
-{
-	unsigned int* vram = Framework::instance().videoMemory();
-	unsigned int windowWidth = Framework::instance().width();
-	unsigned int windowHeight = Framework::instance().height();
-
-	for (int dy = 0; dy < tileSize; dy++)
-	{
-		for (int dx = tileSize * pos; dx < tileSize * (pos + 1); dx++)
-		{
-			unsigned int src = mImage->GetData(dy * mImage->GetWidth() + dx);
-			unsigned int* dst = &vram[(y + dy) * windowWidth + x + (dx - tileSize * pos)];
-
-			unsigned int srcA = (src & 0xff000000) >> 24;
-			unsigned int srcR = src & 0x00ff0000;
-			unsigned int srcG = src & 0x0000ff00;
-			unsigned int srcB = src & 0x000000ff;
-
-			unsigned int dstR = *dst & 0x00ff0000;
-			unsigned int dstG = *dst & 0x0000ff00;
-			unsigned int dstB = *dst & 0x000000ff;
-
-			unsigned int r = (srcR - dstR) * srcA / 255 + dstR;
-			unsigned int g = (srcG - dstG) * srcA / 255 + dstG;
-			unsigned int b = (srcB - dstB) * srcA / 255 + dstB;
-
-			*dst = (r & 0x00ff0000) | (g & 0x0000ff00) | b;
+			mImage->Draw(pX, pY, TILE_SIZE * 0, 0, TILE_SIZE * 1, TILE_SIZE);
 		}
 	}
 }

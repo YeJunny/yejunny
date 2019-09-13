@@ -11,8 +11,8 @@ File::File(const char* fileName)
 	int fileSize = static_cast<int>(fin.tellg());
 	fin.seekg(0, ifstream::beg);
 
+	mData[fileSize] = '\0';
 	fin.read(mData, fileSize);
-	
 }
 
 File::~File()

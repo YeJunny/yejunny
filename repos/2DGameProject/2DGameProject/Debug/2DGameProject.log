@@ -1,23 +1,23 @@
-﻿  Stage.cpp
-c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(314): warning C4482: nonstandard extension used: enum 'Stage::EDraw' used in qualified name
-c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(319): warning C4482: nonstandard extension used: enum 'Stage::EDraw' used in qualified name
-c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(324): warning C4482: nonstandard extension used: enum 'Stage::EDraw' used in qualified name
-c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(329): warning C4482: nonstandard extension used: enum 'Stage::EDraw' used in qualified name
-c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(338): warning C4018: '<' : signed/unsigned mismatch
-c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(340): warning C4018: '<' : signed/unsigned mismatch
-c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(345): warning C4482: nonstandard extension used: enum 'Stage::EDraw' used in qualified name
-c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(350): warning C4482: nonstandard extension used: enum 'Stage::EDraw' used in qualified name
-c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(386): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
-c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(397): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
-c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(408): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
-c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(419): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
-c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(453): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
-c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(464): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
-c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(475): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
-c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(486): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
-c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(505): warning C4189: 'windowHeight' : local variable is initialized but not referenced
-c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(386): warning C4701: potentially uninitialized local variable 'oX' used
-c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(386): warning C4701: potentially uninitialized local variable 'oY' used
-c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(453): warning C4701: potentially uninitialized local variable 'pX' used
-c:\users\yejun\source\repos\2dgameproject\2dgameproject\stage.cpp(453): warning C4701: potentially uninitialized local variable 'pY' used
+﻿  Menu.cpp
+c:\users\yejun\downloads\gamelib2010\gamelib\sequence1\include\gamelib\framework.h : warning C4819: The file contains a character that cannot be represented in the current code page (949). Save the file in Unicode format to prevent data loss
+c:\users\yejun\downloads\gamelib2010\gamelib\sequence1\include\gamelib\gamelib.h : warning C4819: The file contains a character that cannot be represented in the current code page (949). Save the file in Unicode format to prevent data loss
+c:\users\yejun\source\repos\2dgameproject\2dgameproject\menu.cpp(26): warning C4482: nonstandard extension used: enum 'Game::ESeq' used in qualified name
+c:\users\yejun\source\repos\2dgameproject\2dgameproject\menu.cpp(31): warning C4482: nonstandard extension used: enum 'Game::ESeq' used in qualified name
+c:\users\yejun\source\repos\2dgameproject\2dgameproject\menu.cpp(36): warning C4482: nonstandard extension used: enum 'Game::ESeq' used in qualified name
+c:\users\yejun\source\repos\2dgameproject\2dgameproject\menu.cpp(42): warning C4482: nonstandard extension used: enum 'Game::ESeq' used in qualified name
+c:\users\yejun\source\repos\2dgameproject\2dgameproject\menu.cpp(46): warning C4482: nonstandard extension used: enum 'Game::ESeq' used in qualified name
+  Game.cpp
+c:\users\yejun\source\repos\2dgameproject\2dgameproject\game.cpp(14): warning C4482: nonstandard extension used: enum 'Game::ESeq' used in qualified name
+c:\users\yejun\source\repos\2dgameproject\2dgameproject\game.cpp(21): warning C4244: 'initializing' : conversion from 'int' to 'char', possible loss of data
+c:\users\yejun\source\repos\2dgameproject\2dgameproject\game.cpp(60): warning C4482: nonstandard extension used: enum 'Game::ESeq' used in qualified name
+c:\users\yejun\source\repos\2dgameproject\2dgameproject\game.cpp(85): warning C4482: nonstandard extension used: enum 'Game::ESeq' used in qualified name
+c:\users\yejun\source\repos\2dgameproject\2dgameproject\game.cpp(99): warning C4482: nonstandard extension used: enum 'Game::ESeq' used in qualified name
+c:\users\yejun\source\repos\2dgameproject\2dgameproject\game.cpp(115): warning C4482: nonstandard extension used: enum 'Game::ESeq' used in qualified name
+c:\users\yejun\source\repos\2dgameproject\2dgameproject\game.cpp(126): warning C4482: nonstandard extension used: enum 'Game::ESeq' used in qualified name
+c:\users\yejun\source\repos\2dgameproject\2dgameproject\game.cpp(137): warning C4482: nonstandard extension used: enum 'Game::ESeq' used in qualified name
+c:\users\yejun\source\repos\2dgameproject\2dgameproject\game.cpp(151): warning C4482: nonstandard extension used: enum 'Sequence::ESeq' used in qualified name
+c:\users\yejun\source\repos\2dgameproject\2dgameproject\game.cpp(154): warning C4482: nonstandard extension used: enum 'Game::ESeq' used in qualified name
+c:\users\yejun\source\repos\2dgameproject\2dgameproject\game.cpp(168): warning C4482: nonstandard extension used: enum 'Sequence::ESeq' used in qualified name
+c:\users\yejun\source\repos\2dgameproject\2dgameproject\game.cpp(171): warning C4482: nonstandard extension used: enum 'Game::ESeq' used in qualified name
+  Generating Code...
   2DGameProject.vcxproj -> C:\Users\yejun\source\repos\2DGameProject\Debug\2DGameProject.exe

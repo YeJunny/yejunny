@@ -1,10 +1,6 @@
 #pragma once
 
-#include "GameLib/Framework.h"
 #include <cstring>
-
-using namespace GameLib;
-using namespace std;
 
 class Image;
 struct PreInput;
@@ -12,6 +8,14 @@ struct PreInput;
 class Stage
 {
 public:
+	Stage(const char* stage, const char* image);
+	virtual ~Stage();
+	int Input();
+	void Update(int move);
+	void Draw();
+	bool IsClear() const;
+
+private:
 	enum EDraw
 	{
 		Player,
@@ -21,16 +25,6 @@ public:
 		Goal,
 		Space
 	};
-
-	Stage(const char* stage, const char* image);
-	virtual ~Stage();
-	int Input();
-	void Update(int move);
-	void Draw(unsigned int diffTime);
-	void DrawTile(int x, int y, int pos, int tileSize) const;
-	bool IsClear() const;
-
-private:
 	int mWidth;
 	int mHeight;
 	int mNumOfBox;
