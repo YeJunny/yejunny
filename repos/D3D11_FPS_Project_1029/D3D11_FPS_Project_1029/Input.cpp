@@ -198,7 +198,7 @@ void Input::ProcessInput()
 }
 
 
-void Input::GetMouseLocation(int& mouseX, int& mouseY)
+void Input::GetMouseLocation(int& mouseX, int& mouseY) const
 {
 	mouseX = m_mouseX;
 	mouseY = m_mouseY;

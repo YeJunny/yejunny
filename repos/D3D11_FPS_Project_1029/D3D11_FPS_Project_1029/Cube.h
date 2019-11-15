@@ -2,6 +2,8 @@
 
 #include "Object.h"
 
+class Timer;
+
 class Cube : public Object
 {
 public:

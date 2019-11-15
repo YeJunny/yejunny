@@ -12,14 +12,20 @@ Object::Object()
 	, mpConstantBuffer(nullptr)
 	, mpPixelShader(nullptr)
 	, mpWireFrame(nullptr)
+	, mVertexCount(0)
+	, mVertices()
 {
 }
 
-bool Object::Init(const ComPtr<ID3D11Device> pD3DDevice, const WCHAR* shaderFile, const XMMATRIX projection)
+bool Object::Init(const ComPtr<ID3D11Device> pD3DDevice, const WCHAR* shaderFile, 
+	const XMMATRIX projection, std::shared_ptr<Timer> timer)
 {
 	mProjection = projection;
+	mTimer = timer;
+
 	mpD3DDevice = pD3DDevice;
 	mpD3DDevice->GetImmediateContext(&mpD3DContext);
+
 
 	// SET BUFFER
 	D3D11_BUFFER_DESC bd;

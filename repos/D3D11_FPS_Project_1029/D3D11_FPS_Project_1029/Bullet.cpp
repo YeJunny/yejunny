@@ -28,10 +28,13 @@ Bullet::~Bullet()
 	mShooting.reset();
 }
 
-bool Bullet::Init(const ComPtr<ID3D11Device> pD3DDevice, const WCHAR* shaderFile, const XMMATRIX projection, HWND hWnd)
+bool Bullet::Init(const ComPtr<ID3D11Device> pD3DDevice, const WCHAR* shaderFile, 
+	const XMMATRIX projection, HWND hWnd, std::shared_ptr<Timer> timer)
 {
 	mProjection = projection;
 	mpD3DDevice = pD3DDevice;
+	mTimer = timer;
+
 	mpD3DDevice->GetImmediateContext(&mpD3DContext);
 
 	D3D11_BUFFER_DESC bd;
@@ -138,11 +141,14 @@ void Bullet::Create(const int index, const XMFLOAT3& gunPos, const XMFLOAT3& rot
 void Bullet::Update(const int index, const XMFLOAT3 gunPos, const XMMATRIX view)
 {
 	float distance = 0.05f;
+
 	mPos[index].x += distance * sinf(mRot[index].y);
 	mPos[index].z += distance * cosf(mRot[index].y);
+
 	mWorld[index] = XMMatrixScaling(0.01f, 0.01f, 0.01f) *
 		XMMatrixRotationRollPitchYaw(mRot[index].x, mRot[index].y, mRot[index].z) *
 		XMMatrixTranslation(mPos[index].x, mPos[index].y, mPos[index].z);
+
 	mView[index] = view;
 }
 
@@ -167,12 +173,12 @@ void Bullet::Render(const int index)
 	mpD3DContext->Draw(mVertexCount, 0);
 }
 
-XMFLOAT3 Bullet::GetPosition(const int index)
+XMFLOAT3 Bullet::GetPosition(const int index) const
 {
 	return mPos[index];
 }
 
-bool Bullet::GetLive(const int index)
+bool Bullet::GetLive(const int index) const
 {
 	return mLive[index];
 }

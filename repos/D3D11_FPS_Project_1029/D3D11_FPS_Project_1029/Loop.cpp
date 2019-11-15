@@ -18,7 +18,7 @@ Loop::Loop()
 bool Loop::Init()
 {
 	// Init Player
-	if (!mPlayer->Init(mpD3DDevice, mProjection, mInput))
+	if (!mPlayer->Init(mpD3DDevice, mProjection, mInput, mTimer))
 	{
 		return false;
 	}
@@ -30,24 +30,24 @@ bool Loop::Init()
 	}
 
 	// Init Object
-	if (!mCube->Init(mpD3DDevice, (WCHAR*)L"Shader\\Cube.fx", mProjection))
+	if (!mCube->Init(mpD3DDevice, (WCHAR*)L"Shader\\Cube.fx", mProjection, mTimer))
 	{
 		return false;
 	}
 
-	if (!mGround->Init(mpD3DDevice, (WCHAR*)L"Shader\\Cube.fx", mProjection))
+	if (!mGround->Init(mpD3DDevice, (WCHAR*)L"Shader\\Cube.fx", mProjection, mTimer))
 	{
 		return false;
 	}
 
 	mGun = std::make_unique<Gun>();
-	if (!mGun->Init(mpD3DDevice, (WCHAR*)L"Shader\\Cube.fx", mProjection))
+	if (!mGun->Init(mpD3DDevice, (WCHAR*)L"Shader\\Cube.fx", mProjection, mTimer))
 	{
 		return false;
 	}
 
 	mBullet = std::make_unique<Bullet>();
-	if (!mBullet->Init(mpD3DDevice, (WCHAR*)L"Shader\\Cube.fx", mProjection, mhWnd))
+	if (!mBullet->Init(mpD3DDevice, (WCHAR*)L"Shader\\Cube.fx", mProjection, mhWnd, mTimer))
 	{
 		return false;
 	}
@@ -58,44 +58,53 @@ bool Loop::Init()
 void Loop::Update()
 {
 	// Check FPS
-	static ULONGLONG oldTick = GetTickCount64();
-	static ULONGLONG fpsAccumulateTime = 0;
-	ULONGLONG currentTick = GetTickCount64();
+	static ULONGLONG cumulativeTime = 0;
 
-	ULONGLONG diffTick = currentTick - oldTick;
-	oldTick = currentTick;
-	fpsAccumulateTime += diffTick;
+	ULONGLONG diffTick = mTimer->GetDiffTick();
 
-	if (fpsAccumulateTime >= 1000)
+	cumulativeTime += diffTick;
+
+	if (cumulativeTime >= 1000)
 	{
 		WCHAR str[100];
 		wsprintf(str, L"FPS: %d\n", mFrame);
 		mFrame = 0;
-		fpsAccumulateTime = 0;
+		cumulativeTime = 0;
 	}
 
-	// Camera & Player update
+	// Player update
 	mPlayer->Update();
 
-	XMFLOAT3 pos = mPlayer->GetPosition(), rot = mPlayer->GetRotation();
-	mCamera->UpdateLocation(pos, rot);
+	XMFLOAT3 playerPos = mPlayer->GetPosition();
+	XMFLOAT3 playerRot = mPlayer->GetRotation();
+
+
+	// Camera update
+	mCamera->UpdateLocation(playerPos, playerRot);
 
 	XMMATRIX view = mCamera->GetViewMatrix();
 
+
 	// Object update
-	mGun->Update(pos, rot, view);
+	mGun->Update(playerPos, playerRot, view);
+
 	XMFLOAT3 gunPos = mGun->GetPosition();
+
 	bool* bBullet = mPlayer->GetAliveBullet();
+
 	for (int i = 0; i < BULLET_COUNT; ++i)
 	{
 		if (mBullet->GetLive(i))
 		{
 			mBullet->Update(i, gunPos, view);
+
 			XMFLOAT3 pos = mBullet->GetPosition(i);
+
 			if (pos.x >= 30.0f || pos.x <= -30.0f ||
 				pos.z >= 30.0f || pos.z <= -30.0f)
 			{
 				mBullet->SetLive(i, false);
+
 				mPlayer->SetAliveBullet(i);
 			}
 		}
@@ -104,15 +113,17 @@ void Loop::Update()
 		{
 			if (bBullet[i] && !mBullet->GetLive(j))
 			{
-				mBullet->Create(j, gunPos, rot);
+				mBullet->Create(j, gunPos, playerRot);
 				mBullet->SetLive(j, true);
 				mBullet->Update(j, gunPos, view);
+
 				break;
 			}
 		}
 	}
 
 	mCube->Update(view);
+
 	mGround->Update(view);
 }
 

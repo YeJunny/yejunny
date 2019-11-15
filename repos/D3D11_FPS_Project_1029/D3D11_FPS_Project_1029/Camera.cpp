@@ -40,7 +40,7 @@ void Camera::Release()
 {
 }
 
-XMMATRIX Camera::GetViewMatrix()
+XMMATRIX Camera::GetViewMatrix() const
 {
 	return mView;
 }

@@ -15,7 +15,7 @@ public:
 
 	Camera();
 
-	XMMATRIX GetViewMatrix();
+	XMMATRIX GetViewMatrix() const;
 
 private:
 	ComPtr<ID3D11Device> mpD3DDevice;

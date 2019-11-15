@@ -312,7 +312,7 @@ void Sound::ShutdownWaveFile(IDirectSoundBuffer8** secondaryBuffer, IDirectSound
 }
 
 
-bool Sound::PlayWaveFile(const XMFLOAT3& pos)
+bool Sound::PlayWaveFile(const XMFLOAT3& playerPos)
 {
 	// 사운드 버퍼의 시작 부분에 위치를 설정합니다.
 	if (FAILED(m_secondaryBuffer1->SetCurrentPosition(0)))
@@ -327,7 +327,11 @@ bool Sound::PlayWaveFile(const XMFLOAT3& pos)
 	}
 
 	// 사운드의 3D 위치를 설정합니다.
-	m_secondary3DBuffer1->SetPosition(pos.x, pos.y, pos.z, DS3D_IMMEDIATE);
+	if (FAILED(m_secondary3DBuffer1->
+		SetPosition(playerPos.x, playerPos.y, playerPos.z, DS3D_DEFERRED)))
+	{
+		return false;
+	}
 
 	// 2 차 사운드 버퍼의 내용을 재생합니다.
 	if (FAILED(m_secondaryBuffer1->Play(0, 0, 0)))

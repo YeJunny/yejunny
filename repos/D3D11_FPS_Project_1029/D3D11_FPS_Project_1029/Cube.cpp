@@ -4,7 +4,8 @@
 Cube::Cube()
 {
 	mVertexCount = 8;
-	SimpleVertex vertices[] = {
+	SimpleVertex vertices[] = 
+	{
 		{ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
 		{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
 		{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f) },
@@ -21,8 +22,17 @@ Cube::Cube()
 
 void Cube::Update(const XMMATRIX view)
 {
+	static float radians = 0.0f;
+	ULONGLONG diffTick = mTimer->GetDiffTick();
+	radians += diffTick * 0.001f;
+
+	if (radians >= XM_PI * 2)
+	{
+		radians -= XM_PI * 2;
+	}
+
+	mWorld = XMMatrixRotationY(radians) * XMMatrixTranslation(10.0f, 0.5f, 10.0f);
 	mView = view;
-	mWorld = XMMatrixTranslation(10.0f, 0.5f, 10.0f);
 }
 
 void Cube::Render()

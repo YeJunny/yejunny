@@ -1,5 +1,6 @@
 #include "D3DSetting.h"
 #include "Input.h"
+#include "Timer.h"
 using namespace DirectX;
 
 D3DSetting::D3DSetting()
@@ -17,11 +18,13 @@ D3DSetting::D3DSetting()
 	, mHeight(0.0f)
 {
 	mInput = std::make_unique<Input>();
+	mTimer = std::make_unique<Timer>();
 }
 
 D3DSetting::~D3DSetting()
 {
 	mInput.reset();
+	mTimer.reset();
 }
 
 bool D3DSetting::InitD3D_win(HINSTANCE hInst, HWND hWnd)
@@ -131,8 +134,9 @@ bool D3DSetting::InitD3D_win(HINSTANCE hInst, HWND hWnd)
 
 void D3DSetting::Update_win()
 {
-	Update();
 	mInput->Frame();
+	mTimer->Update();
+	Update();
 }
 
 void D3DSetting::Render_win()

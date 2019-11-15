@@ -5,6 +5,7 @@ using namespace Microsoft::WRL;
 using namespace DirectX;
 
 class Input;
+class Timer;
 
 class D3DSetting
 {
@@ -34,6 +35,8 @@ protected:
 	ID3D11DepthStencilView* mpDepthStencilView;
 
 	std::shared_ptr<Input> mInput;
+	std::shared_ptr<Timer> mTimer;
+
 	HWND mhWnd;
 
 	XMMATRIX mWorld;

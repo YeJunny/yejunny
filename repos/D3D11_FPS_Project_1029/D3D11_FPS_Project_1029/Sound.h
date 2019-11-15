@@ -30,7 +30,7 @@ public:
 
 	bool Initialize(HWND, const char* soundFile);
 	void Shutdown();
-	bool PlayWaveFile(const XMFLOAT3&  pos);
+	bool PlayWaveFile(const XMFLOAT3&  playerPos);
 
 private:
 	bool InitializeDirectSound(HWND);

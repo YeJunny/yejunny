@@ -22,6 +22,18 @@
     <Filter Include="Setting">
       <UniqueIdentifier>{31de4136-6bef-4e52-9c84-a2e474747e29}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Setting\Hardware">
+      <UniqueIdentifier>{5a1cbdc5-1334-4b97-8e6e-4d743ff51288}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Setting\Loader">
+      <UniqueIdentifier>{4a3e6439-26b3-45f3-9373-3544bc1bf783}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\Player">
+      <UniqueIdentifier>{9f0334da-94e8-40fc-9cd4-afb24e410615}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\Enemy">
+      <UniqueIdentifier>{fc1b2e23-92de-4270-a792-568521203c06}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Loop.h">
@@ -36,31 +48,13 @@
     <ClInclude Include="Axis.h">
       <Filter>Object\Old</Filter>
     </ClInclude>
-    <ClInclude Include="Player.h">
-      <Filter>Object</Filter>
-    </ClInclude>
-    <ClInclude Include="Gun.h">
-      <Filter>Object</Filter>
-    </ClInclude>
     <ClInclude Include="Ground.h">
       <Filter>Object</Filter>
-    </ClInclude>
-    <ClInclude Include="Cube.h">
-      <Filter>Object</Filter>
-    </ClInclude>
-    <ClInclude Include="Bullet.h">
-      <Filter>Object</Filter>
-    </ClInclude>
-    <ClInclude Include="Camera.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Object.h">
       <Filter>Object</Filter>
     </ClInclude>
     <ClInclude Include="D3DSetting.h">
-      <Filter>Setting</Filter>
-    </ClInclude>
-    <ClInclude Include="FBXLoader.h">
       <Filter>Setting</Filter>
     </ClInclude>
     <ClInclude Include="framework.h">
@@ -69,17 +63,38 @@
     <ClInclude Include="Global.h">
       <Filter>Setting</Filter>
     </ClInclude>
-    <ClInclude Include="Input.h">
-      <Filter>Setting</Filter>
-    </ClInclude>
     <ClInclude Include="Resource.h">
       <Filter>Setting</Filter>
     </ClInclude>
     <ClInclude Include="targetver.h">
       <Filter>Setting</Filter>
     </ClInclude>
-    <ClInclude Include="Sound.h">
+    <ClInclude Include="Timer.h">
       <Filter>Setting</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Input.h">
+      <Filter>Setting\Hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="Sound.h">
+      <Filter>Setting\Hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="FBXLoader.h">
+      <Filter>Setting\Loader</Filter>
+    </ClInclude>
+    <ClInclude Include="Gun.h">
+      <Filter>Object\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Object\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Cube.h">
+      <Filter>Object\Enemy</Filter>
+    </ClInclude>
+    <ClInclude Include="Bullet.h">
+      <Filter>Object\Player</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -108,25 +123,10 @@
     <ClCompile Include="Triangle.cpp">
       <Filter>Object\Old</Filter>
     </ClCompile>
-    <ClCompile Include="Camera.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Axis.cpp">
       <Filter>Object\Old</Filter>
     </ClCompile>
-    <ClCompile Include="Bullet.cpp">
-      <Filter>Object</Filter>
-    </ClCompile>
-    <ClCompile Include="Cube.cpp">
-      <Filter>Object</Filter>
-    </ClCompile>
-    <ClCompile Include="Gun.cpp">
-      <Filter>Object</Filter>
-    </ClCompile>
     <ClCompile Include="Ground.cpp">
-      <Filter>Object</Filter>
-    </ClCompile>
-    <ClCompile Include="Player.cpp">
       <Filter>Object</Filter>
     </ClCompile>
     <ClCompile Include="Object.cpp">
@@ -135,17 +135,35 @@
     <ClCompile Include="D3DSetting.cpp">
       <Filter>Setting</Filter>
     </ClCompile>
-    <ClCompile Include="FBXLoader.cpp">
-      <Filter>Setting</Filter>
-    </ClCompile>
-    <ClCompile Include="Input.cpp">
-      <Filter>Setting</Filter>
-    </ClCompile>
     <ClCompile Include="Global.cpp">
       <Filter>Setting</Filter>
     </ClCompile>
-    <ClCompile Include="Sound.cpp">
+    <ClCompile Include="Timer.cpp">
       <Filter>Setting</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Input.cpp">
+      <Filter>Setting\Hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="Sound.cpp">
+      <Filter>Setting\Hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="FBXLoader.cpp">
+      <Filter>Setting\Loader</Filter>
+    </ClCompile>
+    <ClCompile Include="Gun.cpp">
+      <Filter>Object\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Object\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="Cube.cpp">
+      <Filter>Object\Enemy</Filter>
+    </ClCompile>
+    <ClCompile Include="Bullet.cpp">
+      <Filter>Object\Player</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -11,8 +11,8 @@ public:
 	void LoadNode(FbxNode* node);
 	void ProcessControlPoints(FbxMesh* mesh);
 
-	XMFLOAT3* GetVertices();
-	unsigned int GetVertexCount();
+	XMFLOAT3* GetVertices() const;
+	unsigned int GetVertexCount() const;
 
 	FBXLoader();
 	~FBXLoader();

@@ -76,12 +76,12 @@ FBXLoader::~FBXLoader()
 	}
 }
 
-XMFLOAT3* FBXLoader::GetVertices()
+XMFLOAT3* FBXLoader::GetVertices() const
 {
 	return mVertices;
 }
 
-unsigned int FBXLoader::GetVertexCount()
+unsigned int FBXLoader::GetVertexCount() const
 {
 	return mVertexCount;
 }

@@ -13,7 +13,7 @@ public:
 	void Shutdown();
 	bool Frame();
 
-	void GetMouseLocation(int&, int&);
+	void GetMouseLocation(int&, int&) const;
 	bool IsEscapePressed();
 	bool IsLeftMouseButtonDown();
 
