@@ -4,6 +4,11 @@
 #include "Sound.h"
 
 Bullet::Bullet()
+	: mLive()
+	, mPos()
+	, mRot()
+	, mView()
+	, mWorld()
 {
 	FBXLoader fbxLoader;
 	fbxLoader.LoadFbx("Fbx\\bullet.fbx");

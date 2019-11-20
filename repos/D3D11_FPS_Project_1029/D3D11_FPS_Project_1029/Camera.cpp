@@ -13,6 +13,7 @@ bool Camera::Init(const ComPtr<ID3D11Device> pD3DDevice, const XMMATRIX view)
 {
 	mpD3DDevice = pD3DDevice;
 	mpD3DDevice->GetImmediateContext(&mpD3DContext);
+
 	mView = view;
 
 	return true;
@@ -25,12 +26,12 @@ void Camera::UpdateLocation(const XMFLOAT3 pos, const XMFLOAT3 rot)
 	float rotZ = XMConvertToRadians(rot.z);
 
 	XMMATRIX matRotation = XMMatrixRotationRollPitchYaw(rotX, rotY, rotZ);
-	XMFLOAT3 fAt = { 0.0f, 0.0f, 1.0f };
-	XMFLOAT3 fUp = { 0.0f ,1.0f, 0.0f };
+	XMFLOAT3 atFloat = { 0.0f, 0.0f, 1.0f };
+	XMFLOAT3 upFloat = { 0.0f ,1.0f, 0.0f };
 
 	XMVECTOR eye = XMLoadFloat3(&pos);
-	XMVECTOR at = XMVector3TransformCoord(XMLoadFloat3(&fAt), matRotation);
-	XMVECTOR up = XMVector3TransformCoord(XMLoadFloat3(&fUp), matRotation);
+	XMVECTOR at = XMVector3TransformCoord(XMLoadFloat3(&atFloat), matRotation);
+	XMVECTOR up = XMVector3TransformCoord(XMLoadFloat3(&upFloat), matRotation);
 	at = XMVectorAdd(eye, at);
 
 	mView = XMMatrixLookAtLH(eye, at, up);

@@ -2,6 +2,7 @@
 #include "Ground.h"
 
 Ground::Ground()
+	: mpIndexBuffer(nullptr)
 {
 	mRow = 10;
 	mCol = 10;

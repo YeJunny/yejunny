@@ -4,7 +4,7 @@
 using namespace DirectX;
 
 D3DSetting::D3DSetting()
-	: mFeatureLevel(nullptr)
+	: mFeatureLevel()
 	, mSwapChain(nullptr)
 	, mpD3DDevice(nullptr)
 	, mpD3DContext(nullptr)
@@ -23,8 +23,14 @@ D3DSetting::D3DSetting()
 
 D3DSetting::~D3DSetting()
 {
+	mInput->Shutdown();
+
 	mInput.reset();
 	mTimer.reset();
+
+	mpD3DContext.Reset();
+	mSwapChain.Reset();
+	mpD3DDevice.Reset();
 }
 
 bool D3DSetting::InitD3D_win(HINSTANCE hInst, HWND hWnd)
@@ -65,10 +71,12 @@ bool D3DSetting::InitD3D_win(HINSTANCE hInst, HWND hWnd)
 
 	// SET RENDER TARGET VIEW
 	ID3D11Texture2D* pBackBuffer = nullptr;
+
 	if (FAILED(mSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer)))
 	{
 		return false;
 	}
+
 	if (FAILED(mpD3DDevice->CreateRenderTargetView(pBackBuffer, nullptr, &mpRenderTargetView)))
 	{
 		return false;
@@ -88,6 +96,7 @@ bool D3DSetting::InitD3D_win(HINSTANCE hInst, HWND hWnd)
 	descDepth.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 	descDepth.CPUAccessFlags = 0;
 	descDepth.MiscFlags = 0;
+
 	if (FAILED(mpD3DDevice->CreateTexture2D(&descDepth, NULL, &mpDepthStencil)))
 	{
 		return false;
@@ -98,6 +107,7 @@ bool D3DSetting::InitD3D_win(HINSTANCE hInst, HWND hWnd)
 	descDSV.Format = descDepth.Format;
 	descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	descDSV.Texture2D.MipSlice = 0;
+
 	if (FAILED(mpD3DDevice->CreateDepthStencilView(mpDepthStencil, &descDSV, &mpDepthStencilView)))
 	{
 		return false;
@@ -147,24 +157,4 @@ void D3DSetting::Render_win()
 void D3DSetting::Release_win()
 {
 	Release();
-
-	mInput->Shutdown();
-
-	if (mpD3DContext)
-	{
-		mpD3DContext.Reset();
-		mpD3DContext = nullptr;
-	}
-
-	if (mSwapChain)
-	{
-		mSwapChain.Reset();
-		mSwapChain = nullptr;
-	}
-
-	if (mpD3DDevice)
-	{
-		mpD3DDevice.Reset();
-		mpD3DDevice = nullptr;
-	}
 }

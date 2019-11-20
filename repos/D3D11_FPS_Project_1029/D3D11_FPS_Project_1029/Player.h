@@ -23,8 +23,8 @@ public:
 
 	XMFLOAT3 GetRotation() const;
 	XMFLOAT3 GetPosition() const;
-	bool* GetAliveBullet();
-	void SetAliveBullet(int index);
+	bool* GetLiveBullet();
+	void SetLiveBullet(int index);
 
 private:
 	std::shared_ptr<Input> mInput;

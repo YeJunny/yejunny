@@ -2,6 +2,8 @@
 #include "Global.h"
 
 Cube::Cube()
+	: mIndexCount(0)
+	, mpIndexBuffer(nullptr)
 {
 	mVertexCount = 8;
 	SimpleVertex vertices[] = 
@@ -25,7 +27,6 @@ void Cube::Update(const XMMATRIX view)
 	static float radians = 0.0f;
 	ULONGLONG diffTick = mTimer->GetDiffTick();
 	radians += diffTick * 0.001f;
-
 	if (radians >= XM_PI * 2)
 	{
 		radians -= XM_PI * 2;

@@ -10,9 +10,7 @@ Timer::Timer()
 void Timer::Update()
 {
 	mCurrentTick = GetTickCount64();
-
 	mDiffTick = mCurrentTick - mOldTick;
-
 	mOldTick = mCurrentTick;
 }
 

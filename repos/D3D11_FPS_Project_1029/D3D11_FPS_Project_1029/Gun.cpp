@@ -3,6 +3,7 @@
 #include "Gun.h"
 
 Gun::Gun()
+	: mPos()
 {
 	FBXLoader fbxLoader;
 	fbxLoader.LoadFbx("Fbx\\UZI.fbx");

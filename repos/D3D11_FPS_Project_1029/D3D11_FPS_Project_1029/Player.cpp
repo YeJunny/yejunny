@@ -132,12 +132,12 @@ XMFLOAT3 Player::GetPosition() const
 	return mPos;
 }
 
-bool* Player::GetAliveBullet()
+bool* Player::GetLiveBullet()
 {
 	return mbBullet;
 }
 
-void Player::SetAliveBullet(int index)
+void Player::SetLiveBullet(int index)
 {
 	mbBullet[index] = false;
 }

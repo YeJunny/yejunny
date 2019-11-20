@@ -57,13 +57,10 @@ bool Loop::Init()
 
 void Loop::Update()
 {
-	// Check FPS
+	// Calculate FPS
 	static ULONGLONG cumulativeTime = 0;
-
 	ULONGLONG diffTick = mTimer->GetDiffTick();
-
 	cumulativeTime += diffTick;
-
 	if (cumulativeTime >= 1000)
 	{
 		WCHAR str[100];
@@ -72,40 +69,35 @@ void Loop::Update()
 		cumulativeTime = 0;
 	}
 
+
 	// Player update
 	mPlayer->Update();
-
 	XMFLOAT3 playerPos = mPlayer->GetPosition();
 	XMFLOAT3 playerRot = mPlayer->GetRotation();
 
 
 	// Camera update
 	mCamera->UpdateLocation(playerPos, playerRot);
-
 	XMMATRIX view = mCamera->GetViewMatrix();
 
 
 	// Object update
 	mGun->Update(playerPos, playerRot, view);
-
 	XMFLOAT3 gunPos = mGun->GetPosition();
-
-	bool* bBullet = mPlayer->GetAliveBullet();
-
+	bool* bBullet = mPlayer->GetLiveBullet();
 	for (int i = 0; i < BULLET_COUNT; ++i)
 	{
 		if (mBullet->GetLive(i))
 		{
 			mBullet->Update(i, gunPos, view);
+			XMFLOAT3 bulletPos = mBullet->GetPosition(i);
 
-			XMFLOAT3 pos = mBullet->GetPosition(i);
-
-			if (pos.x >= 30.0f || pos.x <= -30.0f ||
-				pos.z >= 30.0f || pos.z <= -30.0f)
+			if (bulletPos.x >= 30.0f || bulletPos.x <= -30.0f ||
+				bulletPos.z >= 30.0f || bulletPos.z <= -30.0f)
 			{
 				mBullet->SetLive(i, false);
 
-				mPlayer->SetAliveBullet(i);
+				mPlayer->SetLiveBullet(i);
 			}
 		}
 
@@ -123,17 +115,15 @@ void Loop::Update()
 	}
 
 	mCube->Update(view);
-
 	mGround->Update(view);
 }
 
 void Loop::Render()
 {
-	float color[] = { 0.0f, 0.0f, 1.0f, 1.0f };
-	mpD3DContext->ClearRenderTargetView(mpRenderTargetView, color);
+	float backgroundColor[] = { 0.0f, 0.0f, 1.0f, 1.0f };
+	mpD3DContext->ClearRenderTargetView(mpRenderTargetView, backgroundColor);
 	mpD3DContext->ClearDepthStencilView(mpDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 	{
-		// Object Rendering
 		mGround->Render();
 		mCube->Render();
 		mGun->Render();
