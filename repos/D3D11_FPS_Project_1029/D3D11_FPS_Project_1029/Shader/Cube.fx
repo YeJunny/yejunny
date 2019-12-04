@@ -1,52 +1,36 @@
-//--------------------------------------------------------------------------------------
-// File: Tutorial05.fx
-//
-// Copyright (c) Microsoft Corporation. All rights reserved.
-//--------------------------------------------------------------------------------------
-
-//--------------------------------------------------------------------------------------
-// Constant Buffer Variables
-//--------------------------------------------------------------------------------------
-cbuffer ConstantBuffer : register( b0 )
+cbuffer ConstantBuffer// : register( b0 )
 {
 	matrix World;
 	matrix View;
 	matrix Projection;
 }
 
-//--------------------------------------------------------------------------------------
 struct VS_INPUT
 {
-    float4 Pos : POSITION;
-    float4 Color : COLOR;
+    float4 mPos : POSITION;
+    float4 mColor : COLOR;
 };
 
 struct PS_INPUT
 {
-    float4 Pos : SV_POSITION;
-    float4 Color : COLOR;
+    float4 mPos : SV_POSITION;
+    float4 mColor : COLOR;
 };
 
 
-//--------------------------------------------------------------------------------------
-// Vertex Shader
-//--------------------------------------------------------------------------------------
 PS_INPUT VS( VS_INPUT input )
 {
-    PS_INPUT output = (PS_INPUT)0;
-    output.Pos = mul( input.Pos, World );
-    output.Pos = mul( output.Pos, View );
-    output.Pos = mul( output.Pos, Projection );
-    output.Color = input.Color;
+    PS_INPUT output;
+    output.mPos = mul( input.mPos, World );
+    output.mPos = mul( output.mPos, View );
+    output.mPos = mul( output.mPos, Projection );
+    output.mColor = input.mColor;
     
     return output;
 }
 
 
-//--------------------------------------------------------------------------------------
-// Pixel Shader
-//--------------------------------------------------------------------------------------
 float4 PS( PS_INPUT input) : SV_Target
 {
-    return input.Color;
+    return input.mColor;
 }

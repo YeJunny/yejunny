@@ -188,7 +188,7 @@ bool Bullet::GetLive(const int index) const
 	return mLive[index];
 }
 
-void Bullet::SetLive(const int index, bool bLive)
+void Bullet::SetLive(const int index, const bool bLive)
 {
 	mLive[index] = bLive;
 }

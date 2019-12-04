@@ -18,7 +18,7 @@ public:
 
 	XMFLOAT3 GetPosition(const int index) const;
 	bool GetLive(const int index) const;
-	void SetLive(const int index, bool bLive);
+	void SetLive(const int index, const bool bLive);
 
 	Bullet();
 	~Bullet();

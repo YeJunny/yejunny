@@ -137,7 +137,7 @@ bool* Player::GetLiveBullet()
 	return mbBullet;
 }
 
-void Player::SetLiveBullet(int index)
+void Player::SetLiveBullet(const int index)
 {
 	mbBullet[index] = false;
 }
