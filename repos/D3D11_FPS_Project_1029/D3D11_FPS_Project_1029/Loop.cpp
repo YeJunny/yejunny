@@ -30,24 +30,24 @@ bool Loop::Init()
 	}
 
 	// Init Object
-	if (!mCube->Init(mpD3DDevice, (WCHAR*)L"Shader\\Cube.fx", mProjection, mTimer))
+	if (!mCube->Init(mpD3DDevice, L"Shader\\Cube.fx", mProjection, mTimer))
 	{
 		return false;
 	}
 
-	if (!mGround->Init(mpD3DDevice, (WCHAR*)L"Shader\\Cube.fx", mProjection, mTimer))
+	if (!mGround->Init(mpD3DDevice, L"Shader\\Cube.fx", mProjection, mTimer))
 	{
 		return false;
 	}
 
 	mGun = std::make_unique<Gun>();
-	if (!mGun->Init(mpD3DDevice, (WCHAR*)L"Shader\\Cube.fx", mProjection, mTimer))
+	if (!mGun->Init(mpD3DDevice, L"Shader\\Cube.fx", mProjection, mTimer))
 	{
 		return false;
 	}
 
 	mBullet = std::make_unique<Bullet>();
-	if (!mBullet->Init(mpD3DDevice, (WCHAR*)L"Shader\\Cube.fx", mProjection, mhWnd, mTimer))
+	if (!mBullet->Init(mpD3DDevice, L"Shader\\Cube.fx", mProjection, mhWnd, mTimer))
 	{
 		return false;
 	}
