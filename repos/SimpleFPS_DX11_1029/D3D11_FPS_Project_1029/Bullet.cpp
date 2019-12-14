@@ -10,11 +10,10 @@ Bullet::Bullet()
 
 	mVertexCount = fbxLoader.GetVertexCount();
 	assert(mVertexCount, L"Bullet, mVertexCount == 0");
-	mVertices.reset(new SimpleVertex[mVertexCount]);
+	mVertices.reset(new VertexElements[mVertexCount]);
 	for (UINT i = 0; i < mVertexCount; ++i)
 	{
 		mVertices[i].Pos = (fbxLoader.GetVertices())[i];
-		mVertices[i].Color = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
 	}
 
 	for (int i = 0; i < BULLET_COUNT; ++i)
@@ -83,23 +82,23 @@ void Bullet::Update(const int index, const XMFLOAT3 gunPos, const XMMATRIX view)
 
 void Bullet::Render(const int index)
 {
-	UINT stride = sizeof(SimpleVertex);
+	UINT stride = sizeof(VertexElements);
 	UINT offset = 0;
-	mpD3DContext->IASetVertexBuffers(0, 1, mpVertexBuffer.GetAddressOf(), &stride, &offset);
-	mpD3DContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	mD3DContext->IASetVertexBuffers(0, 1, mVertexBuffer.GetAddressOf(), &stride, &offset);
+	mD3DContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	ConstantBuffer cb;
 	cb.World = XMMatrixTranspose(mWorld[index]);
 	cb.View = XMMatrixTranspose(mView[index]);
 	cb.Projection = XMMatrixTranspose(mProjection);
 
-	mpD3DContext->UpdateSubresource(mpConstantBuffer.Get(), 0, nullptr, &cb, 0, 0);
+	mD3DContext->UpdateSubresource(mConstantBuffer.Get(), 0, nullptr, &cb, 0, 0);
 
-	mpD3DContext->VSSetShader(mpVertexShader.Get(), nullptr, 0);
-	mpD3DContext->VSSetConstantBuffers(0, 1, mpConstantBuffer.GetAddressOf());
-	mpD3DContext->PSSetShader(mpPixelShader.Get(), nullptr, 0);
+	mD3DContext->VSSetShader(mVertexShader.Get(), nullptr, 0);
+	mD3DContext->VSSetConstantBuffers(0, 1, mConstantBuffer.GetAddressOf());
+	mD3DContext->PSSetShader(mPixelShader.Get(), nullptr, 0);
 
-	mpD3DContext->Draw(mVertexCount, 0);
+	mD3DContext->Draw(mVertexCount, 0);
 }
 
 XMFLOAT3 Bullet::GetPosition(const int index) const

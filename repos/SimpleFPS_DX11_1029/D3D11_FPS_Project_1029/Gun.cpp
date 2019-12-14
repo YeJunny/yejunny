@@ -9,12 +9,11 @@ Gun::Gun()
 
 	mVertexCount = fbxLoader.GetVertexCount();
 	assert(mVertexCount, L"Gun, mVertexCount == 0");
-	mVertices.reset(new SimpleVertex[mVertexCount]);
+	mVertices.reset(new VertexElements[mVertexCount]);
 
 	for (UINT i = 0; i < mVertexCount; ++i)
 	{
 		mVertices[i].Pos = (fbxLoader.GetVertices())[i];
-		mVertices[i].Color = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
 	}
 
 	mLayoutElementNumber = 2;

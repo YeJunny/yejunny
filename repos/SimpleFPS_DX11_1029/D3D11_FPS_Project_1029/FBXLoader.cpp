@@ -19,28 +19,21 @@ HRESULT FBXLoader::LoadFbx(const char* fileName)
 	FbxScene* pFbxScene = FbxScene::Create(mManager, "");
 
 	bool bSuccess = pImporter->Initialize(fileName, -1, mManager->GetIOSettings());
-	if (!bSuccess)
-	{
-		return E_FAIL;
-	}
+	assert(bSuccess, L"pImporter->Initialize() error");
 
 	bSuccess = pImporter->Import(pFbxScene);
-	if (!bSuccess)
-	{
-		return E_FAIL;
-	}
+	assert(bSuccess, L"pImporter->Import() error");
+
 	pImporter->Destroy();
 
 	FbxGeometryConverter geometryConvert(mManager);
 	geometryConvert.Triangulate(pFbxScene, true);
 
 	FbxNode* pFbxRootNode = pFbxScene->GetRootNode();
-	if (!pFbxRootNode)
-	{
-		return E_FAIL;
-	}
+	assert(pFbxRootNode, L"pFbxScene->GetRootNode() error");
 
-	for (int i = 0; i < pFbxRootNode->GetChildCount(); i++)
+	int childCount = pFbxRootNode->GetChildCount();
+	for (int i = 0; i < childCount; i++)
 	{
 		FbxNode* pFbxChildNode = pFbxRootNode->GetChild(i);
 		if (!pFbxChildNode->GetNodeAttribute())
@@ -54,7 +47,7 @@ HRESULT FBXLoader::LoadFbx(const char* fileName)
 		{
 		case FbxNodeAttribute::eMesh:
 		{
-			mMesh = reinterpret_cast<FbxMesh*>(pFbxChildNode->GetNodeAttribute());
+			mMesh = static_cast<FbxMesh*>(pFbxChildNode->GetNodeAttribute());
 
 			break;
 		}
@@ -64,18 +57,17 @@ HRESULT FBXLoader::LoadFbx(const char* fileName)
 		}
 		}
 
-		if (!mMesh)
-		{
-			assert(mMesh, L"FBXLoader, attributeType all not eMesh");
-			return E_FAIL;
-		}
-
+		assert(attributeType == FbxNodeAttribute::eMesh, L"FBXLoader, attributeType all not eMesh");
+		assert(mMesh, L"FBXLoader, attributeType all not eMesh");
+		
 		FbxVector4* pVertices = mMesh->GetControlPoints();
-		mVertices = new XMFLOAT3[mMesh->GetPolygonCount() * 3];
-		mUVs = new XMFLOAT2[mMesh->GetPolygonCount() * 3];
+		assert(pVertices, L"pVertices == nullptr");
+		int polygonCount = mMesh->GetPolygonCount();
+		mVertices = new XMFLOAT3[polygonCount * 3];
+		mUVs = new XMFLOAT2[polygonCount * 3];
 		mVertexCount = 0;
 
-		for (int j = 0; j < mMesh->GetPolygonCount(); j++)
+		for (int j = 0; j < polygonCount; j++)
 		{
 			for (int k = 0; k < 3; k++)
 			{
@@ -89,8 +81,9 @@ HRESULT FBXLoader::LoadFbx(const char* fileName)
 				mVertices[mVertexCount] = vertex;
 
 				FbxVector2 uv;
-				FbxGeometryElementUV* eUV = mMesh->GetElementUV(0);
 				int uvIndex = mMesh->GetTextureUVIndex(j, k);
+				FbxGeometryElementUV* eUV = mMesh->GetElementUV();
+				assert(eUV, L"eUV == nullptr");
 				uv = eUV->GetDirectArray().GetAt(uvIndex);
 				XMFLOAT2 UVs =
 				{
@@ -103,6 +96,8 @@ HRESULT FBXLoader::LoadFbx(const char* fileName)
 			}
 		}
 	}
+	assert(mVertexCount, L"VertexCount == 0");
+
 	return S_OK;
 }
 

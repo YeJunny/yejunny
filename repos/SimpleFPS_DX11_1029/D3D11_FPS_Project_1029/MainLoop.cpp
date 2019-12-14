@@ -19,20 +19,20 @@ void MainLoop::Init()
 	
 	// Init Camera
 	mCamera = std::make_unique<Camera>();
-	mCamera->Init(mpD3DDevice, mView);
+	mCamera->Init(mD3DDevice, mView);
 
 	// Init Object
 	mCube = std::make_unique<Cube>();
-	mCube->Init(mpD3DDevice, mhWnd, L"Shader\\Box.fx", mProjection, mTimer);
+	mCube->Init(mD3DDevice, mhWnd, L"Shader\\Box.fx", L"Fbx\\skybox.png", mProjection, mTimer);
 
 	mGround = std::make_unique<Ground>();
-	mGround->Init(mpD3DDevice, mhWnd, L"Shader\\Cube.fx", mProjection, mTimer);
+	mGround->Init(mD3DDevice, mhWnd, L"Shader\\Box.fx", L"Fbx\\book-texture.png", mProjection, mTimer);
 
 	mGun = std::make_unique<Gun>();
-	mGun->Init(mpD3DDevice, mhWnd, L"Shader\\Cube.fx", mProjection, mTimer);
+	mGun->Init(mD3DDevice, mhWnd, L"Shader\\Cube.fx", L"Fbx\\book-texture.png", mProjection, mTimer);
 
 	mBullet = std::make_unique<Bullet>();
-	mBullet->Init(mpD3DDevice, mhWnd, L"Shader\\Cube.fx", mProjection, mTimer);
+	mBullet->Init(mD3DDevice, mhWnd, L"Shader\\Cube.fx", L"Fbx\\book-texture.png", mProjection, mTimer);
 }
 
 void MainLoop::Update()
@@ -100,22 +100,22 @@ void MainLoop::Update()
 
 void MainLoop::Render()
 {
-	float backgroundColor[] = { 0.0f, 0.0f, 1.0f, 1.0f };
-	mpD3DContext->ClearRenderTargetView(mpRenderTargetView.Get(), backgroundColor);
-	mpD3DContext->ClearDepthStencilView(mpDepthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
-	{
-		mGround->Render();
-		mCube->Render();
-		mGun->Render();
+	float backgroundColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	mD3DContext->ClearRenderTargetView(mRenderTargetView.Get(), backgroundColor);
+	mD3DContext->ClearDepthStencilView(mDepthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+	
+	mGround->Render();
+	mCube->Render();
+	mGun->Render();
 		
-		for (int i = 0; i < BULLET_COUNT; ++i)
+	for (int i = 0; i < BULLET_COUNT; ++i)
+	{
+		if (mBullet->GetLive(i))
 		{
-			if (mBullet->GetLive(i))
-			{
-				mBullet->Render(i);
-			}
+			mBullet->Render(i);
 		}
 	}
+	
 	mSwapChain->Present(0, 0);
 
 	mFrame++;

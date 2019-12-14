@@ -1,5 +1,5 @@
-Texture2D shaderTexture : register( t0 );
-SamplerState SampleType : register( s0 );
+Texture2D Texture : TEXTURE : register( t0 );
+SamplerState Sampler : SAMPLER : register( s0 );
 
 cbuffer ConstantBuffer : register( b0 )
 {
@@ -17,7 +17,7 @@ struct VS_INPUT
 struct PS_INPUT
 {
     float4 mPos : SV_POSITION;
-    float2 mTex : TEXCOORD0;
+    float2 mTex : TEXCOORD;
 };
 
 
@@ -35,6 +35,5 @@ PS_INPUT VS( VS_INPUT input )
 
 float4 PS( PS_INPUT input ) : SV_Target
 {
-    float4 textureColor = shaderTexture.Sample(SampleType, input.mTex);
-    return textureColor;
+    return float4(Texture.Sample(Sampler, input.mTex).rgb, 1.0f);
 }

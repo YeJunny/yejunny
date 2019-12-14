@@ -39,6 +39,9 @@
     <Filter Include="Object\Terriain">
       <UniqueIdentifier>{8349b590-b930-428b-afe1-5aa0c6a5c5f2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Object\Camera">
+      <UniqueIdentifier>{8756b658-1d0d-4e74-beb7-320125cfb47b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Triangle.h">
@@ -48,15 +51,6 @@
       <Filter>Object\Old</Filter>
     </ClInclude>
     <ClInclude Include="Object.h">
-      <Filter>Object</Filter>
-    </ClInclude>
-    <ClInclude Include="Global.h">
-      <Filter>Setting</Filter>
-    </ClInclude>
-    <ClInclude Include="Timer.h">
-      <Filter>Setting</Filter>
-    </ClInclude>
-    <ClInclude Include="Camera.h">
       <Filter>Object</Filter>
     </ClInclude>
     <ClInclude Include="Input.h">
@@ -101,6 +95,15 @@
     <ClInclude Include="Ground.h">
       <Filter>Object\Terriain</Filter>
     </ClInclude>
+    <ClInclude Include="Global.h">
+      <Filter>Setting\Others</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>Setting\Others</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Object\Camera</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="D3D11_FPS_Project_1029.rc">
@@ -129,15 +132,6 @@
       <Filter>Object\Old</Filter>
     </ClCompile>
     <ClCompile Include="Object.cpp">
-      <Filter>Object</Filter>
-    </ClCompile>
-    <ClCompile Include="Global.cpp">
-      <Filter>Setting</Filter>
-    </ClCompile>
-    <ClCompile Include="Timer.cpp">
-      <Filter>Setting</Filter>
-    </ClCompile>
-    <ClCompile Include="Camera.cpp">
       <Filter>Object</Filter>
     </ClCompile>
     <ClCompile Include="Input.cpp">
@@ -169,6 +163,15 @@
     </ClCompile>
     <ClCompile Include="Ground.cpp">
       <Filter>Object\Terriain</Filter>
+    </ClCompile>
+    <ClCompile Include="Global.cpp">
+      <Filter>Setting\Others</Filter>
+    </ClCompile>
+    <ClCompile Include="Timer.cpp">
+      <Filter>Setting\Others</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Object\Camera</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

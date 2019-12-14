@@ -18,13 +18,13 @@ DxSettings::~DxSettings()
 	mInput.reset();
 	mTimer.reset();
 
-	mpRenderTargetView.Reset();
-	mpDepthStencil.Reset();
-	mpDepthStencilView.Reset();
+	mRenderTargetView.Reset();
+	mDepthStencil.Reset();
+	mDepthStencilView.Reset();
 
-	mpD3DContext.Reset();
+	mD3DContext.Reset();
 	mSwapChain.Reset();
-	mpD3DDevice.Reset();
+	mD3DDevice.Reset();
 }
 
 void DxSettings::InitDxSettings(HINSTANCE hInst, HWND hWnd)
@@ -58,7 +58,7 @@ void DxSettings::InitDxSettings(HINSTANCE hInst, HWND hWnd)
 	swapChainDesc.Windowed = true;
 
 	hr = D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, NULL, 0, featureLevels, 1,
-		D3D11_SDK_VERSION, &swapChainDesc, mSwapChain.GetAddressOf(), mpD3DDevice.GetAddressOf(), mFeatureLevel, mpD3DContext.GetAddressOf());
+		D3D11_SDK_VERSION, &swapChainDesc, mSwapChain.GetAddressOf(), mD3DDevice.GetAddressOf(), mFeatureLevel, mD3DContext.GetAddressOf());
 	if (FAILED(hr))
 	{
 		assert(hr == S_OK, L"D3D11CreateDeviceAndSwapChain() error");
@@ -74,7 +74,7 @@ void DxSettings::InitDxSettings(HINSTANCE hInst, HWND hWnd)
 		assert(hr == S_OK, L"mSwapChain->GetBuffer(pBackBuffer) error");
 	}
 
-	hr = mpD3DDevice->CreateRenderTargetView(pBackBuffer, nullptr, mpRenderTargetView.GetAddressOf());
+	hr = mD3DDevice->CreateRenderTargetView(pBackBuffer, nullptr, mRenderTargetView.GetAddressOf());
 	if (FAILED(hr))
 	{
 		assert(hr == S_OK, L"mpD3DDevice->CreateRenderTargetView(pBackBuffer) error");
@@ -96,7 +96,7 @@ void DxSettings::InitDxSettings(HINSTANCE hInst, HWND hWnd)
 	descDepth.CPUAccessFlags = 0;
 	descDepth.MiscFlags = 0;
 
-	hr = mpD3DDevice->CreateTexture2D(&descDepth, NULL, mpDepthStencil.GetAddressOf());
+	hr = mD3DDevice->CreateTexture2D(&descDepth, NULL, mDepthStencil.GetAddressOf());
 	if (FAILED(hr))
 	{
 		assert(hr == S_OK, L"mpD3DDevice->CreateTexture2D(mpDepthStencil) error");
@@ -107,13 +107,13 @@ void DxSettings::InitDxSettings(HINSTANCE hInst, HWND hWnd)
 	descDSV.Format = descDepth.Format;
 	descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	descDSV.Texture2D.MipSlice = 0;
-	hr = mpD3DDevice->CreateDepthStencilView(mpDepthStencil.Get(), &descDSV, mpDepthStencilView.GetAddressOf());
+	hr = mD3DDevice->CreateDepthStencilView(mDepthStencil.Get(), &descDSV, mDepthStencilView.GetAddressOf());
 	if (FAILED(hr))
 	{
 		assert(hr == S_OK, L"mpD3DDevice->CreateDepthStencilView() error");
 	}
 
-	mpD3DContext->OMSetRenderTargets(1, mpRenderTargetView.GetAddressOf(), mpDepthStencilView.Get());
+	mD3DContext->OMSetRenderTargets(1, mRenderTargetView.GetAddressOf(), mDepthStencilView.Get());
 
 
 	// Create Veiwport
@@ -124,8 +124,10 @@ void DxSettings::InitDxSettings(HINSTANCE hInst, HWND hWnd)
 	vp.MinDepth = 0.0f;
 	vp.TopLeftX = 0;
 	vp.TopLeftY = 0;
-	mpD3DContext->RSSetViewports(1, &vp);
+	mD3DContext->RSSetViewports(1, &vp);
 
+
+	CoInitialize(nullptr);
 
 	// Create Projection Matrix
 	mProjection = XMMatrixPerspectiveFovLH(XM_PIDIV2, mWidth / static_cast<int>(mHeight), 0.01f, 100.0f);

@@ -25,12 +25,12 @@ protected:
 	D3D_FEATURE_LEVEL* mFeatureLevel;
 	ComPtr<IDXGISwapChain> mSwapChain;
 
-	ComPtr<ID3D11Device> mpD3DDevice;
-	ComPtr<ID3D11DeviceContext> mpD3DContext;
+	ComPtr<ID3D11Device> mD3DDevice;
+	ComPtr<ID3D11DeviceContext> mD3DContext;
 
-	ComPtr<ID3D11RenderTargetView> mpRenderTargetView;
-	ComPtr<ID3D11Texture2D> mpDepthStencil;
-	ComPtr<ID3D11DepthStencilView> mpDepthStencilView;
+	ComPtr<ID3D11RenderTargetView> mRenderTargetView;
+	ComPtr<ID3D11Texture2D> mDepthStencil;
+	ComPtr<ID3D11DepthStencilView> mDepthStencilView;
 
 	std::shared_ptr<Input> mInput;
 	std::shared_ptr<Timer> mTimer;
