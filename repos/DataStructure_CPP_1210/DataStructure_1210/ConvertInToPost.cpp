@@ -3,7 +3,7 @@
 
 char* ConvertInToPost::CovertInfixToPostfix(const char* exp)
 {
-	SimpleStack* stack = new SimpleStack();
+	SimpleStack<int>* stack = new SimpleStack<int>();
 	char* postExp = new char[128];
 	int index = 0;
 
@@ -22,6 +22,10 @@ char* ConvertInToPost::CovertInfixToPostfix(const char* exp)
 			int data;
 			while (stack->Pop(&data))
 			{
+				if (data == '(')
+				{
+					break;
+				}
 				postExp[index++] = data;
 			}
 			break;
@@ -29,7 +33,7 @@ char* ConvertInToPost::CovertInfixToPostfix(const char* exp)
 		case '+':
 		case '-':
 		{
-			char vData = stack->View();
+			char vData = static_cast<char>(stack->View());
 			if (vData == '*' || vData == '/')
 			{
 				int data;

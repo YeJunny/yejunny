@@ -24,8 +24,8 @@ private:
 	FbxScene* mScene;
 	FbxMesh* mMesh;
 
-	XMFLOAT3* mVertices;
-	XMFLOAT2* mUVs;
+	std::unique_ptr<XMFLOAT3[]> mVertices;
+	std::unique_ptr<XMFLOAT2[]> mUVs;
 	unsigned int mVertexCount;
 };
 

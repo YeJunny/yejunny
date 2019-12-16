@@ -1,23 +1,109 @@
 #pragma once
 using FunPtr = void (*)(int);
-typedef int DataType;
 
+template <typename T>
 class SimpleBTree
 {
 public:
-	SimpleBTree();
-	SimpleBTree(DataType data);
-	~SimpleBTree();
-	void MakeLeftSubTree(SimpleBTree* node);
-	void MakeRightSubTree(SimpleBTree* node);
-	void SearchPreOrderBTree(FunPtr) const;
-	void SearchInOrderBTree(FunPtr) const;
-	void SearchPostOrderBTree(FunPtr) const;
-	void DeleteBTree() const;
+	SimpleBTree()
+		: mData(0)
+		, mLeftNode(nullptr)
+		, mRightNode(nullptr)
+	{
+	}
+
+	SimpleBTree(T data)
+		: mData(data)
+		, mLeftNode(nullptr)
+		, mRightNode(nullptr)
+	{
+	}
+
+	~SimpleBTree()
+	{
+	}
+
+	void MakeLeftSubTree(SimpleBTree* node)
+	{
+		mLeftNode->DeleteBTree();
+
+		mLeftNode = node;
+	}
+
+	void MakeRightSubTree(SimpleBTree* node)
+	{
+		mRightNode->DeleteBTree();
+
+		mRightNode = node;
+	}
+
+	void SearchPreOrderBTree(FunPtr funPtr) const
+	{
+		if (this == nullptr)
+		{
+			return;
+		}
+
+		funPtr(mData);
+		mLeftNode->SearchPreOrderBTree(funPtr);
+		mRightNode->SearchPreOrderBTree(funPtr);
+	}
+
+	void SearchInOrderBTree(FunPtr funPtr) const
+	{
+		if (this == nullptr)
+		{
+			return;
+		}
+
+		mLeftNode->SearchInOrderBTree(funPtr);
+		funPtr(mData);
+		mRightNode->SearchInOrderBTree(funPtr);
+	}
+
+	void SearchPostOrderBTree(FunPtr funPtr) const
+	{
+		if (this == nullptr)
+		{
+			return;
+		}
+
+		mLeftNode->SearchPostOrderBTree(funPtr);
+		mRightNode->SearchPostOrderBTree(funPtr);
+		funPtr(mData);
+	}
+
+	void DeleteBTree() const
+	{
+		if (this == nullptr)
+		{
+			return;
+		}
+
+		mLeftNode->DeleteBTree();
+		mRightNode->DeleteBTree();
+		delete this;
+	}
+
+	SimpleBTree* GetLeftTree() const
+	{
+		return mLeftNode;
+	}
+
+	SimpleBTree* GetRightTree() const
+	{
+		return mRightNode;
+	}
+
+	T GetData() const
+	{
+		return mData;
+	}
+
 
 private:
 	SimpleBTree* mLeftNode;
 	SimpleBTree* mRightNode;
-	DataType mData;
+	T mData;
 };
 

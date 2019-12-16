@@ -12,9 +12,6 @@
     <Filter Include="Object">
       <UniqueIdentifier>{cf5670d9-d976-4779-b003-73832d248df6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Object\Old">
-      <UniqueIdentifier>{fe903d21-575a-4751-96cb-a50e7e7feb23}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Setting">
       <UniqueIdentifier>{31de4136-6bef-4e52-9c84-a2e474747e29}</UniqueIdentifier>
     </Filter>
@@ -44,12 +41,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Triangle.h">
-      <Filter>Object\Old</Filter>
-    </ClInclude>
-    <ClInclude Include="Axis.h">
-      <Filter>Object\Old</Filter>
-    </ClInclude>
     <ClInclude Include="Object.h">
       <Filter>Object</Filter>
     </ClInclude>
@@ -67,9 +58,6 @@
     </ClInclude>
     <ClInclude Include="Player.h">
       <Filter>Object\Player</Filter>
-    </ClInclude>
-    <ClInclude Include="Cube.h">
-      <Filter>Object\Enemy</Filter>
     </ClInclude>
     <ClInclude Include="Bullet.h">
       <Filter>Object\Player</Filter>
@@ -104,6 +92,9 @@
     <ClInclude Include="Camera.h">
       <Filter>Object\Camera</Filter>
     </ClInclude>
+    <ClInclude Include="Skybox.h">
+      <Filter>Object\Terriain</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="D3D11_FPS_Project_1029.rc">
@@ -125,12 +116,6 @@
     <ClCompile Include="WinMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Triangle.cpp">
-      <Filter>Object\Old</Filter>
-    </ClCompile>
-    <ClCompile Include="Axis.cpp">
-      <Filter>Object\Old</Filter>
-    </ClCompile>
     <ClCompile Include="Object.cpp">
       <Filter>Object</Filter>
     </ClCompile>
@@ -148,9 +133,6 @@
     </ClCompile>
     <ClCompile Include="Player.cpp">
       <Filter>Object\Player</Filter>
-    </ClCompile>
-    <ClCompile Include="Cube.cpp">
-      <Filter>Object\Enemy</Filter>
     </ClCompile>
     <ClCompile Include="Bullet.cpp">
       <Filter>Object\Player</Filter>
@@ -172,6 +154,9 @@
     </ClCompile>
     <ClCompile Include="Camera.cpp">
       <Filter>Object\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Skybox.cpp">
+      <Filter>Object\Terriain</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

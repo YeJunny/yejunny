@@ -11,6 +11,9 @@ void Timer::Update()
 {
 	mCurrentTick = GetTickCount64();
 	mDiffTick = mCurrentTick - mOldTick;
+	WCHAR str[20];
+	wsprintf(str, L"%d\n", mDiffTick);
+	OutputDebugStringW(str);
 	mOldTick = mCurrentTick;
 }
 

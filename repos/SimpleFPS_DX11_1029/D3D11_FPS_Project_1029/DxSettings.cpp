@@ -6,6 +6,7 @@ using namespace DirectX;
 DxSettings::DxSettings()
 	: mWidth(0.0f)
 	, mHeight(0.0f)
+	, mFrame(0)
 {
 	mInput = std::make_unique<Input>();
 	mTimer = std::make_unique<Timer>();
@@ -127,10 +128,10 @@ void DxSettings::InitDxSettings(HINSTANCE hInst, HWND hWnd)
 	mD3DContext->RSSetViewports(1, &vp);
 
 
-	CoInitialize(nullptr);
+	//CoInitialize(nullptr);
 
 	// Create Projection Matrix
-	mProjection = XMMatrixPerspectiveFovLH(XM_PIDIV2, mWidth / static_cast<int>(mHeight), 0.01f, 100.0f);
+	mProjectionMat = XMMatrixPerspectiveFovLH(XM_PIDIV2, mWidth / static_cast<int>(mHeight), 0.01f, 100.0f);
 
 
 	// Other Init
@@ -144,12 +145,36 @@ void DxSettings::InitDxSettings(HINSTANCE hInst, HWND hWnd)
 
 void DxSettings::UpdateDxSettings()
 {
-	mInput->Frame();
 	mTimer->Update();
-	Update();
+	ULONGLONG diffTick = mTimer->GetDiffTick();
+
+	// Calculate FPS
+	static ULONGLONG cumulativeTime = 0;
+	cumulativeTime += diffTick;
+	if (cumulativeTime >= 1000)
+	{
+		WCHAR str[100];
+		wsprintf(str, L"FPS: %d\n", mFrame);
+		mFrame = 0;
+		cumulativeTime = 0;
+		OutputDebugStringW(str);
+	}
+
+	Sleep(10);
+	mInput->Frame();
+
+	while (diffTick > 0)
+	{
+
+		ULONGLONG deltaTime = min(diffTick, 1.0f / 60 * 1000);
+		diffTick -= deltaTime;
+
+		Update();
+	}
 }
 
 void DxSettings::RenderDxSettings()
 {
 	Render();
+	mFrame++;
 }

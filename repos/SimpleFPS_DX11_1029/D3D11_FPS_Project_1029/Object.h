@@ -23,9 +23,9 @@ class Object
 public:
 	virtual void Init(const ComPtr<ID3D11Device> pD3DDevice, HWND hWnd, 
 		const WCHAR* shaderFile, const WCHAR* textureFile,
-		const XMMATRIX projection, std::shared_ptr<Timer> timer);
+		const XMMATRIX& projectionMat, std::shared_ptr<Timer> timer);
 	virtual void InitDetail(HWND hWnd);
-	virtual void Update(const XMMATRIX view);
+	virtual void Update(const XMMATRIX& viewMat);
 	virtual void Render();
 
 	Object();
@@ -51,9 +51,9 @@ protected:
 	ComPtr<ID3D11ShaderResourceView> mTextureRV;
 	ComPtr<ID3D11SamplerState> mSamplerState;
 
-	XMMATRIX mWorld;
-	XMMATRIX mView;
-	XMMATRIX mProjection;
+	XMMATRIX mWorldMat;
+	XMMATRIX mViewMat;
+	XMMATRIX mProjectionMat;
 
 	UINT mVertexCount;
 	std::unique_ptr<VertexElements[]> mVertices;

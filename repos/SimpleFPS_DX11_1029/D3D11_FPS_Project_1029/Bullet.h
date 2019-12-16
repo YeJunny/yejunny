@@ -10,14 +10,14 @@ class Bullet : public Object
 {
 public:
 	virtual void InitDetail(HWND hWnd);
-	virtual void Update(const int index, const XMFLOAT3 gunPos, const XMMATRIX view);
-	void Render(const int index);
+	virtual void Update(const XMMATRIX& viewMat);
+	void Render();
 
-	void Create(const int index, const XMFLOAT3& pos, const XMFLOAT3& rot);
+	void Create(const XMFLOAT3& pos, const XMFLOAT3& rot);
 
-	XMFLOAT3 GetPosition(const int index) const;
-	bool GetLive(const int index) const;
-	void SetLive(const int index, const bool bLive);
+	XMFLOAT3 GetPosition() const;
+	bool GetLive() const;
+	void SetLive(const bool bLive);
 
 	Bullet();
 	~Bullet();
@@ -25,13 +25,10 @@ public:
 private:
 	std::shared_ptr<Timer> mTimer;
 
-	XMFLOAT3 mPos[BULLET_COUNT];
-	XMFLOAT3 mRot[BULLET_COUNT];
+	XMFLOAT3 mPos;
+	XMFLOAT3 mRot;
 
-	bool mLive[BULLET_COUNT];
-
-	XMMATRIX mWorld[BULLET_COUNT];
-	XMMATRIX mView[BULLET_COUNT];
+	bool mLive;
 
 	std::unique_ptr<Sound> mShooting;
 };

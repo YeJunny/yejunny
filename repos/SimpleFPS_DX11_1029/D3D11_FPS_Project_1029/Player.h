@@ -13,8 +13,11 @@ class Timer;
 class Player
 {
 public:
-	virtual void Init(std::shared_ptr<Input> input, std::shared_ptr<Timer> timer);
-	virtual void Update();
+	virtual void Init(const ComPtr<ID3D11Device> pD3DDevice, HWND hWnd, 
+		const XMMATRIX& viewMat, 
+		const XMMATRIX& projectionMat,
+		std::shared_ptr<Input> input, std::shared_ptr<Timer> timer);
+	virtual void Update(const XMMATRIX& viewMat);
 	virtual void Render();
 
 	Player();
@@ -23,7 +26,7 @@ public:
 	XMFLOAT3 GetRotation() const;
 	XMFLOAT3 GetPosition() const;
 	bool* GetLiveBullet();
-	void SetLiveBullet(const int index);
+	void SetLiveBullet();
 
 private:
 	std::shared_ptr<Input> mInput;
@@ -31,8 +34,11 @@ private:
 
 	XMFLOAT3 mPos;
 	XMFLOAT3 mRot;
-	XMMATRIX mView;
+	XMMATRIX mViewMat;
 
-	bool mbBullet[BULLET_COUNT];
+	size_t mNumShootBullet;
+
+	std::unique_ptr<Gun> mGun;
+	std::unique_ptr<Bullet[]> mBullet;
 };
 

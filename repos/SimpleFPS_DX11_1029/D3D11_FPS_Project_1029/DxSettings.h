@@ -36,10 +36,10 @@ protected:
 	std::shared_ptr<Timer> mTimer;
 
 	HWND mhWnd;
+	DWORD mFrame;
 
-	XMMATRIX mWorld;
-	XMMATRIX mView;
-	XMMATRIX mProjection;
+	XMMATRIX mViewMat;
+	XMMATRIX mProjectionMat;
 
 	FLOAT mWidth;
 	FLOAT mHeight;

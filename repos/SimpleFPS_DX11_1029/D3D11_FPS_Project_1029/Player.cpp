@@ -3,6 +3,7 @@
 #include "Player.h"
 
 Player::Player()
+	: mNumShootBullet(0)
 {
 	mPos = { 0.0f, 0.0f, 0.0f };
 	mRot = { 0.0f, 0.0f, 0.0f };
@@ -14,17 +15,27 @@ Player::~Player()
 	mInput.reset();
 }
 
-void Player::Init(std::shared_ptr<Input> input, std::shared_ptr<Timer> timer)
+void Player::Init(const ComPtr<ID3D11Device> d3dDevice, HWND hWnd, const XMMATRIX& viewMat, const XMMATRIX& projectionMat, std::shared_ptr<Input> input, std::shared_ptr<Timer> timer)
 {
 	mInput = input;
 	mTimer = timer;
+	mViewMat = viewMat;
+
+	mGun = std::make_unique<Gun>();
+	mGun->Init(d3dDevice, hWnd, L"Shader\\Box.fx", L"Fbx\\gun.jpg", projectionMat, mTimer);
+
+	mBullet.reset(new Bullet[BULLET_COUNT]);
+	for (int i = 0; i < BULLET_COUNT; i++)
+	{
+		mBullet[i].Init(d3dDevice, hWnd, L"Shader\\Box.fx", L"Fbx\\Bullet_Shell.jpg", projectionMat, mTimer);
+	}
 }
 
-void Player::Update()
+void Player::Update(const XMMATRIX& viewMat)
 {
 	ULONGLONG diffTick = mTimer->GetDiffTick();
-
-	float delay = diffTick * 0.001f;
+	
+	float delay = diffTick * 0.01f;
 	float speed = diffTick * 0.005f;
 	float rotation = diffTick * 0.1f;
 
@@ -34,17 +45,23 @@ void Player::Update()
 	accumulateTime += diffTick;
 	gunDelayTime += diffTick;
 
-	// Shoot
-	if (mInput->IsLeftMouseButtonDown() && gunDelayTime >= delay)
+
+	mGun->Update(mPos, mRot, viewMat);
+	for (int i = 0; i < mNumShootBullet; i++)
 	{
-		for (int i = 0; i < BULLET_COUNT; ++i)
+		mBullet[i].Update(viewMat);
+	}
+
+	// Shoot
+	mInput->Frame();
+	if (mInput->IsLeftMouseButtonDown() && gunDelayTime >= 200.0f)
+	{
+		mBullet[mNumShootBullet++].Create(mGun->GetPosition(), mRot);
+		if (mNumShootBullet >= BULLET_COUNT)
 		{
-			if (!mbBullet[i])
-			{
-				mbBullet[i] = true;
-				break;
-			}
+			mNumShootBullet = 0;
 		}
+
 		gunDelayTime = 0;
 	}
 
@@ -117,6 +134,12 @@ void Player::Update()
 
 void Player::Render()
 {
+	mGun->Render();
+
+	for (int i = 0; i < mNumShootBullet; ++i)
+	{
+		mBullet[i].Render();
+	}
 }
 
 
@@ -129,13 +152,13 @@ XMFLOAT3 Player::GetPosition() const
 {
 	return mPos;
 }
-
-bool* Player::GetLiveBullet()
-{
-	return mbBullet;
-}
-
-void Player::SetLiveBullet(const int index)
-{
-	mbBullet[index] = false;
-}
+//
+//bool* Player::GetLiveBullet()
+//{
+//	return mbBullet;
+//}
+//
+//void Player::SetLiveBullet(const int index)
+//{
+//	mbBullet = false;
+//}

@@ -2,22 +2,14 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="SimpleBTree.cpp" />
-    <ClCompile Include="SimpleStack.cpp">
-      <Filter>Stack</Filter>
-    </ClCompile>
-    <ClCompile Include="LinkedList.cpp">
-      <Filter>LinkedList</Filter>
-    </ClCompile>
-    <ClCompile Include="SimpleQueue.cpp">
-      <Filter>Queue</Filter>
-    </ClCompile>
     <ClCompile Include="ConvertInToPost.cpp">
       <Filter>Others</Filter>
     </ClCompile>
+    <ClCompile Include="ExpTree.cpp">
+      <Filter>Tree\ExpTree</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="SimpleBTree.h" />
     <ClInclude Include="SimpleStack.h">
       <Filter>Stack</Filter>
     </ClInclude>
@@ -30,6 +22,12 @@
     <ClInclude Include="ConvertInToPost.h">
       <Filter>Others</Filter>
     </ClInclude>
+    <ClInclude Include="SimpleBTree.h">
+      <Filter>Tree</Filter>
+    </ClInclude>
+    <ClInclude Include="ExpTree.h">
+      <Filter>Tree\ExpTree</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Stack">
@@ -40,6 +38,12 @@
     </Filter>
     <Filter Include="Queue">
       <UniqueIdentifier>{7da9461d-5934-4028-8c2f-4e603bbfa5ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tree">
+      <UniqueIdentifier>{042bf6eb-f1ba-4d25-a3be-abe58cf793b0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tree\ExpTree">
+      <UniqueIdentifier>{f1d769b6-abb1-482a-b5c3-c3cb831fd799}</UniqueIdentifier>
     </Filter>
     <Filter Include="Others">
       <UniqueIdentifier>{69d0027c-8e4e-485c-8a75-8edbd9ce62f5}</UniqueIdentifier>

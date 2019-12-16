@@ -36,10 +36,10 @@ HRESULT FBXLoader::LoadFbx(const char* fileName)
 	for (int i = 0; i < childCount; i++)
 	{
 		FbxNode* pFbxChildNode = pFbxRootNode->GetChild(i);
-		if (!pFbxChildNode->GetNodeAttribute())
+		/*if (!pFbxChildNode->GetNodeAttribute())
 		{
 			continue;
-		}
+		}*/
 
 		FbxNodeAttribute::EType attributeType = pFbxChildNode->GetNodeAttribute()->GetAttributeType();
 
@@ -63,8 +63,8 @@ HRESULT FBXLoader::LoadFbx(const char* fileName)
 		FbxVector4* pVertices = mMesh->GetControlPoints();
 		assert(pVertices, L"pVertices == nullptr");
 		int polygonCount = mMesh->GetPolygonCount();
-		mVertices = new XMFLOAT3[polygonCount * 3];
-		mUVs = new XMFLOAT2[polygonCount * 3];
+		mVertices.reset(new XMFLOAT3[polygonCount * 3]);
+		mUVs.reset(new XMFLOAT2[polygonCount * 3]);
 		mVertexCount = 0;
 
 		for (int j = 0; j < polygonCount; j++)
@@ -107,16 +107,19 @@ FBXLoader::~FBXLoader()
 	{
 		mManager->Destroy();
 	}
+
+	mVertices.reset();
+	mUVs.reset();
 }
 
 XMFLOAT3* FBXLoader::GetVertices() const
 {
-	return mVertices;
+	return mVertices.get();
 }
 
 XMFLOAT2* FBXLoader::GetUVs() const
 {
-	return mUVs;
+	return mUVs.get();
 }
 
 unsigned int FBXLoader::GetVertexCount() const

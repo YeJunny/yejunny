@@ -2,7 +2,7 @@
 
 #include "framework.h"
 
-#define BULLET_COUNT 5
+#define BULLET_COUNT 20
 
 class Global
 {

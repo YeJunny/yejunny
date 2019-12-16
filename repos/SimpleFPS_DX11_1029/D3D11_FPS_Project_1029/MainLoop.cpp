@@ -1,101 +1,55 @@
 #include "Bullet.h"
 #include "Camera.h"
-#include "Cube.h"
 #include "Ground.h"
 #include "Gun.h"
 #include "MainLoop.h"
 #include "Player.h"
+#include "Skybox.h"
 
 MainLoop::MainLoop()
-	: mFrame(0)
 {
+}
+
+MainLoop::~MainLoop()
+{
+	mSkybox.reset();
+	mGround.reset();
+	mCamera.reset();
+	mPlayer.reset();
 }
 
 void MainLoop::Init()
 {
 	// Init Player
 	mPlayer = std::make_unique<Player>();
-	mPlayer->Init(mInput, mTimer);
+	mPlayer->Init(mD3DDevice, mhWnd, mViewMat, mProjectionMat, mInput, mTimer);
 	
 	// Init Camera
 	mCamera = std::make_unique<Camera>();
-	mCamera->Init(mD3DDevice, mView);
+	mCamera->Init(mD3DDevice, mViewMat);
 
 	// Init Object
-	mCube = std::make_unique<Cube>();
-	mCube->Init(mD3DDevice, mhWnd, L"Shader\\Box.fx", L"Fbx\\skybox.png", mProjection, mTimer);
+	mSkybox = std::make_unique<Skybox>();
+	mSkybox->Init(mD3DDevice, mhWnd, L"Shader\\Box.fx", L"Fbx\\skybox.png", mProjectionMat, mTimer);
 
 	mGround = std::make_unique<Ground>();
-	mGround->Init(mD3DDevice, mhWnd, L"Shader\\Box.fx", L"Fbx\\book-texture.png", mProjection, mTimer);
-
-	mGun = std::make_unique<Gun>();
-	mGun->Init(mD3DDevice, mhWnd, L"Shader\\Cube.fx", L"Fbx\\book-texture.png", mProjection, mTimer);
-
-	mBullet = std::make_unique<Bullet>();
-	mBullet->Init(mD3DDevice, mhWnd, L"Shader\\Cube.fx", L"Fbx\\book-texture.png", mProjection, mTimer);
+	mGround->Init(mD3DDevice, mhWnd, L"Shader\\Box.fx", L"Fbx\\book-texture.png", mProjectionMat, mTimer);
 }
 
 void MainLoop::Update()
 {
-	// Calculate FPS
-	static ULONGLONG cumulativeTime = 0;
-	ULONGLONG diffTick = mTimer->GetDiffTick();
-	cumulativeTime += diffTick;
-	if (cumulativeTime >= 1000)
-	{
-		WCHAR str[100];
-		wsprintf(str, L"FPS: %d\n", mFrame);
-		mFrame = 0;
-		cumulativeTime = 0;
-	}
-
-
 	// Player update
-	mPlayer->Update();
+	mPlayer->Update(mViewMat);
 	XMFLOAT3 playerPos = mPlayer->GetPosition();
 	XMFLOAT3 playerRot = mPlayer->GetRotation();
 
-
 	// Camera update
 	mCamera->UpdateLocation(playerPos, playerRot);
-	XMMATRIX view = mCamera->GetViewMatrix();
-
+	mViewMat = mCamera->GetViewMatrix();
 
 	// Object update
-	mGun->Update(playerPos, playerRot, view);
-	XMFLOAT3 gunPos = mGun->GetPosition();
-	bool* bBullet = mPlayer->GetLiveBullet();
-	for (int i = 0; i < BULLET_COUNT; ++i)
-	{
-		if (mBullet->GetLive(i))
-		{
-			mBullet->Update(i, gunPos, view);
-			XMFLOAT3 bulletPos = mBullet->GetPosition(i);
-
-			if (bulletPos.x >= 30.0f || bulletPos.x <= -30.0f ||
-				bulletPos.z >= 30.0f || bulletPos.z <= -30.0f)
-			{
-				mBullet->SetLive(i, false);
-
-				mPlayer->SetLiveBullet(i);
-			}
-		}
-
-		for (int j = 0; j < BULLET_COUNT; ++j)
-		{
-			if (bBullet[i] && !mBullet->GetLive(j))
-			{
-				mBullet->Create(j, gunPos, playerRot);
-				mBullet->SetLive(j, true);
-				mBullet->Update(j, gunPos, view);
-
-				break;
-			}
-		}
-	}
-
-	mCube->Update(view);
-	mGround->Update(view);
+	mSkybox->Update(mViewMat);
+	mGround->Update(mViewMat);
 }
 
 void MainLoop::Render()
@@ -105,28 +59,8 @@ void MainLoop::Render()
 	mD3DContext->ClearDepthStencilView(mDepthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	
 	mGround->Render();
-	mCube->Render();
-	mGun->Render();
-		
-	for (int i = 0; i < BULLET_COUNT; ++i)
-	{
-		if (mBullet->GetLive(i))
-		{
-			mBullet->Render(i);
-		}
-	}
+	mSkybox->Render();
+	mPlayer->Render();
 	
 	mSwapChain->Present(0, 0);
-
-	mFrame++;
-}
-
-MainLoop::~MainLoop()
-{
-	mCube.reset();
-	mGround.reset();
-	mCamera.reset();
-	mPlayer.reset();
-	mGun.reset();
-	mBullet.reset();
 }

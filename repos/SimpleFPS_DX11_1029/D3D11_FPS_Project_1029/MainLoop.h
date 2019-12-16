@@ -3,7 +3,7 @@
 
 class Bullet;
 class Camera;
-class Cube;
+class Skybox;
 class Ground;
 class Gun;
 class Player;
@@ -19,13 +19,9 @@ public:
 	~MainLoop();
 
 private:
-	DWORD mFrame;
-
 	std::unique_ptr<Ground> mGround;
 	std::unique_ptr<Camera> mCamera;
-	std::unique_ptr<Cube> mCube;
+	std::unique_ptr<Skybox> mSkybox;
 	std::unique_ptr<Player> mPlayer;
-	std::unique_ptr<Gun> mGun;
-	std::unique_ptr<Bullet> mBullet;
 };
 

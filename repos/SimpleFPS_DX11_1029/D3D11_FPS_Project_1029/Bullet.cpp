@@ -14,17 +14,15 @@ Bullet::Bullet()
 	for (UINT i = 0; i < mVertexCount; ++i)
 	{
 		mVertices[i].Pos = (fbxLoader.GetVertices())[i];
+		mVertices[i].Uv = (fbxLoader.GetUVs())[i];
 	}
 
-	for (int i = 0; i < BULLET_COUNT; ++i)
-	{
-		mLive[i] = false;
-	}
+	mLive = false;
 
 	mLayoutElementNumber = 2;
 	mLayout.reset(new D3D11_INPUT_ELEMENT_DESC[mLayoutElementNumber]);
 	mLayout[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 };
-	mLayout[1] = { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+	mLayout[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 };
 }
 
 Bullet::~Bullet()
@@ -42,13 +40,13 @@ void Bullet::InitDetail(HWND hWnd)
 	assert(bSuccess, "mShooting->Initiailize() error");
 }
 
-void Bullet::Create(const int index, const XMFLOAT3& gunPos, const XMFLOAT3& rot)
+void Bullet::Create(const XMFLOAT3& gunPos, const XMFLOAT3& rot)
 {
-	mRot[index].x = XMConvertToRadians(rot.x);
-	mRot[index].y = XMConvertToRadians(rot.y);
-	mRot[index].z = XMConvertToRadians(rot.z);
+	mRot.x = XMConvertToRadians(rot.x);
+	mRot.y = XMConvertToRadians(rot.y);
+	mRot.z = XMConvertToRadians(rot.z);
 
-	XMVECTOR angleVector = { sinf(mRot[index].y), 1.0f, cosf(mRot[index].y) };
+	XMVECTOR angleVector = { sinf(mRot.y), 1.0f, cosf(mRot.y) };
 	XMVECTOR upVector = { 0.0f, 1.0f, 0.0f };
 	XMVECTOR crossVector = XMVector3Cross(upVector, angleVector);
 	XMFLOAT3 crossFloat;
@@ -56,7 +54,7 @@ void Bullet::Create(const int index, const XMFLOAT3& gunPos, const XMFLOAT3& rot
 	XMStoreFloat3(&angleFloat, angleVector);
 	XMStoreFloat3(&crossFloat, crossVector);
 
-	mPos[index] =
+	mPos =
 	{
 		gunPos.x + crossFloat.x * 0.5f + angleFloat.x * 0.6f,
 		gunPos.y - 0.3f,
@@ -66,21 +64,21 @@ void Bullet::Create(const int index, const XMFLOAT3& gunPos, const XMFLOAT3& rot
 	mShooting->PlayWaveFile(gunPos);
 }
 
-void Bullet::Update(const int index, const XMFLOAT3 gunPos, const XMMATRIX view)
+void Bullet::Update(const XMMATRIX& viewMat)
 {
-	float distance = 0.05f;
+	float distance = 0.8f;
 
-	mPos[index].x += distance * sinf(mRot[index].y);
-	mPos[index].z += distance * cosf(mRot[index].y);
+	mPos.x += distance * sinf(mRot.y);
+	mPos.z += distance * cosf(mRot.y);
 
-	mWorld[index] = XMMatrixScaling(0.01f, 0.01f, 0.01f) *
-		XMMatrixRotationRollPitchYaw(mRot[index].x, mRot[index].y, mRot[index].z) *
-		XMMatrixTranslation(mPos[index].x, mPos[index].y, mPos[index].z);
+	mWorldMat = XMMatrixScaling(0.009f, 0.009f, 0.009f) *
+		XMMatrixRotationRollPitchYaw(mRot.x, mRot.y, mRot.z) *
+		XMMatrixTranslation(mPos.x, mPos.y, mPos.z);
 
-	mView[index] = view;
+	mViewMat = viewMat;
 }
 
-void Bullet::Render(const int index)
+void Bullet::Render()
 {
 	UINT stride = sizeof(VertexElements);
 	UINT offset = 0;
@@ -88,30 +86,30 @@ void Bullet::Render(const int index)
 	mD3DContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	ConstantBuffer cb;
-	cb.World = XMMatrixTranspose(mWorld[index]);
-	cb.View = XMMatrixTranspose(mView[index]);
-	cb.Projection = XMMatrixTranspose(mProjection);
-
+	cb.World = XMMatrixTranspose(mWorldMat);
+	cb.View = XMMatrixTranspose(mViewMat);
+	cb.Projection = XMMatrixTranspose(mProjectionMat);
 	mD3DContext->UpdateSubresource(mConstantBuffer.Get(), 0, nullptr, &cb, 0, 0);
-
 	mD3DContext->VSSetShader(mVertexShader.Get(), nullptr, 0);
 	mD3DContext->VSSetConstantBuffers(0, 1, mConstantBuffer.GetAddressOf());
+	mD3DContext->PSSetShaderResources(0, 1, mTextureRV.GetAddressOf());
+	mD3DContext->PSSetSamplers(0, 1, mSamplerState.GetAddressOf());
 	mD3DContext->PSSetShader(mPixelShader.Get(), nullptr, 0);
 
 	mD3DContext->Draw(mVertexCount, 0);
 }
 
-XMFLOAT3 Bullet::GetPosition(const int index) const
+XMFLOAT3 Bullet::GetPosition() const
 {
-	return mPos[index];
+	return mPos;
 }
 
-bool Bullet::GetLive(const int index) const
+bool Bullet::GetLive() const
 {
-	return mLive[index];
+	return mLive;
 }
 
-void Bullet::SetLive(const int index, const bool bLive)
+void Bullet::SetLive(const bool bLive)
 {
-	mLive[index] = bLive;
+	mLive = bLive;
 }

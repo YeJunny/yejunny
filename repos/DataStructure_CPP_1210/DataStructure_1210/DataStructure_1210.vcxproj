@@ -152,14 +152,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ConvertInToPost.cpp" />
-    <ClCompile Include="LinkedList.cpp" />
+    <ClCompile Include="ExpTree.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="SimpleBTree.cpp" />
-    <ClCompile Include="SimpleQueue.cpp" />
-    <ClCompile Include="SimpleStack.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConvertInToPost.h" />
+    <ClInclude Include="ExpTree.h" />
     <ClInclude Include="LinkedList.h" />
     <ClInclude Include="SimpleBTree.h" />
     <ClInclude Include="SimpleQueue.h" />

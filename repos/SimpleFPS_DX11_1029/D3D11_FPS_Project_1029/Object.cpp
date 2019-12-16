@@ -25,16 +25,16 @@ Object::~Object()
 	mTimer.reset();
 }
 
-void Object::Init(const ComPtr<ID3D11Device> pD3DDevice, HWND hWnd, 
+void Object::Init(const ComPtr<ID3D11Device> d3dDevice, HWND hWnd, 
 	const WCHAR* shaderFile, const WCHAR* textureFile,
-	const XMMATRIX projection, std::shared_ptr<Timer> timer)
+	const XMMATRIX& projectionMat, std::shared_ptr<Timer> timer)
 {
 	HRESULT hr;
 
-	mProjection = projection;
+	mProjectionMat = projectionMat;
 	mTimer = timer;
 
-	mD3DDevice = pD3DDevice;
+	mD3DDevice = d3dDevice;
 	mD3DDevice->GetImmediateContext(&mD3DContext);
 
 
@@ -115,10 +115,10 @@ void Object::Init(const ComPtr<ID3D11Device> pD3DDevice, HWND hWnd,
 	{
 		assert(hr == S_OK, L"CreateWICTextureFromFile() error");
 	}
-#ifdef _DEBUG
-	SaveWICTextureToFile(mD3DContext.Get(), mTexture2D.Get(),
-		GUID_ContainerFormatBmp, L"SCREENSHOT.BMP");
-#endif
+//#ifdef _DEBUG
+//	SaveWICTextureToFile(mD3DContext.Get(), mTexture2D.Get(),
+//		GUID_ContainerFormatBmp, L"SCREENSHOT.BMP");
+//#endif
 
 	// Create the sample state
 	D3D11_SAMPLER_DESC sampDesc = {};
@@ -132,7 +132,7 @@ void Object::Init(const ComPtr<ID3D11Device> pD3DDevice, HWND hWnd,
 	hr = mD3DDevice->CreateSamplerState(&sampDesc, mSamplerState.GetAddressOf());
 	if (FAILED(hr))
 	{
-		assert(hr == S_OK, L"mpD3DDevice->CreateSamplerState() error");
+		assert(hr == S_OK, L"mD3DDevice->CreateSamplerState() error");
 	}
 
 	// Create Rasterizer State
@@ -140,22 +140,21 @@ void Object::Init(const ComPtr<ID3D11Device> pD3DDevice, HWND hWnd,
 	ZeroMemory(&cmdesc, sizeof(D3D11_RASTERIZER_DESC));
 	cmdesc.FillMode = D3D11_FILL_SOLID;
 	cmdesc.CullMode = D3D11_CULL_BACK;
-	cmdesc.FrontCounterClockwise = true;
-	//hr = mpD3DDevice->CreateRasterizerState(&cmdesc, &CCWcullMode);
 	cmdesc.FrontCounterClockwise = false;
-	//hr = mpD3DDevice->CreateRasterizerState(&cmdesc, &CWcullMode);
-	cmdesc.CullMode = D3D11_CULL_NONE;
 	hr = mD3DDevice->CreateRasterizerState(&cmdesc, mRasterizerState.GetAddressOf());
-
+	if (FAILED(hr))
+	{
+		assert(hr == S_OK, L"mD3DDevice->CreateRasterizerState(object) error");
+	}
 
 	mVertices.reset();
 
 	InitDetail(hWnd);
 }
 
-void Object::Update(const XMMATRIX view)
+void Object::Update(const XMMATRIX& viewMat)
 {
-	mView = view;
+	mViewMat = viewMat;
 }
 
 void Object::Render()
@@ -166,9 +165,9 @@ void Object::Render()
 	mD3DContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	ConstantBuffer cb;
-	cb.World = XMMatrixTranspose(mWorld);
-	cb.View = XMMatrixTranspose(mView);
-	cb.Projection = XMMatrixTranspose(mProjection);
+	cb.World = XMMatrixTranspose(mWorldMat);
+	cb.View = XMMatrixTranspose(mViewMat);
+	cb.Projection = XMMatrixTranspose(mProjectionMat);
 	mD3DContext->UpdateSubresource(mConstantBuffer.Get(), 0, nullptr, &cb, 0, 0);
 	mD3DContext->VSSetShader(mVertexShader.Get(), nullptr, 0);
 	mD3DContext->VSSetConstantBuffers(0, 1, mConstantBuffer.GetAddressOf());

@@ -160,10 +160,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Axis.h" />
     <ClInclude Include="Bullet.h" />
     <ClInclude Include="Camera.h" />
-    <ClInclude Include="Cube.h" />
+    <ClInclude Include="Skybox.h" />
     <ClInclude Include="FBXLoader.h" />
     <ClInclude Include="Global.h" />
     <ClInclude Include="Ground.h" />
@@ -173,7 +172,6 @@
     <ClInclude Include="Player.h" />
     <ClInclude Include="Sound.h" />
     <ClInclude Include="Timer.h" />
-    <ClInclude Include="Triangle.h" />
     <ClInclude Include="WinMain.h" />
     <ClInclude Include="DxSettings.h" />
     <ClInclude Include="framework.h" />
@@ -182,10 +180,9 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Axis.cpp" />
     <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="Cube.cpp" />
+    <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="DxSettings.cpp" />
     <ClCompile Include="FBXLoader.cpp" />
     <ClCompile Include="Global.cpp" />
@@ -197,7 +194,6 @@
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Sound.cpp" />
     <ClCompile Include="Timer.cpp" />
-    <ClCompile Include="Triangle.cpp" />
     <ClCompile Include="WinMain.cpp" />
   </ItemGroup>
   <ItemGroup>

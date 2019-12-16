@@ -16,7 +16,7 @@ Ground::Ground()
 		mVertices[i].Uv = (fbxLoader->GetUVs())[i];
 	}
 
-	mWorld = XMMatrixRotationRollPitchYaw(XM_PI / 2, 0.0f, 0.0f) *
+	mWorldMat = XMMatrixRotationRollPitchYaw(XM_PI / 2, 0.0f, 0.0f) *
 		XMMatrixTranslation(0.0f, -0.6f, 0.0f);
 	delete fbxLoader;
 
