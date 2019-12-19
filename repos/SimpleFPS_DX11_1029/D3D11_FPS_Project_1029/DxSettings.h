@@ -44,4 +44,3 @@ protected:
 	FLOAT mWidth;
 	FLOAT mHeight;
 };
-

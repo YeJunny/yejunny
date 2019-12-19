@@ -9,19 +9,18 @@ using namespace DirectX;
 class Camera
 {
 public:
-	void Init(const ComPtr<ID3D11Device> pD3DDevice, const XMMATRIX view);
-	void UpdateLocation(const XMFLOAT3 pos, const XMFLOAT3 rot);
-
 	Camera();
 	~Camera();
 
+	void Init(const ComPtr<ID3D11Device> d3dDevice, const XMMATRIX viewMat);
+	void UpdateLocation(const XMFLOAT3 pos, const XMFLOAT3 rot);
 	XMMATRIX GetViewMatrix() const;
 
 private:
-	ComPtr<ID3D11Device> mpD3DDevice;
-	ComPtr<ID3D11DeviceContext> mpD3DContext;
+	ComPtr<ID3D11Device> mD3DDevice;
+	ComPtr<ID3D11DeviceContext> mD3DContext;
 
 	XMFLOAT3 mRot;
-	XMMATRIX mView;
+	XMMATRIX mViewMat;
 };
 

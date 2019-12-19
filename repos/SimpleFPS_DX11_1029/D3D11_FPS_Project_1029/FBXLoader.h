@@ -1,5 +1,5 @@
 #pragma once
-#include "fbxsdk.h"
+#include <fbxsdk.h>
 #include "framework.h"
 #include <DirectXMath.h>
 using namespace DirectX;
@@ -13,18 +13,16 @@ public:
 
 	XMFLOAT3* GetVertices() const;
 	XMFLOAT2* GetUVs() const;
+	XMFLOAT3* GetNormals() const;
+	void GetNormals(FbxNode* Node);
 	unsigned int GetVertexCount() const;
 
 	FBXLoader();
 	~FBXLoader();
 
 private:
-	FbxManager* mManager;
-	FbxIOSettings* mIos;
-	FbxScene* mScene;
-	FbxMesh* mMesh;
-
 	std::unique_ptr<XMFLOAT3[]> mVertices;
+	std::unique_ptr<XMFLOAT3[]> mNormals;
 	std::unique_ptr<XMFLOAT2[]> mUVs;
 	unsigned int mVertexCount;
 };

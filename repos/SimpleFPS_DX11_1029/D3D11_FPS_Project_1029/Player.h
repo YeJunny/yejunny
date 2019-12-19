@@ -8,11 +8,15 @@ using namespace DirectX;
 
 class Bullet;
 class Input;
+class Sound;
 class Timer;
 
 class Player
 {
 public:
+	Player();
+	~Player();
+
 	virtual void Init(const ComPtr<ID3D11Device> pD3DDevice, HWND hWnd, 
 		const XMMATRIX& viewMat, 
 		const XMMATRIX& projectionMat,
@@ -20,13 +24,8 @@ public:
 	virtual void Update(const XMMATRIX& viewMat);
 	virtual void Render();
 
-	Player();
-	~Player();
-
 	XMFLOAT3 GetRotation() const;
 	XMFLOAT3 GetPosition() const;
-	bool* GetLiveBullet();
-	void SetLiveBullet();
 
 private:
 	std::shared_ptr<Input> mInput;
@@ -40,5 +39,6 @@ private:
 
 	std::unique_ptr<Gun> mGun;
 	std::unique_ptr<Bullet[]> mBullet;
+	std::unique_ptr<Sound> mShooting;
 };
 

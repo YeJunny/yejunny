@@ -9,27 +9,29 @@ struct VertexElements
 {
 	XMFLOAT3 Pos;
 	XMFLOAT2 Uv;
+	XMFLOAT3 Normal;
 };
 
 struct ConstantBuffer
 {
-	XMMATRIX World;
-	XMMATRIX View;
-	XMMATRIX Projection;
+	XMMATRIX WorldMat;
+	XMMATRIX ViewMat;
+	XMMATRIX ProjectionMat;
+	XMFLOAT3 LightingPosition;
 };
 
 class Object
 {
 public:
+	Object();
+	~Object();
+
 	virtual void Init(const ComPtr<ID3D11Device> pD3DDevice, HWND hWnd, 
 		const WCHAR* shaderFile, const WCHAR* textureFile,
 		const XMMATRIX& projectionMat, std::shared_ptr<Timer> timer);
 	virtual void InitDetail(HWND hWnd);
 	virtual void Update(const XMMATRIX& viewMat);
 	virtual void Render();
-
-	Object();
-	~Object();
 
 protected:
 	// Shared Points
@@ -59,4 +61,3 @@ protected:
 	std::unique_ptr<VertexElements[]> mVertices;
 	std::shared_ptr<Timer> mTimer;
 };
-

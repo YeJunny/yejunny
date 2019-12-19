@@ -62,7 +62,7 @@ void DxSettings::InitDxSettings(HINSTANCE hInst, HWND hWnd)
 		D3D11_SDK_VERSION, &swapChainDesc, mSwapChain.GetAddressOf(), mD3DDevice.GetAddressOf(), mFeatureLevel, mD3DContext.GetAddressOf());
 	if (FAILED(hr))
 	{
-		assert(hr == S_OK, L"D3D11CreateDeviceAndSwapChain() error");
+		assert(hr == S_OK);
 	}
 
 
@@ -72,13 +72,13 @@ void DxSettings::InitDxSettings(HINSTANCE hInst, HWND hWnd)
 	hr = mSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
 	if (FAILED(hr))
 	{
-		assert(hr == S_OK, L"mSwapChain->GetBuffer(pBackBuffer) error");
+		assert(hr == S_OK);
 	}
 
 	hr = mD3DDevice->CreateRenderTargetView(pBackBuffer, nullptr, mRenderTargetView.GetAddressOf());
 	if (FAILED(hr))
 	{
-		assert(hr == S_OK, L"mpD3DDevice->CreateRenderTargetView(pBackBuffer) error");
+		assert(hr == S_OK);
 	}
 
 
@@ -100,7 +100,7 @@ void DxSettings::InitDxSettings(HINSTANCE hInst, HWND hWnd)
 	hr = mD3DDevice->CreateTexture2D(&descDepth, NULL, mDepthStencil.GetAddressOf());
 	if (FAILED(hr))
 	{
-		assert(hr == S_OK, L"mpD3DDevice->CreateTexture2D(mpDepthStencil) error");
+		assert(hr == S_OK);
 	}
 
 	D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
@@ -111,7 +111,7 @@ void DxSettings::InitDxSettings(HINSTANCE hInst, HWND hWnd)
 	hr = mD3DDevice->CreateDepthStencilView(mDepthStencil.Get(), &descDSV, mDepthStencilView.GetAddressOf());
 	if (FAILED(hr))
 	{
-		assert(hr == S_OK, L"mpD3DDevice->CreateDepthStencilView() error");
+		assert(hr == S_OK);
 	}
 
 	mD3DContext->OMSetRenderTargets(1, mRenderTargetView.GetAddressOf(), mDepthStencilView.Get());
@@ -137,7 +137,7 @@ void DxSettings::InitDxSettings(HINSTANCE hInst, HWND hWnd)
 	// Other Init
 	if (!mInput->Initialize(hInst, hWnd, static_cast<int>(mWidth), static_cast<int>(mHeight)))
 	{
-		assert(false, L"mInput->Initialize() error");
+		assert(false);
 	}
 
 	Init();

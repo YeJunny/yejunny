@@ -37,7 +37,6 @@ void Object::Init(const ComPtr<ID3D11Device> d3dDevice, HWND hWnd,
 	mD3DDevice = d3dDevice;
 	mD3DDevice->GetImmediateContext(&mD3DContext);
 
-
 	// Create Vertex Buffer
 	D3D11_BUFFER_DESC bd;
 	ZeroMemory(&bd, sizeof(bd));
@@ -51,8 +50,9 @@ void Object::Init(const ComPtr<ID3D11Device> d3dDevice, HWND hWnd,
 	hr = mD3DDevice->CreateBuffer(&bd, &InitData, mVertexBuffer.GetAddressOf());
 	if (FAILED(hr))
 	{
-		assert(hr == S_OK, L"mpD3DDevice->CreateBuffer(vertexBuffer) error");
+		Assert(hr == S_OK);
 	}
+	mVertices.reset();
 
 
 	// Create Constant Buffer
@@ -63,7 +63,7 @@ void Object::Init(const ComPtr<ID3D11Device> d3dDevice, HWND hWnd,
 	hr = mD3DDevice->CreateBuffer(&bd, NULL, mConstantBuffer.GetAddressOf());
 	if (FAILED(hr))
 	{
-		assert(hr == S_OK, L"mpD3DDevice->CreateBuffer(constantBuffer) error");
+		Assert(hr == S_OK);
 	}
 
 
@@ -72,13 +72,13 @@ void Object::Init(const ComPtr<ID3D11Device> d3dDevice, HWND hWnd,
 	hr = Global::CompileShaderFromFile(shaderFile, "VS", "vs_4_0", &pVSBlob);
 	if (FAILED(hr))
 	{
-		assert(hr == S_OK, L"VS CompileShaderFromFile() error");
+		Assert(hr == S_OK);
 	}
 	hr = mD3DDevice->CreateVertexShader(pVSBlob->GetBufferPointer(), pVSBlob->GetBufferSize(), nullptr, mVertexShader.GetAddressOf());
 	if (FAILED(hr))
 	{
 		pVSBlob->Release();
-		assert(hr == S_OK, L"mpD3DDevice->CreateVertexShader() error");
+		Assert(hr == S_OK);
 	}
 
 
@@ -87,10 +87,10 @@ void Object::Init(const ComPtr<ID3D11Device> d3dDevice, HWND hWnd,
 		pVSBlob->GetBufferSize(), &mVertexLayout);
 	if (FAILED(hr))
 	{
-		assert(hr == S_OK, L"mpD3DDevice->CreateInputLayout() error");
+		Assert(hr == S_OK);
 	}
-	pVSBlob->Release();
 	mD3DContext->IASetInputLayout(mVertexLayout.Get());
+	pVSBlob->Release();
 
 
 	// Create Pixel Shader
@@ -98,13 +98,13 @@ void Object::Init(const ComPtr<ID3D11Device> d3dDevice, HWND hWnd,
 	hr = Global::CompileShaderFromFile(shaderFile, "PS", "ps_4_0", &pPSBlob);
 	if (FAILED(hr))
 	{
-		assert(hr == S_OK, L"PS CompileShaderFromFile() error");
+		Assert(hr == S_OK);
 	}
 	hr = mD3DDevice->CreatePixelShader(pPSBlob->GetBufferPointer(), pPSBlob->GetBufferSize(), nullptr, mPixelShader.GetAddressOf());
 	if (FAILED(hr))
 	{
 		pPSBlob->Release();
-		assert(hr == S_OK, L"mpD3DDevice->CreatePixelShader() error");
+		Assert(hr == S_OK);
 	}
 	pPSBlob->Release();
 
@@ -113,7 +113,7 @@ void Object::Init(const ComPtr<ID3D11Device> d3dDevice, HWND hWnd,
 	hr = CreateWICTextureFromFile(mD3DDevice.Get(), mD3DContext.Get(), textureFile, mTexture2D.GetAddressOf(), mTextureRV.GetAddressOf(), 0);
 	if (FAILED(hr))
 	{
-		assert(hr == S_OK, L"CreateWICTextureFromFile() error");
+		Assert(hr == S_OK);
 	}
 //#ifdef _DEBUG
 //	SaveWICTextureToFile(mD3DContext.Get(), mTexture2D.Get(),
@@ -132,7 +132,7 @@ void Object::Init(const ComPtr<ID3D11Device> d3dDevice, HWND hWnd,
 	hr = mD3DDevice->CreateSamplerState(&sampDesc, mSamplerState.GetAddressOf());
 	if (FAILED(hr))
 	{
-		assert(hr == S_OK, L"mD3DDevice->CreateSamplerState() error");
+		Assert(hr == S_OK);
 	}
 
 	// Create Rasterizer State
@@ -144,12 +144,14 @@ void Object::Init(const ComPtr<ID3D11Device> d3dDevice, HWND hWnd,
 	hr = mD3DDevice->CreateRasterizerState(&cmdesc, mRasterizerState.GetAddressOf());
 	if (FAILED(hr))
 	{
-		assert(hr == S_OK, L"mD3DDevice->CreateRasterizerState(object) error");
+		Assert(hr == S_OK);
 	}
 
-	mVertices.reset();
-
 	InitDetail(hWnd);
+}
+
+void Object::InitDetail(HWND hWnd)
+{
 }
 
 void Object::Update(const XMMATRIX& viewMat)
@@ -164,20 +166,17 @@ void Object::Render()
 	mD3DContext->IASetVertexBuffers(0, 1, mVertexBuffer.GetAddressOf(), &stride, &offset);
 	mD3DContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	ConstantBuffer cb;
-	cb.World = XMMatrixTranspose(mWorldMat);
-	cb.View = XMMatrixTranspose(mViewMat);
-	cb.Projection = XMMatrixTranspose(mProjectionMat);
-	mD3DContext->UpdateSubresource(mConstantBuffer.Get(), 0, nullptr, &cb, 0, 0);
-	mD3DContext->VSSetShader(mVertexShader.Get(), nullptr, 0);
+	ConstantBuffer constBuffer;
+	constBuffer.WorldMat = XMMatrixTranspose(mWorldMat);
+	constBuffer.ViewMat = XMMatrixTranspose(mViewMat);
+	constBuffer.ProjectionMat = XMMatrixTranspose(mProjectionMat);
+	constBuffer.LightingPosition = XMFLOAT3(500.0f, 500.0f, -500.0f);
+	mD3DContext->UpdateSubresource(mConstantBuffer.Get(), 0, nullptr, &constBuffer, 0, 0);
 	mD3DContext->VSSetConstantBuffers(0, 1, mConstantBuffer.GetAddressOf());
+	mD3DContext->VSSetShader(mVertexShader.Get(), nullptr, 0);
 	mD3DContext->PSSetShaderResources(0, 1, mTextureRV.GetAddressOf());
 	mD3DContext->PSSetSamplers(0, 1, mSamplerState.GetAddressOf());
 	mD3DContext->PSSetShader(mPixelShader.Get(), nullptr, 0);
 	mD3DContext->RSSetState(mRasterizerState.Get());
 	mD3DContext->Draw(mVertexCount, 0);
-}
-
-void Object::InitDetail(HWND hWnd)
-{
 }

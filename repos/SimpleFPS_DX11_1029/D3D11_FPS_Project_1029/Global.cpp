@@ -17,8 +17,16 @@ HRESULT Global::CompileShaderFromFile(const WCHAR* szFileName, const LPCSTR szEn
 	if (FAILED(hr))
 	{
 		if (pErrorBlob != NULL)
-			OutputDebugStringA((char*)pErrorBlob->GetBufferPointer());
+		{
+			char* errorString = (char*)pErrorBlob->GetBufferPointer();
+			OutputDebugStringA("===========Shader Error============\n");
+			OutputDebugString(szFileName);
+			OutputDebugStringA("\n=====================================\n");
+			OutputDebugStringA(errorString);
+			OutputDebugStringA("=====================================\n");
+		}
 		if (pErrorBlob) pErrorBlob->Release();
+		assert(false);
 		return hr;
 	}
 

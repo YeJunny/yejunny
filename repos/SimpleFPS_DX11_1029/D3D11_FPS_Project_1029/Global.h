@@ -3,6 +3,7 @@
 #include "framework.h"
 
 #define BULLET_COUNT 20
+#define Assert(x) assert(x)
 
 class Global
 {
@@ -11,4 +12,3 @@ public:
 		const WCHAR* szFileName, const LPCSTR szEntryPoint, 
 		const LPCSTR szShaderModel, ID3DBlob** ppBlobout);
 };
-

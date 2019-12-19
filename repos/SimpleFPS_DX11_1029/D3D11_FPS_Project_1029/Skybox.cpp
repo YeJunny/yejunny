@@ -10,22 +10,14 @@ Skybox::Skybox()
 
 	fbxLoader.LoadFbx("Fbx\\skybox.fbx");
 	mVertexCount = fbxLoader.GetVertexCount();
-	assert(mVertexCount, L"Cube, mVertexCount == 0");
+	assert(mVertexCount);
 	mVertices.reset(new VertexElements[mVertexCount]);
 
-	std::string fileName = "CubeUVs.txt";
-	std::ofstream writeFile(fileName.data());
 	for (UINT i = 0; i < mVertexCount; ++i)
 	{
 		mVertices[i].Pos = (fbxLoader.GetVertices())[i];
 		mVertices[i].Uv = (fbxLoader.GetUVs())[i];
-		if (writeFile.is_open())
-		{
-			writeFile << "(" << mVertices[i].Uv.x << ", " << mVertices[i].Uv.y << ")\n";
-		}
 	}
-	writeFile << mVertexCount << "\n";
-	writeFile.close();
 
 	mLayoutElementNumber = 2;
 	mLayout.reset(new D3D11_INPUT_ELEMENT_DESC[mLayoutElementNumber]);
@@ -40,21 +32,6 @@ Skybox::~Skybox()
 	mVertices.reset();
 }
 
-void Skybox::Update(const XMMATRIX& viewMat)
-{
-	/*static float radians = 0.0f;
-	ULONGLONG diffTick = mTimer->GetDiffTick();
-	radians += diffTick * 0.001f;
-	if (radians >= XM_PI * 2)
-	{
-		radians -= XM_PI * 2;
-	}
-
-	mWorld = XMMatrixRotationY(radians) * XMMatrixTranslation(10.0f, 0.5f, 10.0f);
-	*/
-	mViewMat = viewMat;
-}
-
 void Skybox::InitDetail(HWND hWnd)
 {
 	D3D11_RASTERIZER_DESC cmdesc;
@@ -66,6 +43,6 @@ void Skybox::InitDetail(HWND hWnd)
  	HRESULT hr = mD3DDevice->CreateRasterizerState(&cmdesc, mRasterizerState.GetAddressOf());
 	if (FAILED(hr))
 	{
-		assert(hr == S_OK, L"mD3DDevice->CreateRasterizerState(skybox) error");
+		assert(hr == S_OK);
 	}
 }

@@ -8,19 +8,21 @@ Gun::Gun()
 	fbxLoader.LoadFbx("Fbx\\EBR.fbx");
 
 	mVertexCount = fbxLoader.GetVertexCount();
-	assert(mVertexCount, L"Gun, mVertexCount == 0");
+	Assert(mVertexCount);
 	mVertices.reset(new VertexElements[mVertexCount]);
 
 	for (UINT i = 0; i < mVertexCount; ++i)
 	{
 		mVertices[i].Pos = (fbxLoader.GetVertices())[i];
 		mVertices[i].Uv = (fbxLoader.GetUVs())[i];
+		mVertices[i].Normal = (fbxLoader.GetNormals())[i];
 	}
 
-	mLayoutElementNumber = 2;
+	mLayoutElementNumber = 3;
 	mLayout.reset(new D3D11_INPUT_ELEMENT_DESC[mLayoutElementNumber]);
 	mLayout[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 };
-	mLayout[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+	mLayout[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+	mLayout[2] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0 };
 }
 
 Gun::~Gun()
@@ -37,15 +39,19 @@ void Gun::Update(const XMFLOAT3& playerPos, const XMFLOAT3& playerRot, const XMM
 	XMVECTOR angleVector = {  sinf(rotY), 1.0f, cosf(rotY) };
 	XMVECTOR upVector = { 0.0f, 1.0f, 0.0f };
 	XMVECTOR crossVector = XMVector3Cross(upVector, angleVector);
-
 	XMFLOAT3 crossFloat, angleFloat;
-
 	XMStoreFloat3(&angleFloat, angleVector);
 	XMStoreFloat3(&crossFloat, crossVector);
 
+	static float xMoveRot = 0;
+	xMoveRot += 0.01f;
+	if (xMoveRot >= 2 * XM_PI)
+	{
+		xMoveRot = 0;
+	}
 	mPos = 
 	{ 
-		playerPos.x + crossFloat.x * 0.2f - angleFloat.x * 0.7f,
+		playerPos.x + crossFloat.x * 0.2f - angleFloat.x * 0.7f + 0.01f * sinf(xMoveRot),
 		playerPos.y - 0.2f,
 		playerPos.z + crossFloat.z * 0.2f - angleFloat.z * 0.7f
 	};

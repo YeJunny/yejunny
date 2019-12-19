@@ -30,10 +30,10 @@ void MainLoop::Init()
 
 	// Init Object
 	mSkybox = std::make_unique<Skybox>();
-	mSkybox->Init(mD3DDevice, mhWnd, L"Shader\\Box.fx", L"Fbx\\skybox.png", mProjectionMat, mTimer);
+	mSkybox->Init(mD3DDevice, mhWnd, L"Shader\\Box.fx", L"Fbx\\skybox.jpg", mProjectionMat, mTimer);
 
 	mGround = std::make_unique<Ground>();
-	mGround->Init(mD3DDevice, mhWnd, L"Shader\\Box.fx", L"Fbx\\book-texture.png", mProjectionMat, mTimer);
+	mGround->Init(mD3DDevice, mhWnd, L"Shader\\Ground.fx", L"Fbx\\wood.png", mProjectionMat, mTimer);
 }
 
 void MainLoop::Update()
