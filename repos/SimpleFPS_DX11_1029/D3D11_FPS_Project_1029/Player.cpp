@@ -18,19 +18,18 @@ Player::~Player()
 	mInput.reset();
 }
 
-void Player::Init(const ComPtr<ID3D11Device> d3dDevice, HWND hWnd, const XMMATRIX& viewMat, const XMMATRIX& projectionMat, std::shared_ptr<Input> input, std::shared_ptr<Timer> timer)
+void Player::Init(const ComPtr<ID3D11Device> d3dDevice, HWND hWnd, const XMMATRIX& projectionMat, std::shared_ptr<Input> input, std::shared_ptr<Timer> timer)
 {
 	mInput = input;
 	mTimer = timer;
-	mViewMat = viewMat;
 
 	mGun = std::make_unique<Gun>();
-	mGun->Init(d3dDevice, hWnd, L"Shader\\Ground.fx", L"Fbx\\gun.jpg", projectionMat, mTimer);
+	mGun->Init(d3dDevice, hWnd, L"Shader\\Ground.fx", "Fbx\\EBR.fbx", L"Fbx\\gun.jpg", projectionMat, mTimer);
 
 	mBullet.reset(new Bullet[BULLET_COUNT]);
 	for (int i = 0; i < BULLET_COUNT; ++i)
 	{
-		mBullet[i].Init(d3dDevice, hWnd, L"Shader\\Box.fx", L"Fbx\\Bullet_Shell.jpg", projectionMat, mTimer);
+		mBullet[i].Init(d3dDevice, hWnd, L"Shader\\Ground.fx", "Fbx\\Bullet.fbx", L"Fbx\\Bullet_Shell.jpg", projectionMat, mTimer);
 	}
 
 	mShooting = std::make_unique<Sound>();
@@ -143,11 +142,11 @@ void Player::Update(const XMMATRIX& viewMat)
 
 void Player::Render()
 {
-	mGun->Render();
+	mGun->Render(mPos);
 
 	for (int i = 0; i < mNumShootBullet; ++i)
 	{
-		mBullet[i].Render();
+		mBullet[i].Render(mPos);
 	}
 }
 

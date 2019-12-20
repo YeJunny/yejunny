@@ -11,12 +11,10 @@ Camera::~Camera()
 {
 }
 
-void Camera::Init(const ComPtr<ID3D11Device> d3dDevice, const XMMATRIX viewMat)
+void Camera::Init(const ComPtr<ID3D11Device> d3dDevice)
 {
 	mD3DDevice = d3dDevice;
 	mD3DDevice->GetImmediateContext(&mD3DContext);
-
-	mViewMat = viewMat;
 }
 
 void Camera::UpdateLocation(const XMFLOAT3 pos, const XMFLOAT3 rot)
@@ -37,7 +35,7 @@ void Camera::UpdateLocation(const XMFLOAT3 pos, const XMFLOAT3 rot)
 	mViewMat = XMMatrixLookAtLH(eye, at, up);
 }
 
-XMMATRIX Camera::GetViewMatrix() const
+XMMATRIX Camera::GetCameraViewMatrix() const
 {
 	return mViewMat;
 }

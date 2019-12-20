@@ -95,6 +95,9 @@
     <ClInclude Include="Skybox.h">
       <Filter>Object\Terriain</Filter>
     </ClInclude>
+    <ClInclude Include="Axis.h">
+      <Filter>Object\Terriain</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="D3D11_FPS_Project_1029.rc">
@@ -156,6 +159,9 @@
       <Filter>Object\Camera</Filter>
     </ClCompile>
     <ClCompile Include="Skybox.cpp">
+      <Filter>Object\Terriain</Filter>
+    </ClCompile>
+    <ClCompile Include="Axis.cpp">
       <Filter>Object\Terriain</Filter>
     </ClCompile>
   </ItemGroup>

@@ -80,39 +80,32 @@ HRESULT FBXLoader::LoadFbx(const char* fileName)
 		{
 			for (int k = 0; k < 3; k++)
 			{
-				int controlPointIndex = mesh->GetPolygonVertex(j, k);
+				int vertexIndex = mesh->GetPolygonVertex(j, k);
 				XMFLOAT3 vertex =
 				{
-					static_cast<float>(vertices[controlPointIndex].mData[0]),
-					static_cast<float>(vertices[controlPointIndex].mData[1]),
-					static_cast<float>(vertices[controlPointIndex].mData[2])
+					static_cast<float>(vertices[vertexIndex].mData[0]),
+					static_cast<float>(vertices[vertexIndex].mData[1]),
+					static_cast<float>(vertices[vertexIndex].mData[2])
 				};
 				mVertices[mVertexCount] = vertex;
 
 				FbxGeometryElementUV* eUV = mesh->GetElementUV();
-				//FbxGeometryElementNormal* eNormal = mesh->GetElementNormal();
 				assert(eUV);
-				//assert(eNormal);
 				int uvIndex = mesh->GetTextureUVIndex(j, k);
 				FbxVector2 uv = eUV->GetDirectArray().GetAt(uvIndex);
-				//FbxVector4 normal = eNormal->GetDirectArray().GetAt(controlPointIndex);
 
 				XMFLOAT2 UVs =
 				{
 					static_cast<float>(uv[0]),
 					static_cast<float>(uv[1]),
 				};
-				/*XMFLOAT3 normals =
-				{
-					static_cast<float>(normal[0]),
-					static_cast<float>(normal[1]),
-					static_cast<float>(normal[2])
-				};*/
 				mUVs[mVertexCount] = UVs;
-				//mNormals[mVertexCount] = normals;
+
 				mVertexCount++;
 			}
 		}
+
+		break;
 	}
 	assert(mVertexCount);
 
@@ -157,14 +150,15 @@ void FBXLoader::GetNormals(FbxNode* node)
 	
 	if (lMesh)
 	{
-		FBXSDK_printf("current mesh node: %s\n", node->GetName());
-
 		FbxGeometryElementNormal* lNormalElement = lMesh->GetElementNormal();
+		FbxVector4* vertexElement = lMesh->GetControlPoints();
+		FbxGeometryElementUV* uvElement = lMesh->GetElementUV();
+
 		switch (lNormalElement->GetMappingMode())
 		{
-		case FbxGeometryElement::eByControlPoint:
+		/*case FbxGeometryElement::eByControlPoint:
 		{
-			mNormals.reset(new XMFLOAT3[lMesh->GetControlPointsCount() * 3]);
+			mNormals.reset(new XMFLOAT3[lMesh->GetControlPointsCount()]);
 
 			for (int lVertexIndex = 0; lVertexIndex < lMesh->GetControlPointsCount(); lVertexIndex++)
 			{
@@ -177,7 +171,6 @@ void FBXLoader::GetNormals(FbxNode* node)
 					lNormalIndex = lNormalElement->GetIndexArray().GetAt(lVertexIndex);
 
 				FbxVector4 lNormal = lNormalElement->GetDirectArray().GetAt(lNormalIndex);
-				FBXSDK_printf("normals for vertex[%d]: %f %f %f %f \n", lVertexIndex, lNormal[0], lNormal[1], lNormal[2], lNormal[3]);
 				
 				mNormals[lVertexIndex] =
 				{
@@ -186,11 +179,15 @@ void FBXLoader::GetNormals(FbxNode* node)
 					static_cast<float>(lNormal[2])
 				};
 			}
+
 			break;
-		}
+		}*/
 		case FbxGeometryElement::eByPolygonVertex:
 		{
 			int lIndexByPolygonVertex = 0;
+
+			/*mVertices.reset(new XMFLOAT3[lMesh->GetPolygonCount() * 3]);
+			mUVs.reset(new XMFLOAT2[lMesh->GetPolygonCount() * 3]);*/
 			mNormals.reset(new XMFLOAT3[lMesh->GetPolygonCount() * 3]);
 
 			for (int lPolygonIndex = 0; lPolygonIndex < lMesh->GetPolygonCount(); lPolygonIndex++)
@@ -200,18 +197,42 @@ void FBXLoader::GetNormals(FbxNode* node)
 				for (int i = 0; i < lPolygonSize; i++)
 				{
 					int lNormalIndex = 0;
+					int uvIndex = 0;
+					int vertexIndex = lMesh->GetPolygonVertex(lPolygonIndex, i);
+
+					if (uvElement->GetMappingMode() == FbxGeometryElement::eDirect)
+					{
+						uvIndex = lIndexByPolygonVertex;
+					}
+					if (uvElement->GetMappingMode() == FbxGeometryElement::eIndexToDirect)
+					{
+						uvIndex = uvElement->GetIndexArray().GetAt(lIndexByPolygonVertex);
+					}
 
 					if (lNormalElement->GetReferenceMode() == FbxGeometryElement::eDirect)
+					{
 						lNormalIndex = lIndexByPolygonVertex;
-
+					}
 					if (lNormalElement->GetReferenceMode() == FbxGeometryElement::eIndexToDirect)
+					{
 						lNormalIndex = lNormalElement->GetIndexArray().GetAt(lIndexByPolygonVertex);
+					}
 
+					FbxVector2 uv = uvElement->GetDirectArray().GetAt(uvIndex);
 					FbxVector4 lNormal = lNormalElement->GetDirectArray().GetAt(lNormalIndex);
-					FBXSDK_printf("normals for polygon[%d]vertex[%d]: %f %f %f %f \n",
-						lPolygonIndex, i, lNormal[0], lNormal[1], lNormal[2], lNormal[3]);
-
-					mNormals[lPolygonIndex] =
+					
+					/*mVertices[lIndexByPolygonVertex] =
+					{
+						static_cast<float>(vertexElement[vertexIndex].mData[0]),
+						static_cast<float>(vertexElement[vertexIndex].mData[1]),
+						static_cast<float>(vertexElement[vertexIndex].mData[2])
+					};
+					mUVs[lIndexByPolygonVertex] =
+					{
+						static_cast<float>(uv[0]),
+						static_cast<float>(uv[1])
+					};*/
+					mNormals[lIndexByPolygonVertex] =
 					{
 						static_cast<float>(lNormal[0]),
 						static_cast<float>(lNormal[1]),
@@ -221,9 +242,8 @@ void FBXLoader::GetNormals(FbxNode* node)
 					lIndexByPolygonVertex++;
 				}
 			}
-			WCHAR str[30];
-			wsprintf(str, L"lIndexByPolygonVertex: %d\n", lIndexByPolygonVertex);
-			OutputDebugString(str);
+			
+			mVertexCount = lIndexByPolygonVertex;
 			break;
 		}
 		default:

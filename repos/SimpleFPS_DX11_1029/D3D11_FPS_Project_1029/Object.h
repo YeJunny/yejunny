@@ -8,16 +8,21 @@ using namespace DirectX;
 struct VertexElements
 {
 	XMFLOAT3 Pos;
-	XMFLOAT2 Uv;
+	XMFLOAT2 UV;
 	XMFLOAT3 Normal;
 };
 
-struct ConstantBuffer
+struct CBufferMatrix
 {
 	XMMATRIX WorldMat;
 	XMMATRIX ViewMat;
 	XMMATRIX ProjectionMat;
-	XMFLOAT3 LightingPosition;
+};
+
+struct CBufferLight
+{
+	XMFLOAT4 WorldLightPos;
+	XMFLOAT4 WorldCameraPos;
 };
 
 class Object
@@ -26,12 +31,12 @@ public:
 	Object();
 	~Object();
 
-	virtual void Init(const ComPtr<ID3D11Device> pD3DDevice, HWND hWnd, 
-		const WCHAR* shaderFile, const WCHAR* textureFile,
+	virtual void Init(const ComPtr<ID3D11Device> d3dDevice, HWND hWnd, 
+		const WCHAR* shaderFile, const char* fbxFile, const WCHAR* textureFile,
 		const XMMATRIX& projectionMat, std::shared_ptr<Timer> timer);
 	virtual void InitDetail(HWND hWnd);
 	virtual void Update(const XMMATRIX& viewMat);
-	virtual void Render();
+	virtual void Render(const XMFLOAT3& playerPos);
 
 protected:
 	// Shared Points
@@ -44,7 +49,8 @@ protected:
 	ComPtr<ID3D11InputLayout> mVertexLayout;
 
 	ComPtr<ID3D11Buffer> mVertexBuffer;
-	ComPtr<ID3D11Buffer> mConstantBuffer;
+	ComPtr<ID3D11Buffer> mCBufferMatrix;
+	ComPtr<ID3D11Buffer> mCBufferLight;
 
 	std::unique_ptr<D3D11_INPUT_ELEMENT_DESC[]> mLayout;
 	UINT mLayoutElementNumber;
@@ -57,7 +63,6 @@ protected:
 	XMMATRIX mViewMat;
 	XMMATRIX mProjectionMat;
 
-	UINT mVertexCount;
-	std::unique_ptr<VertexElements[]> mVertices;
+	size_t mVertexCount;
 	std::shared_ptr<Timer> mTimer;
 };

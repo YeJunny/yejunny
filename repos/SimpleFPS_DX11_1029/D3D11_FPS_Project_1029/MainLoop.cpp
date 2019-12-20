@@ -1,3 +1,4 @@
+#include "Axis.h"
 #include "Bullet.h"
 #include "Camera.h"
 #include "Ground.h"
@@ -12,6 +13,7 @@ MainLoop::MainLoop()
 
 MainLoop::~MainLoop()
 {
+	mAxis.reset();
 	mSkybox.reset();
 	mGround.reset();
 	mCamera.reset();
@@ -22,32 +24,34 @@ void MainLoop::Init()
 {
 	// Init Player
 	mPlayer = std::make_unique<Player>();
-	mPlayer->Init(mD3DDevice, mhWnd, mViewMat, mProjectionMat, mInput, mTimer);
+	mPlayer->Init(mD3DDevice, mhWnd, mProjectionMat, mInput, mTimer);
 	
 	// Init Camera
 	mCamera = std::make_unique<Camera>();
-	mCamera->Init(mD3DDevice, mViewMat);
+	mCamera->Init(mD3DDevice);
 
 	// Init Object
+	mAxis = std::make_unique<Axis>();
+	mAxis->Init(mD3DDevice, L"Shader\\Axis.fx", mProjectionMat, mTimer);
+
 	mSkybox = std::make_unique<Skybox>();
-	mSkybox->Init(mD3DDevice, mhWnd, L"Shader\\Box.fx", L"Fbx\\skybox.jpg", mProjectionMat, mTimer);
+	mSkybox->Init(mD3DDevice, mhWnd, L"Shader\\Box.fx", "Fbx\\skybox.fbx", L"Fbx\\skybox.jpg", mProjectionMat, mTimer);
 
 	mGround = std::make_unique<Ground>();
-	mGround->Init(mD3DDevice, mhWnd, L"Shader\\Ground.fx", L"Fbx\\wood.png", mProjectionMat, mTimer);
+	mGround->Init(mD3DDevice, mhWnd, L"Shader\\Ground.fx", "Fbx\\sphere3k.fbx", L"Fbx\\wood.png", mProjectionMat, mTimer);
 }
 
 void MainLoop::Update()
 {
 	// Player update
 	mPlayer->Update(mViewMat);
-	XMFLOAT3 playerPos = mPlayer->GetPosition();
-	XMFLOAT3 playerRot = mPlayer->GetRotation();
 
 	// Camera update
-	mCamera->UpdateLocation(playerPos, playerRot);
-	mViewMat = mCamera->GetViewMatrix();
+	mCamera->UpdateLocation(mPlayer->GetPosition(), mPlayer->GetRotation());
+	mViewMat = mCamera->GetCameraViewMatrix();
 
 	// Object update
+	mAxis->Update(mViewMat);
 	mSkybox->Update(mViewMat);
 	mGround->Update(mViewMat);
 }
@@ -58,9 +62,17 @@ void MainLoop::Render()
 	mD3DContext->ClearRenderTargetView(mRenderTargetView.Get(), backgroundColor);
 	mD3DContext->ClearDepthStencilView(mDepthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	
-	mGround->Render();
-	mSkybox->Render();
+
+	// Player(Gun, Bullet, etc...) rendering
 	mPlayer->Render();
+	mAxis->Render();
+
+
+	XMFLOAT3 playerPos = mPlayer->GetPosition();
+
+	// Object rendering
+	mGround->Render(playerPos);
+	mSkybox->Render(playerPos);
 	
 	mSwapChain->Present(0, 0);
 }

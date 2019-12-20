@@ -4,20 +4,6 @@
 
 Gun::Gun()
 {
-	FBXLoader fbxLoader;
-	fbxLoader.LoadFbx("Fbx\\EBR.fbx");
-
-	mVertexCount = fbxLoader.GetVertexCount();
-	Assert(mVertexCount);
-	mVertices.reset(new VertexElements[mVertexCount]);
-
-	for (UINT i = 0; i < mVertexCount; ++i)
-	{
-		mVertices[i].Pos = (fbxLoader.GetVertices())[i];
-		mVertices[i].Uv = (fbxLoader.GetUVs())[i];
-		mVertices[i].Normal = (fbxLoader.GetNormals())[i];
-	}
-
 	mLayoutElementNumber = 3;
 	mLayout.reset(new D3D11_INPUT_ELEMENT_DESC[mLayoutElementNumber]);
 	mLayout[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 };
@@ -27,7 +13,6 @@ Gun::Gun()
 
 Gun::~Gun()
 {
-	mVertices.reset();
 }
 
 void Gun::Update(const XMFLOAT3& playerPos, const XMFLOAT3& playerRot, const XMMATRIX& viewMat)

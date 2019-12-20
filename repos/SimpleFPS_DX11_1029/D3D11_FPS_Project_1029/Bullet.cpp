@@ -4,27 +4,15 @@
 
 Bullet::Bullet()
 {
-	FBXLoader fbxLoader;
-	fbxLoader.LoadFbx("Fbx\\Bullet.fbx");
-
-	mVertexCount = fbxLoader.GetVertexCount();
-	Assert(mVertexCount);
-	mVertices.reset(new VertexElements[mVertexCount]);
-	for (UINT i = 0; i < mVertexCount; ++i)
-	{
-		mVertices[i].Pos = (fbxLoader.GetVertices())[i];
-		mVertices[i].Uv = (fbxLoader.GetUVs())[i];
-	}
-
-	mLayoutElementNumber = 2;
+	mLayoutElementNumber = 3;
 	mLayout.reset(new D3D11_INPUT_ELEMENT_DESC[mLayoutElementNumber]);
 	mLayout[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 };
 	mLayout[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+	mLayout[2] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0 };
 }
 
 Bullet::~Bullet()
 {
-	mVertices.reset();
 }
 
 void Bullet::InitDetail(HWND hWnd)
