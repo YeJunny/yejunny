@@ -64,7 +64,7 @@ float4 PS(PS_INPUT Input) : SV_Target
 		specular = pow(specular, 20.0f);
 	}
 
-	float3 ambient = float3(0.1f, 0.1f, 0.1f);
+	float3 ambient = float3(0.5f, 0.5f, 0.5f);
 
 	float3 texColor = Texture.Sample(Sampler, Input.mTex);
 

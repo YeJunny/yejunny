@@ -9,7 +9,7 @@
 #include <ScreenGrab.h>
 using namespace DirectX;
 
-//#define FBX_WRITE
+#define FBX_WRITE
 
 Object::Object()
 	: mVertexCount(0)
@@ -37,64 +37,38 @@ void Object::Init(const ComPtr<ID3D11Device> d3dDevice, HWND hWnd,
 {
 	HRESULT hr;
 
+	mWorldMat = XMMatrixIdentity();
 	mProjectionMat = projectionMat;
 	mTimer = timer;
 
 	mD3DDevice = d3dDevice;
 	mD3DDevice->GetImmediateContext(&mD3DContext);
 
-	// Fbx load
-	FBXLoader* fbxLoader = new FBXLoader();
-	fbxLoader->LoadFbx(fbxFile);
+	std::vector<VertexElements> verticesElementsVector;
+	verticesElementsVector.reserve(10000);
 
+	FBXLoader* fbxLoader = new FBXLoader();
+	fbxLoader->LoadFbx(&verticesElementsVector, fbxFile);
 	mVertexCount = fbxLoader->GetVertexCount();
 	Assert(mVertexCount);
-	VertexElements* vertices = new VertexElements[mVertexCount];
-
-#ifdef FBX_WRITE
-	std::string fileName = std::string(fbxFile) + "Vertices.txt";
-	std::ofstream writeFile(fileName.data());
-	if (writeFile.is_open())
-	{
-		writeFile << std::setw(15 * 2) << "Normal" << std::setw(15 * 3) << "UV" << std::setw(15 * 3) << "Pos\n";
-	}
-#endif
-	for (size_t i = 0; i < mVertexCount; ++i)
-	{
-		vertices[i].Pos = (fbxLoader->GetVertices())[i];
-		vertices[i].UV = (fbxLoader->GetUVs())[i];
-		vertices[i].Normal = (fbxLoader->GetNormals())[i];
-#ifdef FBX_WRITE
-		if (writeFile.is_open())
-		{
-			writeFile << "(" << std::setw(15) << vertices[i].Normal.x << ", " << std::setw(15) << vertices[i].Normal.y << ", " << std::setw(15) << vertices[i].Normal.z << ")" << " | "
-				<< "(" << std::setw(15) << vertices[i].UV.x << ", " << std::setw(15) << vertices[i].UV.y << ")" << " | "
-				<< "(" << std::setw(15) << vertices[i].Pos.x << ", " << std::setw(15) << vertices[i].Pos.y << ", " << std::setw(15) << vertices[i].Pos.z << ")\n";
-		}
-#endif
-	}
-#ifdef FBX_WRITE
-	writeFile << mVertexCount << "\n";
-	writeFile.close();
-#endif
 	delete fbxLoader;
+
 
 	// Create Vertex Buffer
 	D3D11_BUFFER_DESC bd;
 	ZeroMemory(&bd, sizeof(bd));
 	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.ByteWidth = sizeof(VertexElements) * (UINT)mVertexCount;
+	bd.ByteWidth = sizeof(verticesElementsVector) * verticesElementsVector.size();
 	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bd.CPUAccessFlags = 0;
 	D3D11_SUBRESOURCE_DATA initData;
 	ZeroMemory(&initData, sizeof(initData));
-	initData.pSysMem = vertices;
+	initData.pSysMem = verticesElementsVector.data();
 	hr = mD3DDevice->CreateBuffer(&bd, &initData, mVertexBuffer.GetAddressOf());
 	if (FAILED(hr))
 	{
 		Assert(hr == S_OK);
 	}
-	delete[] vertices;
+	verticesElementsVector.clear();
 
 	// Create Constant Buffer
 	bd.ByteWidth = sizeof(CBufferMatrix);
@@ -217,7 +191,7 @@ void Object::Render(const XMFLOAT3& playerPos)
 	cBufferMatrix.ProjectionMat = XMMatrixTranspose(mProjectionMat);
 
 	CBufferLight cBufferLight;
-	cBufferLight.WorldLightPos = XMFLOAT4(20.0f, 20.0f, 0.0f, 0.0f);
+	cBufferLight.WorldLightPos = XMFLOAT4(500.0f, 500.0f, -500.0f, 0.0f);
 	cBufferLight.WorldCameraPos = XMFLOAT4(playerPos.x, playerPos.y, playerPos.z, 0.0f);
 
 	mD3DContext->UpdateSubresource(mCBufferMatrix.Get(), 0, nullptr, &cBufferMatrix, 0, 0);

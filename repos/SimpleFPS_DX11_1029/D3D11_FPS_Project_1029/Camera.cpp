@@ -17,20 +17,19 @@ void Camera::Init(const ComPtr<ID3D11Device> d3dDevice)
 	mD3DDevice->GetImmediateContext(&mD3DContext);
 }
 
-void Camera::UpdateLocation(const XMFLOAT3 pos, const XMFLOAT3 rot)
+void Camera::UpdateLocation(const XMFLOAT3& playerPos, const XMFLOAT3& playerRot)
 {
-	float rotX = XMConvertToRadians(rot.x);
-	float rotY = XMConvertToRadians(rot.y);
-	float rotZ = XMConvertToRadians(rot.z);
+	float rotX = XMConvertToRadians(playerRot.x);
+	float rotY = XMConvertToRadians(playerRot.y);
+	float rotZ = XMConvertToRadians(playerRot.z);
 
 	XMMATRIX rotationMat = XMMatrixRotationRollPitchYaw(rotX, rotY, rotZ);
-	XMFLOAT3 atFloat = { 0.0f, 0.0f, 1.0f };
+	XMFLOAT3 atFloat = { 0.0f, 0.0f, 10.0f };
 	XMFLOAT3 upFloat = { 0.0f ,1.0f, 0.0f };
 
-	XMVECTOR eye = XMLoadFloat3(&pos);
-	XMVECTOR at = XMVector3TransformCoord(XMLoadFloat3(&atFloat), rotationMat);
-	XMVECTOR up = XMVector3TransformCoord(XMLoadFloat3(&upFloat), rotationMat);
-	at = XMVectorAdd(eye, at);
+	XMVECTOR eye = XMLoadFloat3(&playerPos);
+	XMVECTOR at = XMVectorAdd(eye, XMVector3TransformCoord(XMLoadFloat3(&atFloat), rotationMat));
+	XMVECTOR up = XMLoadFloat3(&upFloat);// XMVector3TransformCoord(, rotationMat);
 
 	mViewMat = XMMatrixLookAtLH(eye, at, up);
 }

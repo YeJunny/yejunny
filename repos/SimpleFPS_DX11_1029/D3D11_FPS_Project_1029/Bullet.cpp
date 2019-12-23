@@ -17,13 +17,14 @@ Bullet::~Bullet()
 
 void Bullet::InitDetail(HWND hWnd)
 {
+	mWorldMat = XMMatrixScaling(0.009f, 0.009f, 0.009f);
 }
 
-void Bullet::Create(const XMFLOAT3& gunPos, const XMFLOAT3& rot)
+void Bullet::Create(const XMFLOAT3& gunPos, const XMFLOAT3& playerRot)
 {
-	mRot.x = XMConvertToRadians(rot.x);
-	mRot.y = XMConvertToRadians(rot.y);
-	mRot.z = XMConvertToRadians(rot.z);
+	mRot.x = XMConvertToRadians(playerRot.x);
+	mRot.y = XMConvertToRadians(playerRot.y);
+	mRot.z = XMConvertToRadians(playerRot.z);
 
 	XMVECTOR angleVector = { sinf(mRot.y), 1.0f, cosf(mRot.y) };
 	XMVECTOR upVector = { 0.0f, 1.0f, 0.0f };
@@ -36,7 +37,7 @@ void Bullet::Create(const XMFLOAT3& gunPos, const XMFLOAT3& rot)
 	mPos =
 	{
 		gunPos.x + crossFloat.x * 0.5f + angleFloat.x * 7.0f,
-		gunPos.y - 0.2f,
+		gunPos.y + 0.2f,
 		gunPos.z + crossFloat.z * 0.5f + angleFloat.z * 7.0f
 	};
 

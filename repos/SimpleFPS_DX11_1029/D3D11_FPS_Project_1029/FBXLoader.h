@@ -1,29 +1,28 @@
 #pragma once
-#include <fbxsdk.h>
-#include "framework.h"
 #include <DirectXMath.h>
+#include <fbxsdk.h>
+#include <string>
+#include <vector>
+#include "framework.h"
+#include "Object.h"
+
 using namespace DirectX;
 
 class FBXLoader
 {
 public:
-	HRESULT LoadFbx(const char* fileName);
-	void LoadNode(FbxNode* node);
-	void ProcessControlPoints(FbxMesh* mesh);
-
-	XMFLOAT3* GetVertices() const;
-	XMFLOAT2* GetUVs() const;
-	XMFLOAT3* GetNormals() const;
-	void GetNormals(FbxNode* Node);
-	unsigned int GetVertexCount() const;
-
 	FBXLoader();
 	~FBXLoader();
 
+	HRESULT LoadFbx(std::vector<VertexElements>* elements, const char* fileName);
+	void LoadNode(FbxNode* node);
+
+	void GetVerticesUVsNormalsRecursive(FbxNode* node);
+	unsigned int GetVertexCount() const;
+
 private:
-	std::unique_ptr<XMFLOAT3[]> mVertices;
-	std::unique_ptr<XMFLOAT3[]> mNormals;
-	std::unique_ptr<XMFLOAT2[]> mUVs;
+	std::vector<VertexElements>* mElements;
+	std::string mFileName;
 	unsigned int mVertexCount;
 };
 

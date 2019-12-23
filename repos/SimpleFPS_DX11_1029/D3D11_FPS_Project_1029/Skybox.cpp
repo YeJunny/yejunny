@@ -10,8 +10,6 @@ Skybox::Skybox()
 	mLayout.reset(new D3D11_INPUT_ELEMENT_DESC[mLayoutElementNumber]);
 	mLayout[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 };
 	mLayout[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 };
-
-	mWorldMat = XMMatrixScaling(60.0f, 60.0f, 60.0f);
 }
 
 Skybox::~Skybox()
@@ -31,4 +29,6 @@ void Skybox::InitDetail(HWND hWnd)
 	{
 		assert(hr == S_OK);
 	}
+
+	mWorldMat = XMMatrixScaling(40.0f, 40.0f, 40.0f);
 }

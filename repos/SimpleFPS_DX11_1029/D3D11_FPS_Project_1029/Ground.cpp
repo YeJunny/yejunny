@@ -24,9 +24,9 @@ void Ground::Update(const XMMATRIX& viewMat)
 		radians = 0;
 	}
 
-	mWorldMat = XMMatrixScaling(0.4f, 0.4f, 0.4f);// *
-		//XMMatrixRotationRollPitchYaw(0, radians, 0.0f) *
-		//XMMatrixTranslation(10.0f, 0.0f, 10.0f);
+	mWorldMat = XMMatrixScaling(0.4f, 0.4f, 0.4f) *
+		XMMatrixRotationRollPitchYaw(0, radians, 0.0f) *
+		XMMatrixTranslation(10.0f, 0.0f, 10.0f);
 	
 	mViewMat = viewMat;
 }

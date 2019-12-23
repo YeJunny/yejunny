@@ -17,7 +17,7 @@ public:
 	Player();
 	~Player();
 
-	virtual void Init(const ComPtr<ID3D11Device> pD3DDevice, HWND hWnd, 
+	virtual void Init(const ComPtr<ID3D11Device> d3dDevice, HWND hWnd, 
 		const XMMATRIX& projectionMat,
 		std::shared_ptr<Input> input, std::shared_ptr<Timer> timer);
 	virtual void Update(const XMMATRIX& viewMat);

@@ -12,9 +12,8 @@ public:
 	Bullet();
 	~Bullet();
 
-	virtual void Update(const XMMATRIX& viewMat);
-
-	virtual void InitDetail(HWND hWnd);
+	virtual void Update(const XMMATRIX& viewMat) override;
+	virtual void InitDetail(HWND hWnd) override;
 	void Create(const XMFLOAT3& pos, const XMFLOAT3& rot);
 	XMFLOAT3 GetPosition() const;
 

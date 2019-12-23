@@ -1,4 +1,8 @@
 #include "FBXLoader.h"
+#include <fstream>
+#include <iomanip>
+
+#define FBX_WRITE
 
 FBXLoader::FBXLoader()
 {
@@ -6,12 +10,9 @@ FBXLoader::FBXLoader()
 
 FBXLoader::~FBXLoader()
 {
-	mVertices.reset();
-	mUVs.reset();
-	mNormals.reset();
 }
 
-HRESULT FBXLoader::LoadFbx(const char* fileName)
+HRESULT FBXLoader::LoadFbx(std::vector<VertexElements>* elements, const char* fileName)
 {
 	// Init & Setting
 	FbxManager* manager = FbxManager::Create();
@@ -30,221 +31,196 @@ HRESULT FBXLoader::LoadFbx(const char* fileName)
 
 	bSuccess = importer->Import(fbxScene);
 	assert(bSuccess);
-	importer->Destroy();
 
 	FbxGeometryConverter geometryConvert(manager);
-	geometryConvert.Triangulate(fbxScene, true);
+	bSuccess = geometryConvert.Triangulate(fbxScene, true);
+	assert(bSuccess);
 
+	importer->Destroy();
 
-	// Process Calculation
+	mFileName = fileName;
+	mElements = elements;
+
 	FbxNode* fbxRootNode = fbxScene->GetRootNode();
 	assert(fbxRootNode);
-	GetNormals(fbxRootNode);
+	GetVerticesUVsNormalsRecursive(fbxRootNode);
 
-	FbxMesh* mesh;
-	int childCount = fbxRootNode->GetChildCount();
+	manager->Destroy();
+	return S_OK;
+}
+
+void FBXLoader::GetVerticesUVsNormalsRecursive(FbxNode* node)
+{
+#ifdef FBX_WRITE
+	static int number = 0;
+	char numberStr[10];
+	_itoa_s(number, numberStr, 10);
+#endif
+	static size_t vertexCount = 0;
+
+	if (!node)
+	{
+		return;
+	}
+
+	int childCount = node->GetChildCount();
+#ifdef FBX_WRITE
+	std::string fileNameString = mFileName + "_folder\\" + std::string(numberStr) + "_Info_" + node->GetName() + +".txt";
+	number++;
+	std::ofstream writeFile(fileNameString.data());
+	if (writeFile.is_open())
+	{
+		writeFile
+			<< "==============================================================================\n"
+			<< "	First Load: Vertex, UV, Normal		" << fileNameString << "\n"
+			<< "==============================================================================\n"
+			<< "get " << node->GetName() << " ... OK\n"
+			<< "childCount is ... " << childCount << "\n";
+	}
+#endif
 	for (int i = 0; i < childCount; i++)
 	{
-		FbxNode* fbxChildNode = fbxRootNode->GetChild(i);
-		if (!fbxChildNode->GetNodeAttribute())
+		FbxNode* fbxChildNode = node->GetChild(i);
+		assert(fbxChildNode);
+#ifdef FBX_WRITE
+		if (writeFile.is_open())
 		{
+			writeFile
+				<< "get child " << i << " name is ... " << fbxChildNode->GetName() << "\n";
+		}
+#endif
+		if (!fbxChildNode->GetNodeAttribute() || fbxChildNode->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::EType::eNull)
+		{
+#ifdef FBX_WRITE
+			if (writeFile.is_open())
+			{
+				writeFile
+					<< "\tchild " << i << " Attribute is ... nullptr\n";
+			}
+#endif
+			GetVerticesUVsNormalsRecursive(fbxChildNode);
+
 			continue;
 		}
 
 		FbxNodeAttribute::EType attributeType = fbxChildNode->GetNodeAttribute()->GetAttributeType();
+		FbxMesh* mesh;
 		switch (attributeType)
 		{
 		case FbxNodeAttribute::eMesh:
 		{
+
+#ifdef FBX_WRITE
+			if (writeFile.is_open())
+			{
+				writeFile
+					<< "\tchild " << i << " NodeAttribute is ... " << "eMesh\n";
+			}
+#endif
+			FbxGeometryConverter geometryConvert(node->GetFbxManager());
+			//mesh = static_cast<FbxMesh*>(geometryConvert.Triangulate(fbxChildNode->GetNodeAttribute(), true));
 			mesh = static_cast<FbxMesh*>(fbxChildNode->GetNodeAttribute());
 
 			break;
 		}
 		default:
 		{
+
+#ifdef FBX_WRITE
+			if (writeFile.is_open())
+			{
+				writeFile
+					<< "\tchild " << i << " NodeAttributeType is ... " << attributeType << " ( eUnknown = 0, eNull = 1, eMarker = 2, eSkeleton = 3, eMesh = 4, eNurbs = 5, ePatch = 6, eCamera = 7, eCameraStereo = 8, eCameraSwitcher = 9, eLight = 10, eOpticalReference = 11, eOpticalMarker = 12, eNurbsCurve = 13, eTrimNurbsSurface = 14, eBoundary = 15, eNurbsSurface = 16, eShape = 17, eLODGroup = 18, eSubDiv = 19, eCachedEffect = 20, Line = 21 )\n";
+			}
+#endif
 			continue;
 		}
 		}
 
+		//////////////// NodeAttributeType == eMesh ///////////////////
 		assert(attributeType == FbxNodeAttribute::eMesh, L"FBXLoader, attributeType all not eMesh");
 		assert(mesh);
 
 		FbxVector4* vertices = mesh->GetControlPoints();
 		assert(vertices);
 		int polygonCount = mesh->GetPolygonCount();
-		mVertices.reset(new XMFLOAT3[polygonCount * 3]);
-		mUVs.reset(new XMFLOAT2[polygonCount * 3]);
-		mVertexCount = 0;
 
-		for (int j = 0; j < polygonCount; j++)
+		FbxGeometryElementNormal* normalElements = mesh->GetElementNormal();
+		assert(normalElements);
+
+#ifdef FBX_WRITE
+		if (writeFile.is_open())
 		{
-			for (int k = 0; k < 3; k++)
-			{
-				int vertexIndex = mesh->GetPolygonVertex(j, k);
-				XMFLOAT3 vertex =
-				{
-					static_cast<float>(vertices[vertexIndex].mData[0]),
-					static_cast<float>(vertices[vertexIndex].mData[1]),
-					static_cast<float>(vertices[vertexIndex].mData[2])
-				};
-				mVertices[mVertexCount] = vertex;
-
-				FbxGeometryElementUV* eUV = mesh->GetElementUV();
-				assert(eUV);
-				int uvIndex = mesh->GetTextureUVIndex(j, k);
-				FbxVector2 uv = eUV->GetDirectArray().GetAt(uvIndex);
-
-				XMFLOAT2 UVs =
-				{
-					static_cast<float>(uv[0]),
-					static_cast<float>(uv[1]),
-				};
-				mUVs[mVertexCount] = UVs;
-
-				mVertexCount++;
-			}
+			writeFile
+				<< "\tchild " << i << " mesh's ploygonCount is ... " << polygonCount << "\n"
+				<< "\tchild " << i << " mesh's list of vertex, uv and normal ...\n"
+				<< "\t\t\t\t\t\t\t\t\t\t\t\t\t\t" << "Vertex\t\t\t\t\t\t\t\t\t\t\t\t" << "UV\t\t\t\t\t\t\t\t\t\t\t\t" << "Normal\n";
 		}
+#endif
 
-		break;
-	}
-	assert(mVertexCount);
-
-	if (manager)
-	{
-		manager->Destroy();
-	}
-
-	return S_OK;
-}
-
-XMFLOAT3* FBXLoader::GetVertices() const
-{
-	return mVertices.get();
-}
-
-XMFLOAT2* FBXLoader::GetUVs() const
-{
-	return mUVs.get();
-}
-
-XMFLOAT3* FBXLoader::GetNormals() const
-{
-	return mNormals.get();
-}
-
-unsigned int FBXLoader::GetVertexCount() const
-{
-	return mVertexCount;
-}
-
-void FBXLoader::GetNormals(FbxNode* node)
-{
-	if (!node)
-		return;
-
-	FbxMesh* lMesh = node->GetMesh();
-	for (int i = 0; !lMesh; ++i)
-	{
-		lMesh = node->GetChild(i)->GetMesh();
-	}
-	
-	if (lMesh)
-	{
-		FbxGeometryElementNormal* lNormalElement = lMesh->GetElementNormal();
-		FbxVector4* vertexElement = lMesh->GetControlPoints();
-		FbxGeometryElementUV* uvElement = lMesh->GetElementUV();
-
-		switch (lNormalElement->GetMappingMode())
+		switch (normalElements->GetMappingMode())
 		{
-		/*case FbxGeometryElement::eByControlPoint:
-		{
-			mNormals.reset(new XMFLOAT3[lMesh->GetControlPointsCount()]);
-
-			for (int lVertexIndex = 0; lVertexIndex < lMesh->GetControlPointsCount(); lVertexIndex++)
-			{
-				int lNormalIndex = 0;
-
-				if (lNormalElement->GetReferenceMode() == FbxGeometryElement::eDirect)
-					lNormalIndex = lVertexIndex;
-
-				if (lNormalElement->GetReferenceMode() == FbxGeometryElement::eIndexToDirect)
-					lNormalIndex = lNormalElement->GetIndexArray().GetAt(lVertexIndex);
-
-				FbxVector4 lNormal = lNormalElement->GetDirectArray().GetAt(lNormalIndex);
-				
-				mNormals[lVertexIndex] =
-				{
-					static_cast<float>(lNormal[0]),
-					static_cast<float>(lNormal[1]),
-					static_cast<float>(lNormal[2])
-				};
-			}
-
-			break;
-		}*/
 		case FbxGeometryElement::eByPolygonVertex:
 		{
-			int lIndexByPolygonVertex = 0;
-
-			/*mVertices.reset(new XMFLOAT3[lMesh->GetPolygonCount() * 3]);
-			mUVs.reset(new XMFLOAT2[lMesh->GetPolygonCount() * 3]);*/
-			mNormals.reset(new XMFLOAT3[lMesh->GetPolygonCount() * 3]);
-
-			for (int lPolygonIndex = 0; lPolygonIndex < lMesh->GetPolygonCount(); lPolygonIndex++)
+			for (size_t polygonIndex = 0; polygonIndex < polygonCount; ++polygonIndex)
 			{
-				int lPolygonSize = lMesh->GetPolygonSize(lPolygonIndex);
+				size_t polygonSize = mesh->GetPolygonSize(polygonIndex);
 
-				for (int i = 0; i < lPolygonSize; i++)
+				for (int k = 0; k < polygonSize; k++)
 				{
-					int lNormalIndex = 0;
-					int uvIndex = 0;
-					int vertexIndex = lMesh->GetPolygonVertex(lPolygonIndex, i);
+					int vertexIndex = mesh->GetPolygonVertex(polygonIndex, k);
 
-					if (uvElement->GetMappingMode() == FbxGeometryElement::eDirect)
-					{
-						uvIndex = lIndexByPolygonVertex;
-					}
-					if (uvElement->GetMappingMode() == FbxGeometryElement::eIndexToDirect)
-					{
-						uvIndex = uvElement->GetIndexArray().GetAt(lIndexByPolygonVertex);
-					}
+					FbxGeometryElementUV* eUV = mesh->GetElementUV();
+					assert(eUV);
+					int uvIndex = mesh->GetTextureUVIndex(polygonIndex, k);
+					FbxVector2 uv = eUV->GetDirectArray().GetAt(uvIndex);
 
-					if (lNormalElement->GetReferenceMode() == FbxGeometryElement::eDirect)
+					int normalIndex = 0;
+					if (normalElements->GetReferenceMode() == FbxGeometryElement::eDirect)
 					{
-						lNormalIndex = lIndexByPolygonVertex;
+						normalIndex = mVertexCount;
 					}
-					if (lNormalElement->GetReferenceMode() == FbxGeometryElement::eIndexToDirect)
+					if (normalElements->GetReferenceMode() == FbxGeometryElement::eIndexToDirect)
 					{
-						lNormalIndex = lNormalElement->GetIndexArray().GetAt(lIndexByPolygonVertex);
+						normalIndex = normalElements->GetIndexArray().GetAt(mVertexCount);
 					}
+					FbxVector4 normalFbxVector4 = normalElements->GetDirectArray().GetAt(normalIndex);
 
-					FbxVector2 uv = uvElement->GetDirectArray().GetAt(uvIndex);
-					FbxVector4 lNormal = lNormalElement->GetDirectArray().GetAt(lNormalIndex);
-					
-					/*mVertices[lIndexByPolygonVertex] =
+					VertexElements vertexElement =
 					{
-						static_cast<float>(vertexElement[vertexIndex].mData[0]),
-						static_cast<float>(vertexElement[vertexIndex].mData[1]),
-						static_cast<float>(vertexElement[vertexIndex].mData[2])
+						XMFLOAT3(
+							static_cast<float>(vertices[vertexIndex].mData[0]),
+							static_cast<float>(vertices[vertexIndex].mData[1]),
+							static_cast<float>(vertices[vertexIndex].mData[2])),
+
+						XMFLOAT2(static_cast<float>(uv[0]), static_cast<float>(uv[1])),
+
+						XMFLOAT3(
+							static_cast<float>(normalFbxVector4[0]),
+							static_cast<float>(normalFbxVector4[1]), 
+							static_cast<float>(normalFbxVector4[2]))
 					};
-					mUVs[lIndexByPolygonVertex] =
+					mElements->push_back(vertexElement);
+
+					vertexCount++;
+
+#ifdef FBX_WRITE
+					if (writeFile.is_open())
 					{
-						static_cast<float>(uv[0]),
-						static_cast<float>(uv[1])
-					};*/
-					mNormals[lIndexByPolygonVertex] =
-					{
-						static_cast<float>(lNormal[0]),
-						static_cast<float>(lNormal[1]),
-						static_cast<float>(lNormal[2])
-					};
-					
-					lIndexByPolygonVertex++;
+						writeFile
+							<< "\t\t" << "vertex[" << std::setw(4) << polygonIndex << "][" << std::setw(4) << k << "]\t|\t" 
+							<< std::setw(15) << vertices[vertexIndex].mData[0] << ", " << std::setw(15) << vertices[vertexIndex].mData[1] << ", " << std::setw(15) << vertices[vertexIndex].mData[2]
+							<< "\t|\t" << std::setw(15) << uv[0] << ", " << std::setw(15) << uv[1] 
+							<< "\t|\t" << std::setw(15) << normalFbxVector4[0] << ", " << std::setw(15) << normalFbxVector4[1] << ", " << std::setw(15) << normalFbxVector4[2] << "\n";
+					}
+#endif
 				}
 			}
-			
-			mVertexCount = lIndexByPolygonVertex;
 			break;
+		}
+		case FbxGeometryElement::eByControlPoint:
+		{
+			assert(false);
 		}
 		default:
 		{
@@ -252,9 +228,14 @@ void FBXLoader::GetNormals(FbxNode* node)
 		}
 		}
 	}
-	/*int i, lCount = node->GetChildCount();
-	for (i = 0; i < lCount; i++)
-	{
-		GetNormals(node->GetChild(i));
-	}*/
+	assert(vertexCount);
+	mVertexCount = vertexCount;
+
+	writeFile.close();
+
+}
+
+unsigned int FBXLoader::GetVertexCount() const
+{
+	return mVertexCount;
 }

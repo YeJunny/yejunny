@@ -6,7 +6,7 @@
 Player::Player()
 	: mNumShootBullet(0)
 {
-	mPos = { 0.0f, 0.0f, 0.0f };
+	mPos = { 0.0f, 4.5f, 0.0f };
 	mRot = { 0.0f, 0.0f, 0.0f };
 }
 

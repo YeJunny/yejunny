@@ -34,14 +34,18 @@ void Gun::Update(const XMFLOAT3& playerPos, const XMFLOAT3& playerRot, const XMM
 	{
 		xMoveRot = 0;
 	}
+
+	const float posCrossFactor = 0.4f;
+	const float posAngleFactor = -4.3f;
+
 	mPos = 
 	{ 
-		playerPos.x + crossFloat.x * 0.2f - angleFloat.x * 0.7f + 0.01f * sinf(xMoveRot),
-		playerPos.y - 0.2f,
-		playerPos.z + crossFloat.z * 0.2f - angleFloat.z * 0.7f
+		playerPos.x + crossFloat.x * posCrossFactor + angleFloat.x * posAngleFactor + 0.1f * sinf(xMoveRot),
+		playerPos.y - 0.35f,
+		playerPos.z + crossFloat.z * posCrossFactor + angleFloat.z * posAngleFactor + 0.05f * sinf(xMoveRot)
 	};
 
-	mWorldMat = XMMatrixScaling(0.02f, 0.02f, 0.02f) *
+	mWorldMat = XMMatrixScaling(0.05f, 0.05f, 0.05f) *
 		XMMatrixRotationRollPitchYaw(rotX - XM_PI / 2, rotY, rotZ) *
 		XMMatrixTranslation(mPos.x, mPos.y, mPos.z);
 

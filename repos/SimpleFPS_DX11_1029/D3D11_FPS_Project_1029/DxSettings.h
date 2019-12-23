@@ -10,6 +10,9 @@ class Timer;
 class DxSettings
 {
 public:
+	DxSettings();
+	~DxSettings();
+
 	void InitDxSettings(HINSTANCE hInst, HWND hwnd);
 	void UpdateDxSettings();
 	void RenderDxSettings();
@@ -17,9 +20,6 @@ public:
 	virtual void Init() = 0;
 	virtual void Update() = 0;
 	virtual void Render() = 0;
-
-	DxSettings();
-	~DxSettings();
 
 protected:
 	D3D_FEATURE_LEVEL* mFeatureLevel;

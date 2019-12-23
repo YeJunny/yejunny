@@ -8,6 +8,6 @@ public:
 	Ground();
 	~Ground();
 
-	void Update(const XMMATRIX& viewMat);
+	void Update(const XMMATRIX& viewMat) override;
 };
 

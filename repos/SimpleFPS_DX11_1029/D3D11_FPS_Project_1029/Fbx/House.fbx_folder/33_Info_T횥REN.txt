@@ -1,0 +1,17 @@
+==============================================================================
+	First Load: Vertex, UV, Normal		Fbx\House.fbx_folder\33_Info_TÜREN.txt
+==============================================================================
+get TÜREN ... OK
+childCount is ... 6
+get child 0 name is ... Tür_Instanz_4
+	child 0 Attribute is ... nullptr
+get child 1 name is ... Tür_Instanz_3
+	child 1 Attribute is ... nullptr
+get child 2 name is ... Tür_Instanz
+	child 2 Attribute is ... nullptr
+get child 3 name is ... Tür_Instanz_1
+	child 3 Attribute is ... nullptr
+get child 4 name is ... Tür_Instanz_2
+	child 4 Attribute is ... nullptr
+get child 5 name is ... Tür_6
+	child 5 Attribute is ... nullptr

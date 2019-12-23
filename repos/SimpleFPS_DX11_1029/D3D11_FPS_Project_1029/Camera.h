@@ -13,14 +13,13 @@ public:
 	~Camera();
 
 	void Init(const ComPtr<ID3D11Device> d3dDevice);
-	void UpdateLocation(const XMFLOAT3 pos, const XMFLOAT3 rot);
+	void UpdateLocation(const XMFLOAT3& playerPos, const XMFLOAT3& playerRot);
 	XMMATRIX GetCameraViewMatrix() const;
 
 private:
 	ComPtr<ID3D11Device> mD3DDevice;
 	ComPtr<ID3D11DeviceContext> mD3DContext;
 
-	XMFLOAT3 mRot;
 	XMMATRIX mViewMat;
 };
 

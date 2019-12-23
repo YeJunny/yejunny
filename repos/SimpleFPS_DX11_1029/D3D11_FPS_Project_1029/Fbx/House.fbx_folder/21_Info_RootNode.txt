@@ -1,0 +1,42 @@
+==============================================================================
+	First Load: Vertex, UV, Normal		Fbx\House.fbx_folder\21_Info_RootNode.txt
+==============================================================================
+get RootNode ... OK
+childCount is ... 5
+get child 0 name is ... FENSTER
+	child 0 Attribute is ... nullptr
+get child 1 name is ... ZARGEN
+	child 1 Attribute is ... nullptr
+get child 2 name is ... TÜREN
+	child 2 Attribute is ... nullptr
+get child 3 name is ... WAND
+	child 3 Attribute is ... nullptr
+get child 4 name is ... BODEN
+	child 4 NodeAttribute is ... eMesh
+	child 4 mesh's ploygonCount is ... 8
+	child 4 mesh's list of vertex, uv and normal ...
+														Vertex												UV												Normal
+		vertex[   0][   0]	|	            613,               0,             474	|	       0.281481,               1	|	              0,               0,               0
+		vertex[   0][   1]	|	           -603,               0,             474	|	              0,               1	|	              0,               0,               0
+		vertex[   0][   2]	|	           -603,             -20,             474	|	              0,               0	|	              0,               0,               0
+		vertex[   1][   0]	|	            613,               0,             474	|	       0.281481,               1	|	              0,               0,               0
+		vertex[   1][   1]	|	           -603,             -20,             474	|	              0,               0	|	              0,               0,               0
+		vertex[   1][   2]	|	            613,             -20,             474	|	       0.281481,               0	|	              0,               0,               0
+		vertex[   2][   0]	|	            613,               0,            -470	|	            0.5,               1	|	              0,               0,               0
+		vertex[   2][   1]	|	            613,               0,             474	|	       0.281481,               1	|	              0,               0,               0
+		vertex[   2][   2]	|	            613,             -20,             474	|	       0.281481,               0	|	              0,               0,               0
+		vertex[   3][   0]	|	            613,             -20,             474	|	       0.281481,               0	|	              0,               0,               0
+		vertex[   3][   1]	|	            613,             -20,            -470	|	            0.5,               0	|	              0,               0,               0
+		vertex[   3][   2]	|	            613,               0,            -470	|	            0.5,               1	|	              0,               0,               0
+		vertex[   4][   0]	|	            613,             -20,            -470	|	            0.5,               0	|	              0,               0,               0
+		vertex[   4][   1]	|	           -603,             -20,            -470	|	       0.781482,               0	|	              0,               0,               0
+		vertex[   4][   2]	|	           -603,               0,            -470	|	       0.781482,               1	|	              0,               0,               0
+		vertex[   5][   0]	|	            613,             -20,            -470	|	            0.5,               0	|	              0,               0,               0
+		vertex[   5][   1]	|	           -603,               0,            -470	|	       0.781482,               1	|	              0,               0,               0
+		vertex[   5][   2]	|	            613,               0,            -470	|	            0.5,               1	|	              0,               0,               0
+		vertex[   6][   0]	|	           -603,               0,             474	|	              1,               1	|	              0,               0,               0
+		vertex[   6][   1]	|	           -603,             -20,            -470	|	       0.781482,               0	|	              0,               0,               0
+		vertex[   6][   2]	|	           -603,             -20,             474	|	              1,               0	|	              0,               0,               0
+		vertex[   7][   0]	|	           -603,             -20,            -470	|	       0.781482,               0	|	              0,               0,               0
+		vertex[   7][   1]	|	           -603,               0,             474	|	              1,               1	|	              0,               0,               0
+		vertex[   7][   2]	|	           -603,               0,            -470	|	       0.781482,               1	|	              0,               0,               0

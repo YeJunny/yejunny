@@ -131,7 +131,7 @@ void DxSettings::InitDxSettings(HINSTANCE hInst, HWND hWnd)
 	//CoInitialize(nullptr);
 
 	// Create Projection Matrix
-	mProjectionMat = XMMatrixPerspectiveFovLH(XM_PIDIV2, mWidth / static_cast<int>(mHeight), 0.01f, 100.0f);
+	mProjectionMat = XMMatrixPerspectiveFovLH(XM_PIDIV2, mWidth / static_cast<int>(mHeight), 0.1f, 200.0f);
 
 
 	// Other Init

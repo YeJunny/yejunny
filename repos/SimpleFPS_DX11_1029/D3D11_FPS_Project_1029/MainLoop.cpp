@@ -3,6 +3,7 @@
 #include "Camera.h"
 #include "Ground.h"
 #include "Gun.h"
+#include "House.h"
 #include "MainLoop.h"
 #include "Player.h"
 #include "Skybox.h"
@@ -13,8 +14,9 @@ MainLoop::MainLoop()
 
 MainLoop::~MainLoop()
 {
-	mAxis.reset();
-	mSkybox.reset();
+	mHouse.reset();
+	//mAxis.reset();
+	//mSkybox.reset();
 	mGround.reset();
 	mCamera.reset();
 	mPlayer.reset();
@@ -31,14 +33,17 @@ void MainLoop::Init()
 	mCamera->Init(mD3DDevice);
 
 	// Init Object
-	mAxis = std::make_unique<Axis>();
-	mAxis->Init(mD3DDevice, L"Shader\\Axis.fx", mProjectionMat, mTimer);
+	/*mAxis = std::make_unique<Axis>();
+	mAxis->Init(mD3DDevice, L"Shader\\Axis.fx", mProjectionMat, mTimer);*/
+
+	mHouse = std::make_unique<House>();
+	mHouse->Init(mD3DDevice, mhWnd, L"Shader\\House.fx", "Fbx\\Castle.fbx", L"Fbx\\Castle_Interior_Texture.jpg", mProjectionMat, mTimer);
 
 	mSkybox = std::make_unique<Skybox>();
-	mSkybox->Init(mD3DDevice, mhWnd, L"Shader\\Box.fx", "Fbx\\skybox.fbx", L"Fbx\\skybox.jpg", mProjectionMat, mTimer);
+	mSkybox->Init(mD3DDevice, mhWnd, L"Shader\\Box.fx", "Fbx\\skybox.fbx", L"Fbx\\skyboxGood.png", mProjectionMat, mTimer);
 
-	mGround = std::make_unique<Ground>();
-	mGround->Init(mD3DDevice, mhWnd, L"Shader\\Ground.fx", "Fbx\\sphere3k.fbx", L"Fbx\\wood.png", mProjectionMat, mTimer);
+	/*mGround = std::make_unique<Ground>();
+	mGround->Init(mD3DDevice, mhWnd, L"Shader\\Ground.fx", "Fbx\\sphere3k.fbx", L"Fbx\\wood.png", mProjectionMat, mTimer);*/
 }
 
 void MainLoop::Update()
@@ -51,9 +56,10 @@ void MainLoop::Update()
 	mViewMat = mCamera->GetCameraViewMatrix();
 
 	// Object update
-	mAxis->Update(mViewMat);
+	//mAxis->Update(mViewMat);
+	mHouse->Update(mViewMat);
+	//mGround->Update(mViewMat);
 	mSkybox->Update(mViewMat);
-	mGround->Update(mViewMat);
 }
 
 void MainLoop::Render()
@@ -65,14 +71,16 @@ void MainLoop::Render()
 
 	// Player(Gun, Bullet, etc...) rendering
 	mPlayer->Render();
-	mAxis->Render();
+	//mAxis->Render();
 
 
 	XMFLOAT3 playerPos = mPlayer->GetPosition();
 
 	// Object rendering
-	mGround->Render(playerPos);
+	mHouse->Render(playerPos);
+	//mGround->Render(playerPos);
 	mSkybox->Render(playerPos);
 	
+
 	mSwapChain->Present(0, 0);
 }
