@@ -78,7 +78,7 @@ void FBXLoader::GetVerticesUVsNormalsRecursive(FbxNode* node)
 			<< "childCount is ... " << childCount << "\n";
 	}
 #endif
-	for (int i = 0; i < childCount; i++)
+	for (int i = 0; i < childCount; ++i)
 	{
 		FbxNode* fbxChildNode = node->GetChild(i);
 		assert(fbxChildNode);
@@ -166,7 +166,7 @@ void FBXLoader::GetVerticesUVsNormalsRecursive(FbxNode* node)
 			{
 				size_t polygonSize = mesh->GetPolygonSize(polygonIndex);
 
-				for (int k = 0; k < polygonSize; k++)
+				for (int k = 0; k < polygonSize; ++k)
 				{
 					int vertexIndex = mesh->GetPolygonVertex(polygonIndex, k);
 
@@ -230,9 +230,9 @@ void FBXLoader::GetVerticesUVsNormalsRecursive(FbxNode* node)
 	}
 	assert(vertexCount);
 	mVertexCount = vertexCount;
-
+#ifdef FBX_WRITE
 	writeFile.close();
-
+#endif
 }
 
 unsigned int FBXLoader::GetVertexCount() const

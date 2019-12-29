@@ -12,7 +12,7 @@ public:
 	{
 	}
 
-	SimpleBTree(T data)
+	SimpleBTree(T& data)
 		: mData(data)
 		, mLeftNode(nullptr)
 		, mRightNode(nullptr)

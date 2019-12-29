@@ -15,8 +15,6 @@ public:
 	~FBXLoader();
 
 	HRESULT LoadFbx(std::vector<VertexElements>* elements, const char* fileName);
-	void LoadNode(FbxNode* node);
-
 	void GetVerticesUVsNormalsRecursive(FbxNode* node);
 	unsigned int GetVertexCount() const;
 

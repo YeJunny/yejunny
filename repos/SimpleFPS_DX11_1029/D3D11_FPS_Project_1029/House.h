@@ -8,7 +8,7 @@ public:
 	House();
 	~House();
 
-	void InitDetail(HWND hWnd) override;
+	virtual void InitDetail(HWND hWnd) override;
 
 };
 

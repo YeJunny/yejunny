@@ -42,7 +42,7 @@ void Gun::Update(const XMFLOAT3& playerPos, const XMFLOAT3& playerRot, const XMM
 	{ 
 		playerPos.x + crossFloat.x * posCrossFactor + angleFloat.x * posAngleFactor + 0.1f * sinf(xMoveRot),
 		playerPos.y - 0.35f,
-		playerPos.z + crossFloat.z * posCrossFactor + angleFloat.z * posAngleFactor + 0.05f * sinf(xMoveRot)
+		playerPos.z + crossFloat.z * posCrossFactor + angleFloat.z * posAngleFactor + 0.005f * sinf(xMoveRot)
 	};
 
 	mWorldMat = XMMatrixScaling(0.05f, 0.05f, 0.05f) *

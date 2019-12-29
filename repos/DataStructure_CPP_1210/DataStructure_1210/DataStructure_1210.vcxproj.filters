@@ -8,6 +8,9 @@
     <ClCompile Include="ExpTree.cpp">
       <Filter>Tree\ExpTree</Filter>
     </ClCompile>
+    <ClCompile Include="Math.cpp">
+      <Filter>Math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SimpleStack.h">
@@ -28,6 +31,27 @@
     <ClInclude Include="ExpTree.h">
       <Filter>Tree\ExpTree</Filter>
     </ClInclude>
+    <ClInclude Include="SimpleHeap.h">
+      <Filter>Heap</Filter>
+    </ClInclude>
+    <ClInclude Include="MergeSort.h">
+      <Filter>Sort</Filter>
+    </ClInclude>
+    <ClInclude Include="QuickSort.h">
+      <Filter>Sort</Filter>
+    </ClInclude>
+    <ClInclude Include="InsertionSort.h">
+      <Filter>Sort</Filter>
+    </ClInclude>
+    <ClInclude Include="SelectionSort.h">
+      <Filter>Sort</Filter>
+    </ClInclude>
+    <ClInclude Include="Math.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="RadixSort.h">
+      <Filter>Sort</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Stack">
@@ -47,6 +71,15 @@
     </Filter>
     <Filter Include="Others">
       <UniqueIdentifier>{69d0027c-8e4e-485c-8a75-8edbd9ce62f5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Heap">
+      <UniqueIdentifier>{8555b033-1c21-4d45-87a1-66e208f7c51f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sort">
+      <UniqueIdentifier>{29480e69-6833-4a1f-b5cd-c073df0ad629}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Math">
+      <UniqueIdentifier>{d1de3ede-6ba1-4214-a6aa-964c660ab2a5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

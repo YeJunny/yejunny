@@ -1,19 +1,18 @@
 #include <iostream>
-#include "ConvertInToPost.h"
-#include "ExpTree.h"
+#include "Math.h"
+#include "RadixSort.h"
 using namespace std;
 
 int main()
 {
-	char* postExp = ConvertInToPost::CovertInfixToPostfix("1/3");
+	int numbers[] = { 15,24,13,8,11,1456,2,0,1,9 };
+	//int numbers[] = { 3,3,3 };
+	//int numbers[] = { 3,2,4,1,7,8,2 };
 
-	ExpTree expTree(postExp);
-	expTree.ShowExpInfixOrder();
-	std::cout << std::endl;
-	expTree.ShowExpPostfixOrder();
-	cout << endl;
+	RadixSort<int>::Sort(numbers, sizeof(numbers) / sizeof(int), 4);
 
-	cout << expTree.CalulateExp() << endl;
-
-	delete postExp;
+	for (int number : numbers)
+	{
+		cout << number << " ";
+	}
 }
