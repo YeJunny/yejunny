@@ -17,11 +17,11 @@ int main()
 	person[1].Insert(456, "YJK", "Address2");
 	person[2].Insert(789, "BJK", "Address3");
 
-	hashTable->Insert(972, &person[0]);
+	hashTable->Insert(302, &person[0]);
 	hashTable->Insert(202, &person[1]);
 	hashTable->Insert(205, &person[2]);
 
-	PersonInfo* personInfo = hashTable->GetValueOrNull(205);
+	PersonInfo* personInfo = hashTable->GetValueOrNull(302);
 	if (personInfo)
 	{
 		personInfo->ShowPersonInfo();

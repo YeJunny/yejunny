@@ -39,6 +39,27 @@ void HashTable::Insert(Key key, Value value)
 	{
 		mLinkedList[index].Insert(slot);
 	}
+	else
+	{
+		Slot* outSlot;
+		if (mLinkedList[index].First(&outSlot))
+		{
+			if (outSlot->Key == key)
+			{
+				return;
+			}
+
+			while (mLinkedList[index].Next(&outSlot))
+			{
+				if (outSlot->Key == key)
+				{
+					return;
+				}
+			}
+
+			mLinkedList[index].Insert(slot);
+		}
+	}
 }
 
 Value HashTable::Delete(Key key)
