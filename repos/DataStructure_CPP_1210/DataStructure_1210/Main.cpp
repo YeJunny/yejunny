@@ -1,18 +1,32 @@
 #include <iostream>
-#include "Math.h"
-#include "RadixSort.h"
+#include "HashTable.h"
+#include "PersonInfo.h"
 using namespace std;
+
+int GetHashValue(int value)
+{
+	return value % 100;
+}
 
 int main()
 {
-	int numbers[] = { 15,24,13,8,11,1456,2,0,1,9 };
-	//int numbers[] = { 3,3,3 };
-	//int numbers[] = { 3,2,4,1,7,8,2 };
+	HashTable* hashTable = new HashTable(GetHashValue);
 
-	RadixSort<int>::Sort(numbers, sizeof(numbers) / sizeof(int), 4);
+	PersonInfo* person = new PersonInfo[3]();
+	person[0].Insert(123, "JK", "Address1");
+	person[1].Insert(456, "YJK", "Address2");
+	person[2].Insert(789, "BJK", "Address3");
 
-	for (int number : numbers)
+	hashTable->Insert(972, &person[0]);
+	hashTable->Insert(202, &person[1]);
+	hashTable->Insert(205, &person[2]);
+
+	PersonInfo* personInfo = hashTable->GetValueOrNull(205);
+	if (personInfo)
 	{
-		cout << number << " ";
+		personInfo->ShowPersonInfo();
 	}
+
+	delete[] person;
+	delete hashTable;
 }

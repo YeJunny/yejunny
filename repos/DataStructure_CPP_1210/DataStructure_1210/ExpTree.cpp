@@ -50,12 +50,12 @@ ExpTree::ExpTree(const char* exp)
 
 ExpTree::~ExpTree()
 {
-	mRoot->DeleteBTree();
+	mRoot->DeleteBTreeRecursive();
 }
 
 void ExpTree::ShowExpPrefixOrder() const
 {
-	mRoot->SearchPreOrderBTree(PrintData);
+	mRoot->SearchPreOrderBTreeRecursive(PrintData);
 }
 
 void ExpTree::ShowExpInfixOrder() const
@@ -87,7 +87,7 @@ void ExpTree::ShowExpInfixOrderRecursive(SimpleBTree<int>* node) const
 
 void ExpTree::ShowExpPostfixOrder() const
 {
-	mRoot->SearchPostOrderBTree(PrintData);
+	mRoot->SearchPostOrderBTreeRecursive(PrintData);
 }
 
 float ExpTree::CalulateExp() const

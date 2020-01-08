@@ -12,7 +12,7 @@ public:
 	{
 	}
 
-	SimpleBTree(T& data)
+	SimpleBTree(const T& data)
 		: mData(data)
 		, mLeftNode(nullptr)
 		, mRightNode(nullptr)
@@ -23,21 +23,21 @@ public:
 	{
 	}
 
-	void MakeLeftSubTree(SimpleBTree* node)
+	void MakeLeftSubTree(SimpleBTree<T>* node)
 	{
-		mLeftNode->DeleteBTree();
+		mLeftNode->DeleteBTreeRecursive();
 
 		mLeftNode = node;
 	}
 
-	void MakeRightSubTree(SimpleBTree* node)
+	void MakeRightSubTree(SimpleBTree<T>* node)
 	{
-		mRightNode->DeleteBTree();
+		mRightNode->DeleteBTreeRecursive();
 
 		mRightNode = node;
 	}
 
-	void SearchPreOrderBTree(FunPtr funPtr) const
+	void SearchPreOrderBTreeRecursive(const FunPtr funPtr) const
 	{
 		if (this == nullptr)
 		{
@@ -45,54 +45,69 @@ public:
 		}
 
 		funPtr(mData);
-		mLeftNode->SearchPreOrderBTree(funPtr);
-		mRightNode->SearchPreOrderBTree(funPtr);
+		mLeftNode->SearchPreOrderBTreeRecursive(funPtr);
+		mRightNode->SearchPreOrderBTreeRecursive(funPtr);
 	}
 
-	void SearchInOrderBTree(FunPtr funPtr) const
+	void SearchInOrderBTreeRecursive(const FunPtr funPtr) const
 	{
 		if (this == nullptr)
 		{
 			return;
 		}
 
-		mLeftNode->SearchInOrderBTree(funPtr);
+		mLeftNode->SearchInOrderBTreeRecursive(funPtr);
 		funPtr(mData);
-		mRightNode->SearchInOrderBTree(funPtr);
+		mRightNode->SearchInOrderBTreeRecursive(funPtr);
 	}
 
-	void SearchPostOrderBTree(FunPtr funPtr) const
+	void SearchPostOrderBTreeRecursive(const FunPtr funPtr) const
 	{
 		if (this == nullptr)
 		{
 			return;
 		}
 
-		mLeftNode->SearchPostOrderBTree(funPtr);
-		mRightNode->SearchPostOrderBTree(funPtr);
+		mLeftNode->SearchPostOrderBTreeRecursive(funPtr);
+		mRightNode->SearchPostOrderBTreeRecursive(funPtr);
 		funPtr(mData);
 	}
 
-	void DeleteBTree() const
+	void DeleteBTreeRecursive() const
 	{
 		if (this == nullptr)
 		{
 			return;
 		}
 
-		mLeftNode->DeleteBTree();
-		mRightNode->DeleteBTree();
+		mLeftNode->DeleteBTreeRecursive();
+		mRightNode->DeleteBTreeRecursive();
 		delete this;
 	}
 
-	SimpleBTree* GetLeftTree() const
+	void SetLeftTree(SimpleBTree<T>* leftNode)
+	{
+		mLeftNode = leftNode;
+	}
+
+	void SetRightTree(SimpleBTree<T>* rightNode)
+	{
+		mRightNode = rightNode;
+	}
+
+	SimpleBTree<T>* GetLeftTree() const
 	{
 		return mLeftNode;
 	}
 
-	SimpleBTree* GetRightTree() const
+	SimpleBTree<T>* GetRightTree() const
 	{
 		return mRightNode;
+	}
+
+	void SetData(const T data)
+	{
+		mData = data;
 	}
 
 	T GetData() const

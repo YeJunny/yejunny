@@ -11,6 +11,12 @@
     <ClCompile Include="Math.cpp">
       <Filter>Math</Filter>
     </ClCompile>
+    <ClCompile Include="PersonInfo.cpp">
+      <Filter>HashTable</Filter>
+    </ClCompile>
+    <ClCompile Include="HashTable.cpp">
+      <Filter>HashTable</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SimpleStack.h">
@@ -52,6 +58,21 @@
     <ClInclude Include="RadixSort.h">
       <Filter>Sort</Filter>
     </ClInclude>
+    <ClInclude Include="Search.h">
+      <Filter>Others</Filter>
+    </ClInclude>
+    <ClInclude Include="AVLTree.h">
+      <Filter>Tree</Filter>
+    </ClInclude>
+    <ClInclude Include="Slot.h">
+      <Filter>HashTable</Filter>
+    </ClInclude>
+    <ClInclude Include="PersonInfo.h">
+      <Filter>HashTable</Filter>
+    </ClInclude>
+    <ClInclude Include="HashTable.h">
+      <Filter>HashTable</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Stack">
@@ -80,6 +101,9 @@
     </Filter>
     <Filter Include="Math">
       <UniqueIdentifier>{d1de3ede-6ba1-4214-a6aa-964c660ab2a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HashTable">
+      <UniqueIdentifier>{500a2d4a-a73d-498d-a69c-d98453d4f02a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
