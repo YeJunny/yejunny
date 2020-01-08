@@ -3,8 +3,8 @@
 template <typename T>
 struct Node
 {
-	Node* Next = nullptr;
-	T Data = 0;
+	Node* Next;
+	T Data;
 };
 
 template <typename T>

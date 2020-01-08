@@ -32,14 +32,12 @@ public:
 			if (mLinkedList[i].First(&slot))
 			{
 				delete slot;
-			}
-			while (mLinkedList[i].Next(&slot))
-			{
-				if (slot)
+				while (mLinkedList[i].Next(&slot))
 				{
 					delete slot;
 				}
 			}
+			
 		}
 		delete[] mLinkedList;
 	}

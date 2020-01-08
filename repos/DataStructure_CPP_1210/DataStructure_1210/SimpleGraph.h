@@ -14,6 +14,7 @@ public:
 	void ShowGraphInfo();
 
 private:
+	int mNumVertex;
 	LinkedList<EVertex>* mVertices;
 };
 

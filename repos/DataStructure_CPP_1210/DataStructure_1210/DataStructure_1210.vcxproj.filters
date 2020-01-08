@@ -17,6 +17,9 @@
     <ClCompile Include="SimpleGraph.cpp">
       <Filter>Graph</Filter>
     </ClCompile>
+    <ClCompile Include="DFSGraph.cpp">
+      <Filter>Graph</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SimpleStack.h">
@@ -71,6 +74,9 @@
       <Filter>HashTable</Filter>
     </ClInclude>
     <ClInclude Include="SimpleGraph.h">
+      <Filter>Graph</Filter>
+    </ClInclude>
+    <ClInclude Include="DFSGraph.h">
       <Filter>Graph</Filter>
     </ClInclude>
   </ItemGroup>
