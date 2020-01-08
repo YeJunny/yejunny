@@ -14,8 +14,8 @@
     <ClCompile Include="PersonInfo.cpp">
       <Filter>HashTable</Filter>
     </ClCompile>
-    <ClCompile Include="HashTable.cpp">
-      <Filter>HashTable</Filter>
+    <ClCompile Include="SimpleGraph.cpp">
+      <Filter>Graph</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -64,14 +64,14 @@
     <ClInclude Include="AVLTree.h">
       <Filter>Tree</Filter>
     </ClInclude>
-    <ClInclude Include="Slot.h">
-      <Filter>HashTable</Filter>
-    </ClInclude>
     <ClInclude Include="PersonInfo.h">
       <Filter>HashTable</Filter>
     </ClInclude>
     <ClInclude Include="HashTable.h">
       <Filter>HashTable</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleGraph.h">
+      <Filter>Graph</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -104,6 +104,9 @@
     </Filter>
     <Filter Include="HashTable">
       <UniqueIdentifier>{500a2d4a-a73d-498d-a69c-d98453d4f02a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graph">
+      <UniqueIdentifier>{2e69eb08-443d-40ff-8545-b72fdefe3d23}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
