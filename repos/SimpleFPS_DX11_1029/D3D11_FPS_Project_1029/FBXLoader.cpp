@@ -138,7 +138,7 @@ void FBXLoader::GetVerticesUVsNormalsRecursive(FbxNode* node)
 		}
 
 		//////////////// NodeAttributeType == eMesh ///////////////////
-		assert(attributeType == FbxNodeAttribute::eMesh, L"FBXLoader, attributeType all not eMesh");
+		assert(attributeType == FbxNodeAttribute::eMesh);
 		assert(mesh);
 
 		FbxVector4* vertices = mesh->GetControlPoints();

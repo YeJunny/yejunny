@@ -6,14 +6,17 @@ template <typename T>
 class SimpleHeap
 {
 public:
+	typedef int GetPriority(T data1, T data2);
+
 	SimpleHeap()
 		: mIndex(1)
 	{
 	}
 
-	void Init(bool bIsMaxHeap)
+	void Init(GetPriority getPriorityFunc, bool bIsMaxHeap)
 	{
 		mbIsMaxHeap = bIsMaxHeap;
+		mPriorityFunc = getPriorityFunc;
 	}
 
 	void Insert(const T& data)
@@ -47,8 +50,8 @@ private:
 			return;
 		}
 		
-		if (mbIsMaxHeap && mHeapArray[index] > mHeapArray[parentIndex] ||
-			!mbIsMaxHeap && mHeapArray[index] < mHeapArray[parentIndex])
+		if (mbIsMaxHeap && mPriorityFunc(mHeapArray[index], mHeapArray[parentIndex]) > 0 ||
+			!mbIsMaxHeap && mPriorityFunc(mHeapArray[index], mHeapArray[parentIndex]) < 0)
 		{
 			Swap(index, parentIndex);
 			CompareNodeRecursive(parentIndex);
@@ -69,21 +72,21 @@ private:
 		T rightChildValue = mHeapArray[rightChildIndex];
 		T currentNodeValue = mHeapArray[index];
 
-		if (mbIsMaxHeap && leftChildValue > currentNodeValue && leftChildValue > rightChildValue ||
-			!mbIsMaxHeap && leftChildValue < currentNodeValue && leftChildValue < rightChildValue)
+		if (mbIsMaxHeap && mPriorityFunc(leftChildValue, currentNodeValue) > 0 && mPriorityFunc(leftChildValue, rightChildValue) > 0 ||
+			!mbIsMaxHeap && mPriorityFunc(leftChildValue, currentNodeValue) < 0 && mPriorityFunc(leftChildValue, rightChildValue) < 0)
 		{
 			Swap(index, leftChildIndex);
 			RemoveNodeRecursive(leftChildIndex);
 		}
-		else if (mbIsMaxHeap && rightChildValue > currentNodeValue ||
-			!mbIsMaxHeap && rightChildValue < currentNodeValue)
+		else if (mbIsMaxHeap && mPriorityFunc(rightChildValue, currentNodeValue) > 0 ||
+			!mbIsMaxHeap && mPriorityFunc(rightChildValue, currentNodeValue) < 0)
 		{
 			Swap(index, rightChildIndex);
 			RemoveNodeRecursive(rightChildIndex);
 		}
 	}
 
-	void Swap(int index1, int index2)
+	void Swap(int& index1, int& index2)
 	{
 		T temp = mHeapArray[index1];
 		mHeapArray[index1] = mHeapArray[index2];
@@ -105,7 +108,8 @@ private:
 		return index * 2 + 1;
 	}
 
+	T mHeapArray[MAX_LEN];
+	GetPriority* mPriorityFunc;
 	bool mbIsMaxHeap;
 	int mIndex;
-	T mHeapArray[MAX_LEN];
 };

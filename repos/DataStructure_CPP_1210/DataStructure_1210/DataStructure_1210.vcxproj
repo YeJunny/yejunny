@@ -152,15 +152,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ConvertInToPost.cpp" />
-    <ClCompile Include="DFSGraph.cpp" />
     <ClCompile Include="ExpTree.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Math.cpp" />
     <ClCompile Include="PersonInfo.cpp" />
-    <ClCompile Include="SimpleGraph.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AVLTree.h" />
+    <ClInclude Include="BFSGraph.h" />
     <ClInclude Include="ConvertInToPost.h" />
     <ClInclude Include="DFSGraph.h" />
     <ClInclude Include="ExpTree.h" />

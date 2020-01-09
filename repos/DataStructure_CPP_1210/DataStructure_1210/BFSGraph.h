@@ -1,12 +1,13 @@
 #pragma once
 
 #include "SimpleGraph.h"
+#include "SimpleQueue.h"
 
 template <typename TVertex>
-class DFSGraph : public SimpleGraph<TVertex>
+class BFSGraph : public SimpleGraph<TVertex>
 {
 public:
-	DFSGraph(int numVertex, TVertex* vertexList)
+	BFSGraph(int numVertex, TVertex* vertexList)
 		: SimpleGraph<TVertex>(numVertex, vertexList)
 	{
 		mbIsVisit = new bool[numVertex];
@@ -16,14 +17,14 @@ public:
 		}
 	}
 
-	~DFSGraph()
+	~BFSGraph()
 	{
 		delete[] mbIsVisit;
 	}
 
 	void SearchAllNode(const TVertex vertex)
 	{
-		ShowDFSGraphInfoRecursive(vertex);
+		ShowBFSGraphInfoRecursive(vertex);
 
 		for (int i = 0; i < this->mNumVertex; ++i)
 		{
@@ -32,28 +33,37 @@ public:
 	}
 
 private:
-	void ShowDFSGraphInfoRecursive(const TVertex vertex)
+	void ShowBFSGraphInfoRecursive(const TVertex vertex)
 	{
 		int vertexIndex = this->GetIndexByVertex(vertex);
 
-		mbIsVisit[vertexIndex] = true;
-		std::cout << this->mVertexList[vertexIndex] << std::endl;
+		if (!mbIsVisit[vertexIndex])
+		{
+			mbIsVisit[vertexIndex] = true;
+			std::cout << this->mVertexList[vertexIndex] << std::endl;
+		}
 
+		SimpleQueue<TVertex> queue;
 		TVertex outVertex;
 		if (this->mVertices[vertexIndex].First(&outVertex))
 		{
 			if (!mbIsVisit[this->GetIndexByVertex(outVertex)])
 			{
-				ShowDFSGraphInfoRecursive(outVertex);
+				queue.Push(outVertex);
 			}
 
 			while (this->mVertices[vertexIndex].Next(&outVertex))
 			{
 				if (!mbIsVisit[this->GetIndexByVertex(outVertex)])
 				{
-					ShowDFSGraphInfoRecursive(outVertex);
+					queue.Push(outVertex);
 				}
 			}
+		}
+
+		while (queue.Pop(&outVertex))
+		{
+			ShowBFSGraphInfoRecursive(outVertex);
 		}
 	}
 

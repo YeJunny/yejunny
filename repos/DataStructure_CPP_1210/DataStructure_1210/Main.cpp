@@ -4,14 +4,22 @@ using namespace std;
 
 int main()
 {
-	SimpleGraph graph(5);
-	graph.AddEdge(EVertex::A, EVertex::B);
-	graph.AddEdge(EVertex::A, EVertex::C);
-	graph.AddEdge(EVertex::A, EVertex::D);
-	graph.AddEdge(EVertex::B, EVertex::D);
-	graph.AddEdge(EVertex::C, EVertex::B);
-	graph.AddEdge(EVertex::E, EVertex::C);
+	const char* vertices[6] = { "A", "B", "C", "D", "E", "F" };
+
+	SimpleGraph<char*> graph((char**)vertices, 6, true);
+	graph.AddEdge("A", "B", 9);
+	graph.AddEdge("B", "C", 2);
+	graph.AddEdge("A", "C", 12);
+	graph.AddEdge("A", "D", 8);
+	graph.AddEdge("D", "C", 6);
+	graph.AddEdge("A", "F", 11);
+	graph.AddEdge("F", "D", 4);
+	graph.AddEdge("D", "E", 3);
+	graph.AddEdge("E", "C", 7);
+	graph.AddEdge("F", "E", 13);
+
+	graph.ChangeKruskalMST();
 
 	graph.ShowGraphInfo();
-
+	graph.ShowEdgeInfo();
 }
