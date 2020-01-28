@@ -22,16 +22,19 @@ void Player::Init(const ComPtr<ID3D11Device> d3dDevice, HWND hWnd, const XMMATRI
 {
 	mInput = input;
 	mTimer = timer;
-
-	mGun = std::make_unique<Gun>();
-	mGun->Init(d3dDevice, hWnd, L"Shader\\Ground.fx", "Fbx\\EBR.fbx", L"Fbx\\gun.jpg", projectionMat, mTimer);
-
-	mBullet.reset(new Bullet[BULLET_COUNT]);
-	for (int i = 0; i < BULLET_COUNT; ++i)
 	{
-		mBullet[i].Init(d3dDevice, hWnd, L"Shader\\Ground.fx", "Fbx\\Bullet.fbx", L"Fbx\\Bullet_Shell.jpg", projectionMat, mTimer);
+		mGun = std::make_unique<Gun>();
+		WCHAR textureFiles[][TEXTURE_LEN] = { L"Fbx\\gun.jpg" };
+		mGun->Init(d3dDevice, hWnd, L"Shader\\Ground.fx", "Fbx\\EBR.fbx", textureFiles, projectionMat, mTimer);
 	}
-
+	{
+		mBullet.reset(new Bullet[BULLET_COUNT]);
+		WCHAR textureFiles[][TEXTURE_LEN] = { L"Fbx\\Bullet_Shell1.jpg", L"Fbx\\Bullet_Shell2.jpg" };
+		for (int i = 0; i < BULLET_COUNT; ++i)
+		{
+			mBullet[i].Init(d3dDevice, hWnd, L"Shader\\Ground.fx", "Fbx\\Bullet.fbx", textureFiles, projectionMat, mTimer);
+		}
+	}
 	mShooting = std::make_unique<Sound>();
 	bool bSuccess = mShooting->Initialize(hWnd, "Sound\\Gun_Silencer.wav");
 	assert(bSuccess);

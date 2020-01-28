@@ -29,7 +29,7 @@ void Camera::UpdateLocation(const XMFLOAT3& playerPos, const XMFLOAT3& playerRot
 
 	XMVECTOR eye = XMLoadFloat3(&playerPos);
 	XMVECTOR at = XMVectorAdd(eye, XMVector3TransformCoord(XMLoadFloat3(&atFloat), rotationMat));
-	XMVECTOR up = XMLoadFloat3(&upFloat);// XMVector3TransformCoord(, rotationMat);
+	XMVECTOR up = XMVector3TransformCoord(XMLoadFloat3(&upFloat), rotationMat);
 
 	mViewMat = XMMatrixLookAtLH(eye, at, up);
 }

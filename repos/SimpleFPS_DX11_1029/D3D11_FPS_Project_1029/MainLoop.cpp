@@ -1,6 +1,7 @@
 #include "Axis.h"
 #include "Bullet.h"
 #include "Camera.h"
+#include "Enemy.h"
 #include "Ground.h"
 #include "Gun.h"
 #include "House.h"
@@ -20,6 +21,7 @@ MainLoop::~MainLoop()
 	mGround.reset();
 	mCamera.reset();
 	mPlayer.reset();
+	mEnemy.reset();
 }
 
 void MainLoop::Init()
@@ -35,13 +37,27 @@ void MainLoop::Init()
 	// Init Object
 	/*mAxis = std::make_unique<Axis>();
 	mAxis->Init(mD3DDevice, L"Shader\\Axis.fx", mProjectionMat, mTimer);*/
-
-	mHouse = std::make_unique<House>();
-	mHouse->Init(mD3DDevice, mhWnd, L"Shader\\House.fx", "Fbx\\Castle.fbx", L"Fbx\\Castle_Interior_Texture.jpg", mProjectionMat, mTimer);
-
-	mSkybox = std::make_unique<Skybox>();
-	mSkybox->Init(mD3DDevice, mhWnd, L"Shader\\Box.fx", "Fbx\\skybox.fbx", L"Fbx\\skyboxGood.png", mProjectionMat, mTimer);
-
+	{
+		mHouse = std::make_unique<House>();
+		WCHAR textureFiles[][TEXTURE_LEN] = 
+		{ 
+			L"Fbx\\Castle_Exterior_Texture.jpg",
+			L"Fbx\\Castle_TowersDoors_Windows_Texture.jpg",
+			L"Fbx\\Castle_Ground_Fountain_Texture.jpg",
+			L"Fbx\\Castle_Interior_Texture.jpg",
+		};
+		mHouse->Init(mD3DDevice, mhWnd, L"Shader\\House.fx", "Fbx\\Castle.fbx", textureFiles, mProjectionMat, mTimer);
+	}
+	{
+		mSkybox = std::make_unique<Skybox>();
+		WCHAR textureFiles[][TEXTURE_LEN] = { L"Fbx\\skyboxGood.png" };
+		mSkybox->Init(mD3DDevice, mhWnd, L"Shader\\Box.fx", "Fbx\\skybox.fbx", textureFiles, mProjectionMat, mTimer);
+	}
+	{
+		mEnemy = std::make_unique<Enemy>();
+		WCHAR textureFiles[][TEXTURE_LEN] = { L"Fbx\\Enemy.jpg" };
+		mEnemy->Init(mD3DDevice, mhWnd, L"Shader\\Box.fx", "Fbx\\Enemy.fbx", textureFiles, mProjectionMat, mTimer);
+	}
 	/*mGround = std::make_unique<Ground>();
 	mGround->Init(mD3DDevice, mhWnd, L"Shader\\Ground.fx", "Fbx\\sphere3k.fbx", L"Fbx\\wood.png", mProjectionMat, mTimer);*/
 }
@@ -60,6 +76,7 @@ void MainLoop::Update()
 	mHouse->Update(mViewMat);
 	//mGround->Update(mViewMat);
 	mSkybox->Update(mViewMat);
+	mEnemy->Update(mViewMat);
 }
 
 void MainLoop::Render()
@@ -80,7 +97,7 @@ void MainLoop::Render()
 	mHouse->Render(playerPos);
 	//mGround->Render(playerPos);
 	mSkybox->Render(playerPos);
-	
+	mEnemy->Render(playerPos);
 
 	mSwapChain->Present(0, 0);
 }

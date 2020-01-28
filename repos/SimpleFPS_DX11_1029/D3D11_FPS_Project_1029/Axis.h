@@ -11,6 +11,7 @@ public:
 	void Render();
 
 private:
-
+	ComPtr<ID3D11Buffer> mVertexBuffer;
+	size_t mVertexCount;
 };
 

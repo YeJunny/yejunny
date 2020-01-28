@@ -14,12 +14,13 @@ public:
 	FBXLoader();
 	~FBXLoader();
 
-	HRESULT LoadFbx(std::vector<VertexElements>* elements, const char* fileName);
-	void GetVerticesUVsNormalsRecursive(FbxNode* node);
+	HRESULT LoadFbx(std::vector<std::vector<VertexElements>>* elements, const char* fileName);
+	void LoadVerticesUVsNormalsRecursive(FbxNode* node);
+	void LoadAnimationRecursive(FbxNode* node);
 	unsigned int GetVertexCount() const;
 
 private:
-	std::vector<VertexElements>* mElements;
+	std::vector<std::vector<VertexElements>>* mElements;
 	std::string mFileName;
 	unsigned int mVertexCount;
 };

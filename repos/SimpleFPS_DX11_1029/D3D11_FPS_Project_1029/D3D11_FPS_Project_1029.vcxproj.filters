@@ -101,6 +101,9 @@
     <ClInclude Include="House.h">
       <Filter>Object\Terriain</Filter>
     </ClInclude>
+    <ClInclude Include="Enemy.h">
+      <Filter>Object\Enemy</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="D3D11_FPS_Project_1029.rc">
@@ -169,6 +172,9 @@
     </ClCompile>
     <ClCompile Include="House.cpp">
       <Filter>Object\Terriain</Filter>
+    </ClCompile>
+    <ClCompile Include="Enemy.cpp">
+      <Filter>Object\Enemy</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

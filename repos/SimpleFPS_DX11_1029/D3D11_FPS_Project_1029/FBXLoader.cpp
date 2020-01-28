@@ -12,9 +12,8 @@ FBXLoader::~FBXLoader()
 {
 }
 
-HRESULT FBXLoader::LoadFbx(std::vector<VertexElements>* elements, const char* fileName)
+HRESULT FBXLoader::LoadFbx(std::vector<std::vector<VertexElements>>* elements, const char* fileName)
 {
-	// Init & Setting
 	FbxManager* manager = FbxManager::Create();
 	assert(manager);
 	FbxIOSettings* ios = FbxIOSettings::Create(manager, IOSROOT);
@@ -43,18 +42,18 @@ HRESULT FBXLoader::LoadFbx(std::vector<VertexElements>* elements, const char* fi
 
 	FbxNode* fbxRootNode = fbxScene->GetRootNode();
 	assert(fbxRootNode);
-	GetVerticesUVsNormalsRecursive(fbxRootNode);
+	LoadVerticesUVsNormalsRecursive(fbxRootNode);
 
 	manager->Destroy();
 	return S_OK;
 }
 
-void FBXLoader::GetVerticesUVsNormalsRecursive(FbxNode* node)
+void FBXLoader::LoadVerticesUVsNormalsRecursive(FbxNode* node)
 {
 #ifdef FBX_WRITE
-	static int number = 0;
+	static int recursiveNumber = 0;
 	char numberStr[10];
-	_itoa_s(number, numberStr, 10);
+	_itoa_s(recursiveNumber, numberStr, 10);
 #endif
 	static size_t vertexCount = 0;
 
@@ -66,7 +65,7 @@ void FBXLoader::GetVerticesUVsNormalsRecursive(FbxNode* node)
 	int childCount = node->GetChildCount();
 #ifdef FBX_WRITE
 	std::string fileNameString = mFileName + "_folder\\" + std::string(numberStr) + "_Info_" + node->GetName() + +".txt";
-	number++;
+	++recursiveNumber;
 	std::ofstream writeFile(fileNameString.data());
 	if (writeFile.is_open())
 	{
@@ -98,7 +97,7 @@ void FBXLoader::GetVerticesUVsNormalsRecursive(FbxNode* node)
 					<< "\tchild " << i << " Attribute is ... nullptr\n";
 			}
 #endif
-			GetVerticesUVsNormalsRecursive(fbxChildNode);
+			LoadVerticesUVsNormalsRecursive(fbxChildNode);
 
 			continue;
 		}
@@ -147,6 +146,8 @@ void FBXLoader::GetVerticesUVsNormalsRecursive(FbxNode* node)
 
 		FbxGeometryElementNormal* normalElements = mesh->GetElementNormal();
 		assert(normalElements);
+		FbxGeometryElementUV* eUV = mesh->GetElementUV();
+		//assert(eUV);
 
 #ifdef FBX_WRITE
 		if (writeFile.is_open())
@@ -157,6 +158,7 @@ void FBXLoader::GetVerticesUVsNormalsRecursive(FbxNode* node)
 				<< "\t\t\t\t\t\t\t\t\t\t\t\t\t\t" << "Vertex\t\t\t\t\t\t\t\t\t\t\t\t" << "UV\t\t\t\t\t\t\t\t\t\t\t\t" << "Normal\n";
 		}
 #endif
+		std::vector<VertexElements> monoMeshElement;
 
 		switch (normalElements->GetMappingMode())
 		{
@@ -169,11 +171,12 @@ void FBXLoader::GetVerticesUVsNormalsRecursive(FbxNode* node)
 				for (int k = 0; k < polygonSize; ++k)
 				{
 					int vertexIndex = mesh->GetPolygonVertex(polygonIndex, k);
-
-					FbxGeometryElementUV* eUV = mesh->GetElementUV();
-					assert(eUV);
 					int uvIndex = mesh->GetTextureUVIndex(polygonIndex, k);
-					FbxVector2 uv = eUV->GetDirectArray().GetAt(uvIndex);
+					FbxVector2 uv = { 0, 0 };
+					if (eUV)
+					{
+						uv = eUV->GetDirectArray().GetAt(uvIndex);
+					}
 
 					int normalIndex = 0;
 					if (normalElements->GetReferenceMode() == FbxGeometryElement::eDirect)
@@ -193,14 +196,15 @@ void FBXLoader::GetVerticesUVsNormalsRecursive(FbxNode* node)
 							static_cast<float>(vertices[vertexIndex].mData[1]),
 							static_cast<float>(vertices[vertexIndex].mData[2])),
 
-						XMFLOAT2(static_cast<float>(uv[0]), static_cast<float>(uv[1])),
+						XMFLOAT2(static_cast<float>(uv[0]), 1 - static_cast<float>(uv[1])),
 
 						XMFLOAT3(
 							static_cast<float>(normalFbxVector4[0]),
 							static_cast<float>(normalFbxVector4[1]), 
 							static_cast<float>(normalFbxVector4[2]))
 					};
-					mElements->push_back(vertexElement);
+
+					monoMeshElement.push_back(vertexElement);
 
 					vertexCount++;
 
@@ -227,12 +231,19 @@ void FBXLoader::GetVerticesUVsNormalsRecursive(FbxNode* node)
 			break;
 		}
 		}
+
+		mElements->push_back(monoMeshElement);
 	}
 	assert(vertexCount);
 	mVertexCount = vertexCount;
 #ifdef FBX_WRITE
 	writeFile.close();
 #endif
+}
+
+void FBXLoader::LoadAnimationRecursive(FbxNode* node)
+{
+
 }
 
 unsigned int FBXLoader::GetVertexCount() const

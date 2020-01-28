@@ -8,6 +8,7 @@
 #include <wrl.h>
 #include <ScreenGrab.h>
 using namespace DirectX;
+using namespace std;
 
 #define FBX_WRITE
 
@@ -21,18 +22,21 @@ Object::~Object()
 	mVertexShader.Reset();
 	mVertexLayout.Reset();
 	mPixelShader.Reset();
-	mVertexBuffer.Reset();
+	for (int i = 0; i < mMeshCount; ++i)
+	{
+		mVertexBuffer[i].Reset();
+		mTextureResourceView[i].Reset();
+	}
 	mCBufferMatrix.Reset();
 	mCBufferLight.Reset();
-	mTextureRV.Reset();
 	mRasterizerState.Reset();
 
 	mLayout.reset();
 	mTimer.reset();
 }
 
-void Object::Init(const ComPtr<ID3D11Device> d3dDevice, HWND hWnd, 
-	const WCHAR* shaderFile, const char* fbxFile, const WCHAR* textureFile,
+void Object::Init(const ComPtr<ID3D11Device> d3dDevice, HWND hWnd,
+	const WCHAR* shaderFile, const char* fbxFile, const WCHAR textureFiles[][TEXTURE_LEN],
 	const XMMATRIX& projectionMat, std::shared_ptr<Timer> timer)
 {
 	HRESULT hr;
@@ -44,29 +48,37 @@ void Object::Init(const ComPtr<ID3D11Device> d3dDevice, HWND hWnd,
 	mD3DDevice = d3dDevice;
 	mD3DDevice->GetImmediateContext(&mD3DContext);
 
-	std::vector<VertexElements> verticesElementsVector;
-	verticesElementsVector.reserve(10000);
+	vector<vector<VertexElements>> verticesElementsVector;
+	verticesElementsVector.reserve(10);
 
 	FBXLoader* fbxLoader = new FBXLoader();
 	fbxLoader->LoadFbx(&verticesElementsVector, fbxFile);
-	mVertexCount = fbxLoader->GetVertexCount();
-	Assert(mVertexCount);
 	delete fbxLoader;
 
+	mMeshCount = verticesElementsVector.size();
+	mVertexBuffer = new ComPtr<ID3D11Buffer>[mMeshCount]();
+	mVertexCount = new size_t[mMeshCount];
 
 	// Create Vertex Buffer
+
 	D3D11_BUFFER_DESC bd;
 	ZeroMemory(&bd, sizeof(bd));
-	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.ByteWidth = sizeof(verticesElementsVector) * verticesElementsVector.size();
-	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	D3D11_SUBRESOURCE_DATA initData;
-	ZeroMemory(&initData, sizeof(initData));
-	initData.pSysMem = verticesElementsVector.data();
-	hr = mD3DDevice->CreateBuffer(&bd, &initData, mVertexBuffer.GetAddressOf());
-	if (FAILED(hr))
+
+	for (int i = 0; i < mMeshCount; ++i)
 	{
-		Assert(hr == S_OK);
+		mVertexCount[i] = verticesElementsVector[i].size();
+		bd.Usage = D3D11_USAGE_DEFAULT;
+		bd.ByteWidth = sizeof(verticesElementsVector[i]) * mVertexCount[i];
+		bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		D3D11_SUBRESOURCE_DATA initData;
+		ZeroMemory(&initData, sizeof(initData));
+		initData.pSysMem = verticesElementsVector[i].data();
+		hr = mD3DDevice->CreateBuffer(&bd, &initData, mVertexBuffer[i].GetAddressOf());
+		if (FAILED(hr))
+		{
+			Assert(hr == S_OK);
+		}
+		verticesElementsVector[i].clear();
 	}
 	verticesElementsVector.clear();
 
@@ -125,18 +137,24 @@ void Object::Init(const ComPtr<ID3D11Device> d3dDevice, HWND hWnd,
 		Assert(hr == S_OK);
 	}
 	pPSBlob->Release();
-
+	
 
 	// Create Texture
-	hr = CreateWICTextureFromFile(mD3DDevice.Get(), mD3DContext.Get(), textureFile, mTexture2D.GetAddressOf(), mTextureRV.GetAddressOf(), 0);
-	if (FAILED(hr))
+	mTextureResourceView = new ComPtr<ID3D11ShaderResourceView>[mMeshCount];
+	for (int i = 0; i < mMeshCount; ++i)
 	{
-		Assert(hr == S_OK);
+		hr = CreateWICTextureFromFile(mD3DDevice.Get(), mD3DContext.Get(), textureFiles[i], mTexture2D.GetAddressOf(), mTextureResourceView[i].GetAddressOf(), 0);
+		if (FAILED(hr))
+		{
+			Assert(hr == S_OK);
+		}
+		/*#ifdef _DEBUG
+			WCHAR fileName[128];
+			swprintf_s(fileName, 128, L"%s.BMP", textureFiles[i]);
+			SaveWICTextureToFile(mD3DContext.Get(), mTexture2D.Get(),
+				GUID_ContainerFormatBmp, fileName);
+		#endif*/
 	}
-//#ifdef _DEBUG
-//	SaveWICTextureToFile(mD3DContext.Get(), mTexture2D.Get(),
-//		GUID_ContainerFormatBmp, L"SCREENSHOT.BMP");
-//#endif
 
 	// Create the sample state
 	D3D11_SAMPLER_DESC sampDesc = {};
@@ -182,7 +200,6 @@ void Object::Render(const XMFLOAT3& playerPos)
 	UINT stride = sizeof(VertexElements);
 	UINT offset = 0;
 	mD3DContext->IASetInputLayout(mVertexLayout.Get());
-	mD3DContext->IASetVertexBuffers(0, 1, mVertexBuffer.GetAddressOf(), &stride, &offset);
 	mD3DContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	CBufferMatrix cBufferMatrix;
@@ -200,12 +217,15 @@ void Object::Render(const XMFLOAT3& playerPos)
 	mD3DContext->VSSetConstantBuffers(1, 1, mCBufferLight.GetAddressOf());
 
 	mD3DContext->VSSetShader(mVertexShader.Get(), nullptr, 0);
-
-	mD3DContext->PSSetShaderResources(0, 1, mTextureRV.GetAddressOf());
-	mD3DContext->PSSetSamplers(0, 1, mSamplerState.GetAddressOf());
 	mD3DContext->PSSetShader(mPixelShader.Get(), nullptr, 0);
+	mD3DContext->PSSetSamplers(0, 1, mSamplerState.GetAddressOf());
 
 	mD3DContext->RSSetState(mRasterizerState.Get());
-
-	mD3DContext->Draw((UINT)mVertexCount, 0);
+	
+	for (int i = 0; i < mMeshCount; ++i)
+	{
+		mD3DContext->IASetVertexBuffers(0, 1, mVertexBuffer[i].GetAddressOf(), &stride, &offset);
+		mD3DContext->PSSetShaderResources(0, 1, mTextureResourceView[i].GetAddressOf());
+		mD3DContext->Draw(static_cast<UINT>(mVertexCount[i]), 0);
+	}
 }
