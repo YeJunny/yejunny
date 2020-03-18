@@ -1,108 +1,113 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Object">
-      <UniqueIdentifier>{cf5670d9-d976-4779-b003-73832d248df6}</UniqueIdentifier>
+    <Filter Include="Main">
+      <UniqueIdentifier>{b016681e-6c1e-42b3-b070-4759eda3e4c6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Setting">
-      <UniqueIdentifier>{31de4136-6bef-4e52-9c84-a2e474747e29}</UniqueIdentifier>
+    <Filter Include="Settings">
+      <UniqueIdentifier>{5b700780-c39b-495b-a222-bc9da4fea666}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Setting\Hardware">
-      <UniqueIdentifier>{5a1cbdc5-1334-4b97-8e6e-4d743ff51288}</UniqueIdentifier>
+    <Filter Include="Settings\Include">
+      <UniqueIdentifier>{989841c3-1a53-456c-bf0e-e2fe147c1a92}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Setting\Loader">
-      <UniqueIdentifier>{4a3e6439-26b3-45f3-9373-3544bc1bf783}</UniqueIdentifier>
+    <Filter Include="Objects">
+      <UniqueIdentifier>{4ea7ffee-3650-4637-8b9e-18dded294012}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Object\Player">
-      <UniqueIdentifier>{9f0334da-94e8-40fc-9cd4-afb24e410615}</UniqueIdentifier>
+    <Filter Include="Objects\Camera">
+      <UniqueIdentifier>{c9242f11-9d76-4a82-943f-ef171db46eeb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Object\Enemy">
-      <UniqueIdentifier>{fc1b2e23-92de-4270-a792-568521203c06}</UniqueIdentifier>
+    <Filter Include="Objects\Castle">
+      <UniqueIdentifier>{32b46f4c-67fc-4804-9e87-a75b2777eb9c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Setting\Dx">
-      <UniqueIdentifier>{598d00e2-607c-4752-a3fb-2a9939af83f7}</UniqueIdentifier>
+    <Filter Include="Objects\Enemy">
+      <UniqueIdentifier>{906d897c-3a1c-4555-9a15-f7d48dfa165a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Setting\Others">
-      <UniqueIdentifier>{f9727c3b-11f0-4c74-b6b7-806e4dda2e5c}</UniqueIdentifier>
+    <Filter Include="Objects\Others">
+      <UniqueIdentifier>{66219aea-d656-4de7-8104-acdba6cd1c1e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Object\Terriain">
-      <UniqueIdentifier>{8349b590-b930-428b-afe1-5aa0c6a5c5f2}</UniqueIdentifier>
+    <Filter Include="Objects\Player">
+      <UniqueIdentifier>{bdec9a43-40dc-4683-8884-7d74d93414a0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Object\Camera">
-      <UniqueIdentifier>{8756b658-1d0d-4e74-beb7-320125cfb47b}</UniqueIdentifier>
+    <Filter Include="Hardware">
+      <UniqueIdentifier>{58d5bd28-963f-4354-99ee-283e6e515834}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="FBXLoader">
+      <UniqueIdentifier>{3a2d796e-d6db-4a85-bf06-283e8350c420}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="FBXLoader\CharacterFBXData">
+      <UniqueIdentifier>{3e09f4ba-2497-48f5-a98c-ba61a8d3098b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Settings\Time">
+      <UniqueIdentifier>{e82c726a-4cfb-49d2-b787-8219c499148b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Object.h">
-      <Filter>Object</Filter>
+    <ClInclude Include="Source\Main\MainLoopManager.h">
+      <Filter>Main</Filter>
     </ClInclude>
-    <ClInclude Include="Input.h">
-      <Filter>Setting\Hardware</Filter>
+    <ClInclude Include="Source\Main\WinMain.h">
+      <Filter>Main</Filter>
     </ClInclude>
-    <ClInclude Include="Sound.h">
-      <Filter>Setting\Hardware</Filter>
-    </ClInclude>
-    <ClInclude Include="FBXLoader.h">
-      <Filter>Setting\Loader</Filter>
-    </ClInclude>
-    <ClInclude Include="Gun.h">
-      <Filter>Object\Player</Filter>
-    </ClInclude>
-    <ClInclude Include="Player.h">
-      <Filter>Object\Player</Filter>
-    </ClInclude>
-    <ClInclude Include="Bullet.h">
-      <Filter>Object\Player</Filter>
-    </ClInclude>
-    <ClInclude Include="WinMain.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MainLoop.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DxSettings.h">
-      <Filter>Setting\Dx</Filter>
-    </ClInclude>
-    <ClInclude Include="framework.h">
-      <Filter>Setting\Others</Filter>
+    <ClInclude Include="Source\Settings\Include\Framework.h">
+      <Filter>Settings\Include</Filter>
     </ClInclude>
     <ClInclude Include="Resource.h">
-      <Filter>Setting\Others</Filter>
+      <Filter>Settings\Include</Filter>
     </ClInclude>
-    <ClInclude Include="targetver.h">
-      <Filter>Setting\Others</Filter>
+    <ClInclude Include="Source\Objects\Camera\Camera.h">
+      <Filter>Objects\Camera</Filter>
     </ClInclude>
-    <ClInclude Include="Ground.h">
-      <Filter>Object\Terriain</Filter>
+    <ClInclude Include="Source\Objects\Castle\Castle.h">
+      <Filter>Objects\Castle</Filter>
     </ClInclude>
-    <ClInclude Include="Global.h">
-      <Filter>Setting\Others</Filter>
+    <ClInclude Include="Source\Objects\Player\Bullet.h">
+      <Filter>Objects\Player</Filter>
     </ClInclude>
-    <ClInclude Include="Timer.h">
-      <Filter>Setting\Others</Filter>
+    <ClInclude Include="Source\Objects\Player\Gun.h">
+      <Filter>Objects\Player</Filter>
     </ClInclude>
-    <ClInclude Include="Camera.h">
-      <Filter>Object\Camera</Filter>
+    <ClInclude Include="Source\Objects\Player\Player.h">
+      <Filter>Objects\Player</Filter>
     </ClInclude>
-    <ClInclude Include="Skybox.h">
-      <Filter>Object\Terriain</Filter>
+    <ClInclude Include="Source\Objects\Others\Skybox.h">
+      <Filter>Objects\Others</Filter>
     </ClInclude>
-    <ClInclude Include="Axis.h">
-      <Filter>Object\Terriain</Filter>
+    <ClInclude Include="Source\Objects\Object.h">
+      <Filter>Objects</Filter>
     </ClInclude>
-    <ClInclude Include="House.h">
-      <Filter>Object\Terriain</Filter>
+    <ClInclude Include="Source\FBXLoader\FBXLoader.h">
+      <Filter>FBXLoader</Filter>
     </ClInclude>
-    <ClInclude Include="Enemy.h">
-      <Filter>Object\Enemy</Filter>
+    <ClInclude Include="Source\Settings\Global.h">
+      <Filter>Settings</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\FBXLoader\CharacterFBXData\BoneData.h">
+      <Filter>FBXLoader\CharacterFBXData</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\FBXLoader\CharacterFBXData\ControlPointData.h">
+      <Filter>FBXLoader\CharacterFBXData</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\FBXLoader\CharacterFBXData\PureVertexData.h">
+      <Filter>FBXLoader\CharacterFBXData</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\FBXLoader\CharacterFBXData\CharacterFbxData.h">
+      <Filter>FBXLoader\CharacterFBXData</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Hardware\Sound.h">
+      <Filter>Hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Hardware\Input.h">
+      <Filter>Hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Settings\Time\Time.h">
+      <Filter>Settings\Time</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Objects\Enemy\Enemy.h">
+      <Filter>Objects\Enemy</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -122,59 +127,56 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="WinMain.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Source\Main\MainLoopManager.cpp">
+      <Filter>Main</Filter>
     </ClCompile>
-    <ClCompile Include="Object.cpp">
-      <Filter>Object</Filter>
+    <ClCompile Include="Source\Main\WinMain.cpp">
+      <Filter>Main</Filter>
     </ClCompile>
-    <ClCompile Include="Input.cpp">
-      <Filter>Setting\Hardware</Filter>
+    <ClCompile Include="Source\Objects\Camera\Camera.cpp">
+      <Filter>Objects\Camera</Filter>
     </ClCompile>
-    <ClCompile Include="Sound.cpp">
-      <Filter>Setting\Hardware</Filter>
+    <ClCompile Include="Source\Objects\Castle\Castle.cpp">
+      <Filter>Objects\Castle</Filter>
     </ClCompile>
-    <ClCompile Include="FBXLoader.cpp">
-      <Filter>Setting\Loader</Filter>
+    <ClCompile Include="Source\Objects\Enemy\Enemy.cpp">
+      <Filter>Objects\Enemy</Filter>
     </ClCompile>
-    <ClCompile Include="Gun.cpp">
-      <Filter>Object\Player</Filter>
+    <ClCompile Include="Source\Objects\Player\Bullet.cpp">
+      <Filter>Objects\Player</Filter>
     </ClCompile>
-    <ClCompile Include="Player.cpp">
-      <Filter>Object\Player</Filter>
+    <ClCompile Include="Source\Objects\Player\Gun.cpp">
+      <Filter>Objects\Player</Filter>
     </ClCompile>
-    <ClCompile Include="Bullet.cpp">
-      <Filter>Object\Player</Filter>
+    <ClCompile Include="Source\Objects\Player\Player.cpp">
+      <Filter>Objects\Player</Filter>
     </ClCompile>
-    <ClCompile Include="MainLoop.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Source\Objects\Others\Skybox.cpp">
+      <Filter>Objects\Others</Filter>
     </ClCompile>
-    <ClCompile Include="DxSettings.cpp">
-      <Filter>Setting\Dx</Filter>
+    <ClCompile Include="Source\Objects\Object.cpp">
+      <Filter>Objects</Filter>
     </ClCompile>
-    <ClCompile Include="Ground.cpp">
-      <Filter>Object\Terriain</Filter>
+    <ClCompile Include="Source\FBXLoader\FBXLoader.cpp">
+      <Filter>FBXLoader</Filter>
     </ClCompile>
-    <ClCompile Include="Global.cpp">
-      <Filter>Setting\Others</Filter>
+    <ClCompile Include="Source\Settings\Global.cpp">
+      <Filter>Settings</Filter>
     </ClCompile>
-    <ClCompile Include="Timer.cpp">
-      <Filter>Setting\Others</Filter>
+    <ClCompile Include="Source\FBXLoader\CharacterFBXData\BoneData.cpp">
+      <Filter>FBXLoader\CharacterFBXData</Filter>
     </ClCompile>
-    <ClCompile Include="Camera.cpp">
-      <Filter>Object\Camera</Filter>
+    <ClCompile Include="Source\FBXLoader\CharacterFBXData\ControlPointData.cpp">
+      <Filter>FBXLoader\CharacterFBXData</Filter>
     </ClCompile>
-    <ClCompile Include="Skybox.cpp">
-      <Filter>Object\Terriain</Filter>
+    <ClCompile Include="Source\Hardware\Sound.cpp">
+      <Filter>Hardware</Filter>
     </ClCompile>
-    <ClCompile Include="Axis.cpp">
-      <Filter>Object\Terriain</Filter>
+    <ClCompile Include="Source\Hardware\Input.cpp">
+      <Filter>Hardware</Filter>
     </ClCompile>
-    <ClCompile Include="House.cpp">
-      <Filter>Object\Terriain</Filter>
-    </ClCompile>
-    <ClCompile Include="Enemy.cpp">
-      <Filter>Object\Enemy</Filter>
+    <ClCompile Include="Source\Settings\Time\Time.cpp">
+      <Filter>Settings\Time</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

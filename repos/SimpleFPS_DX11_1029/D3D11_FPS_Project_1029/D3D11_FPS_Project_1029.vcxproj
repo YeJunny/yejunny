@@ -77,8 +77,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Program Files\Autodesk\FBX\FBX SDK\2019.0\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Program Files\Autodesk\FBX\FBX SDK\2019.0\lib\vs2015\x64\debug;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -114,11 +114,14 @@
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalUsingDirectories>%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files\Autodesk\FBX\FBX SDK\2020.0.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Program Files\Autodesk\FBX\FBX SDK\2020.0.1\lib\vs2017\x64\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>LIBCMT;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <AdditionalDependencies>libfbxsdk-md.lib;libxml2-md.lib;zlib-md.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -160,47 +163,46 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Axis.h" />
-    <ClInclude Include="Bullet.h" />
-    <ClInclude Include="Camera.h" />
-    <ClInclude Include="Enemy.h" />
-    <ClInclude Include="House.h" />
-    <ClInclude Include="Skybox.h" />
-    <ClInclude Include="FBXLoader.h" />
-    <ClInclude Include="Global.h" />
-    <ClInclude Include="Ground.h" />
-    <ClInclude Include="Gun.h" />
-    <ClInclude Include="Input.h" />
-    <ClInclude Include="Object.h" />
-    <ClInclude Include="Player.h" />
-    <ClInclude Include="Sound.h" />
-    <ClInclude Include="Timer.h" />
-    <ClInclude Include="WinMain.h" />
-    <ClInclude Include="DxSettings.h" />
-    <ClInclude Include="framework.h" />
-    <ClInclude Include="MainLoop.h" />
+    <ClInclude Include="Source\FBXLoader\CharacterFBXData\BoneData.h" />
+    <ClInclude Include="Source\FBXLoader\CharacterFBXData\CharacterFbxData.h" />
+    <ClInclude Include="Source\FBXLoader\CharacterFBXData\ControlPointData.h" />
+    <ClInclude Include="Source\FBXLoader\CharacterFBXData\PureVertexData.h" />
+    <ClInclude Include="Source\FBXLoader\FBXLoader.h" />
+    <ClInclude Include="Source\Hardware\Input.h" />
+    <ClInclude Include="Source\Hardware\Sound.h" />
+    <ClInclude Include="Source\Main\MainLoopManager.h" />
+    <ClInclude Include="Source\Main\WinMain.h" />
+    <ClInclude Include="Source\Objects\Camera\Camera.h" />
+    <ClInclude Include="Source\Objects\Castle\Castle.h" />
+    <ClInclude Include="Source\Objects\Enemy\Enemy.h" />
+    <ClInclude Include="Source\Objects\Object.h" />
+    <ClInclude Include="Source\Objects\Others\Skybox.h" />
+    <ClInclude Include="Source\Objects\Player\Bullet.h" />
+    <ClInclude Include="Source\Objects\Player\Gun.h" />
+    <ClInclude Include="Source\Objects\Player\Player.h" />
+    <ClInclude Include="Source\Settings\Global.h" />
+    <ClInclude Include="Source\Settings\Include\Framework.h" />
+    <ClInclude Include="Source\Settings\Time\Time.h" />
     <ClInclude Include="Resource.h" />
-    <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Axis.cpp" />
-    <ClCompile Include="Bullet.cpp" />
-    <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="Enemy.cpp" />
-    <ClCompile Include="House.cpp" />
-    <ClCompile Include="Skybox.cpp" />
-    <ClCompile Include="DxSettings.cpp" />
-    <ClCompile Include="FBXLoader.cpp" />
-    <ClCompile Include="Global.cpp" />
-    <ClCompile Include="Ground.cpp" />
-    <ClCompile Include="Gun.cpp" />
-    <ClCompile Include="Input.cpp" />
-    <ClCompile Include="MainLoop.cpp" />
-    <ClCompile Include="Object.cpp" />
-    <ClCompile Include="Player.cpp" />
-    <ClCompile Include="Sound.cpp" />
-    <ClCompile Include="Timer.cpp" />
-    <ClCompile Include="WinMain.cpp" />
+    <ClCompile Include="Source\FBXLoader\CharacterFBXData\BoneData.cpp" />
+    <ClCompile Include="Source\FBXLoader\CharacterFBXData\ControlPointData.cpp" />
+    <ClCompile Include="Source\FBXLoader\FBXLoader.cpp" />
+    <ClCompile Include="Source\Hardware\Input.cpp" />
+    <ClCompile Include="Source\Hardware\Sound.cpp" />
+    <ClCompile Include="Source\Main\MainLoopManager.cpp" />
+    <ClCompile Include="Source\Main\WinMain.cpp" />
+    <ClCompile Include="Source\Objects\Camera\Camera.cpp" />
+    <ClCompile Include="Source\Objects\Castle\Castle.cpp" />
+    <ClCompile Include="Source\Objects\Enemy\Enemy.cpp" />
+    <ClCompile Include="Source\Objects\Object.cpp" />
+    <ClCompile Include="Source\Objects\Others\Skybox.cpp" />
+    <ClCompile Include="Source\Objects\Player\Bullet.cpp" />
+    <ClCompile Include="Source\Objects\Player\Gun.cpp" />
+    <ClCompile Include="Source\Objects\Player\Player.cpp" />
+    <ClCompile Include="Source\Settings\Global.cpp" />
+    <ClCompile Include="Source\Settings\Time\Time.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="D3D11_FPS_Project_1029.rc" />

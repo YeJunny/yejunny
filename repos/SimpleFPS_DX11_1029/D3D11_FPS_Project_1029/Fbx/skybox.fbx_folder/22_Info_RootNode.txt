@@ -1,12 +1,12 @@
 ==============================================================================
-	First Load: Vertex, UV, Normal		Fbx\skybox.fbx_folder\22_Info_RootNode.txt
+	Load Fbx - Vertex, UV, Normal, Animation, etc ...		Fbx\skybox.fbx_folder\22_Info_RootNode.txt
 ==============================================================================
-get RootNode ... OK
+Get RootNode ... OK
 childCount is ... 3
-get child 0 name is ... Cube
-	child 0 NodeAttribute is ... eMesh
-	child 0 mesh's ploygonCount is ... 12
-	child 0 mesh's list of vertex, uv and normal ...
+Get Child Node 0 Name is ... Cube
+	Child 0 Node Attribute is ... eMesh
+	Child 0 Mesh's Ploygon Count is ... 12
+	Child 0 Mesh's List of Vertex, UV and Normal ...
 														Vertex												UV												Normal
 		vertex[   0][   0]	|	             -1,               1,               1	|	           0.75,        0.406504	|	              0,               0,               1
 		vertex[   0][   1]	|	             -1,              -1,               1	|	           0.75,        0.656504	|	              0,               0,               1
@@ -14,37 +14,38 @@ get child 0 name is ... Cube
 		vertex[   1][   0]	|	              1,               1,               1	|	            0.5,        0.406504	|	              0,               0,               1
 		vertex[   1][   1]	|	             -1,              -1,               1	|	           0.75,        0.656504	|	              0,               0,               1
 		vertex[   1][   2]	|	              1,              -1,               1	|	            0.5,        0.656504	|	              0,               0,               1
-		vertex[   2][   0]	|	             -1,              -1,               1	|	            0.5,        0.906504	|	              0,               0,               1
-		vertex[   2][   1]	|	              1,              -1,              -1	|	           0.25,        0.656504	|	              0,               0,               1
-		vertex[   2][   2]	|	              1,              -1,               1	|	            0.5,        0.656504	|	              0,               0,               1
-		vertex[   3][   0]	|	              1,              -1,              -1	|	           0.25,        0.656504	|	              0,               0,               1
-		vertex[   3][   1]	|	             -1,              -1,               1	|	            0.5,        0.906504	|	              0,               0,               1
-		vertex[   3][   2]	|	             -1,              -1,              -1	|	           0.25,        0.906504	|	              0,               0,               1
-		vertex[   4][   0]	|	             -1,               1,               1	|	       0.748729,        0.404022	|	              0,               0,               1
-		vertex[   4][   1]	|	             -1,              -1,              -1	|	       0.998222,        0.654921	|	              0,               0,               1
-		vertex[   4][   2]	|	             -1,              -1,               1	|	       0.748223,        0.654021	|	              0,               0,               1
-		vertex[   5][   0]	|	             -1,              -1,              -1	|	       0.998222,        0.654921	|	              0,               0,               1
-		vertex[   5][   1]	|	             -1,               1,               1	|	       0.748729,        0.404022	|	              0,               0,               1
-		vertex[   5][   2]	|	             -1,               1,              -1	|	       0.998728,        0.404922	|	              0,               0,               1
-		vertex[   6][   0]	|	              1,              -1,              -1	|	           0.25,        0.656504	|	              0,               0,               1
-		vertex[   6][   1]	|	             -1,              -1,              -1	|	   -1.11759e-08,        0.656504	|	              0,               0,               1
-		vertex[   6][   2]	|	             -1,               1,              -1	|	   -1.11759e-08,        0.406504	|	              0,               0,               1
-		vertex[   7][   0]	|	              1,              -1,              -1	|	           0.25,        0.656504	|	              0,               0,               1
-		vertex[   7][   1]	|	             -1,               1,              -1	|	   -1.11759e-08,        0.406504	|	              0,               0,               1
-		vertex[   7][   2]	|	              1,               1,              -1	|	           0.25,        0.406504	|	              0,               0,               1
-		vertex[   8][   0]	|	              1,              -1,               1	|	            0.5,        0.656504	|	              0,               0,               1
-		vertex[   8][   1]	|	              1,               1,              -1	|	           0.25,        0.406504	|	              0,               0,               1
-		vertex[   8][   2]	|	              1,               1,               1	|	            0.5,        0.406504	|	              0,               0,               1
-		vertex[   9][   0]	|	              1,               1,              -1	|	           0.25,        0.406504	|	              0,               0,               1
-		vertex[   9][   1]	|	              1,              -1,               1	|	            0.5,        0.656504	|	              0,               0,               1
-		vertex[   9][   2]	|	              1,              -1,              -1	|	           0.25,        0.656504	|	              0,               0,               1
-		vertex[  10][   0]	|	              1,               1,               1	|	            0.5,        0.406504	|	              0,               0,               1
-		vertex[  10][   1]	|	             -1,               1,              -1	|	           0.25,        0.156504	|	              0,               0,               1
-		vertex[  10][   2]	|	             -1,               1,               1	|	            0.5,        0.156504	|	              0,               0,               1
-		vertex[  11][   0]	|	             -1,               1,              -1	|	           0.25,        0.156504	|	              0,               0,               1
-		vertex[  11][   1]	|	              1,               1,               1	|	            0.5,        0.406504	|	              0,               0,               1
-		vertex[  11][   2]	|	              1,               1,              -1	|	           0.25,        0.406504	|	              0,               0,               1
-get child 1 name is ... Light
-	child 1 NodeAttributeType is ... 10 ( eUnknown = 0, eNull = 1, eMarker = 2, eSkeleton = 3, eMesh = 4, eNurbs = 5, ePatch = 6, eCamera = 7, eCameraStereo = 8, eCameraSwitcher = 9, eLight = 10, eOpticalReference = 11, eOpticalMarker = 12, eNurbsCurve = 13, eTrimNurbsSurface = 14, eBoundary = 15, eNurbsSurface = 16, eShape = 17, eLODGroup = 18, eSubDiv = 19, eCachedEffect = 20, Line = 21 )
-get child 2 name is ... Camera
-	child 2 NodeAttributeType is ... 7 ( eUnknown = 0, eNull = 1, eMarker = 2, eSkeleton = 3, eMesh = 4, eNurbs = 5, ePatch = 6, eCamera = 7, eCameraStereo = 8, eCameraSwitcher = 9, eLight = 10, eOpticalReference = 11, eOpticalMarker = 12, eNurbsCurve = 13, eTrimNurbsSurface = 14, eBoundary = 15, eNurbsSurface = 16, eShape = 17, eLODGroup = 18, eSubDiv = 19, eCachedEffect = 20, Line = 21 )
+		vertex[   2][   0]	|	             -1,              -1,               1	|	            0.5,        0.906504	|	              0,              -1,               0
+		vertex[   2][   1]	|	              1,              -1,              -1	|	           0.25,        0.656504	|	              0,              -1,               0
+		vertex[   2][   2]	|	              1,              -1,               1	|	            0.5,        0.656504	|	              0,              -1,               0
+		vertex[   3][   0]	|	              1,              -1,              -1	|	           0.25,        0.656504	|	              0,              -1,               0
+		vertex[   3][   1]	|	             -1,              -1,               1	|	            0.5,        0.906504	|	              0,              -1,               0
+		vertex[   3][   2]	|	             -1,              -1,              -1	|	           0.25,        0.906504	|	              0,              -1,               0
+		vertex[   4][   0]	|	             -1,               1,               1	|	       0.748729,        0.404022	|	             -1,               0,               0
+		vertex[   4][   1]	|	             -1,              -1,              -1	|	       0.998222,        0.654921	|	             -1,               0,               0
+		vertex[   4][   2]	|	             -1,              -1,               1	|	       0.748223,        0.654021	|	             -1,               0,               0
+		vertex[   5][   0]	|	             -1,              -1,              -1	|	       0.998222,        0.654921	|	             -1,               0,               0
+		vertex[   5][   1]	|	             -1,               1,               1	|	       0.748729,        0.404022	|	             -1,               0,               0
+		vertex[   5][   2]	|	             -1,               1,              -1	|	       0.998728,        0.404922	|	             -1,               0,               0
+		vertex[   6][   0]	|	              1,              -1,              -1	|	           0.25,        0.656504	|	              0,               0,              -1
+		vertex[   6][   1]	|	             -1,              -1,              -1	|	   -1.11759e-08,        0.656504	|	              0,               0,              -1
+		vertex[   6][   2]	|	             -1,               1,              -1	|	   -1.11759e-08,        0.406504	|	              0,               0,              -1
+		vertex[   7][   0]	|	              1,              -1,              -1	|	           0.25,        0.656504	|	              0,               0,              -1
+		vertex[   7][   1]	|	             -1,               1,              -1	|	   -1.11759e-08,        0.406504	|	              0,               0,              -1
+		vertex[   7][   2]	|	              1,               1,              -1	|	           0.25,        0.406504	|	              0,               0,              -1
+		vertex[   8][   0]	|	              1,              -1,               1	|	            0.5,        0.656504	|	              1,               0,               0
+		vertex[   8][   1]	|	              1,               1,              -1	|	           0.25,        0.406504	|	              1,               0,               0
+		vertex[   8][   2]	|	              1,               1,               1	|	            0.5,        0.406504	|	              1,               0,               0
+		vertex[   9][   0]	|	              1,               1,              -1	|	           0.25,        0.406504	|	              1,               0,               0
+		vertex[   9][   1]	|	              1,              -1,               1	|	            0.5,        0.656504	|	              1,               0,               0
+		vertex[   9][   2]	|	              1,              -1,              -1	|	           0.25,        0.656504	|	              1,               0,               0
+		vertex[  10][   0]	|	              1,               1,               1	|	            0.5,        0.406504	|	              0,               1,               0
+		vertex[  10][   1]	|	             -1,               1,              -1	|	           0.25,        0.156504	|	              0,               1,               0
+		vertex[  10][   2]	|	             -1,               1,               1	|	            0.5,        0.156504	|	              0,               1,               0
+		vertex[  11][   0]	|	             -1,               1,              -1	|	           0.25,        0.156504	|	              0,               1,               0
+		vertex[  11][   1]	|	              1,               1,               1	|	            0.5,        0.406504	|	              0,               1,               0
+		vertex[  11][   2]	|	              1,               1,              -1	|	           0.25,        0.406504	|	              0,               1,               0
+	No Animation Data!
+Get Child Node 1 Name is ... Light
+	Child 1 Node AttributeType is ... 10 ( eUnknown = 0, eNull = 1, eMarker = 2, eSkeleton = 3, eMesh = 4, eNurbs = 5, ePatch = 6, eCamera = 7, eCameraStereo = 8, eCameraSwitcher = 9, eLight = 10, eOpticalReference = 11, eOpticalMarker = 12, eNurbsCurve = 13, eTrimNurbsSurface = 14, eBoundary = 15, eNurbsSurface = 16, eShape = 17, eLODGroup = 18, eSubDiv = 19, eCachedEffect = 20, Line = 21 )
+Get Child Node 2 Name is ... Camera
+	Child 2 Node AttributeType is ... 7 ( eUnknown = 0, eNull = 1, eMarker = 2, eSkeleton = 3, eMesh = 4, eNurbs = 5, ePatch = 6, eCamera = 7, eCameraStereo = 8, eCameraSwitcher = 9, eLight = 10, eOpticalReference = 11, eOpticalMarker = 12, eNurbsCurve = 13, eTrimNurbsSurface = 14, eBoundary = 15, eNurbsSurface = 16, eShape = 17, eLODGroup = 18, eSubDiv = 19, eCachedEffect = 20, Line = 21 )
