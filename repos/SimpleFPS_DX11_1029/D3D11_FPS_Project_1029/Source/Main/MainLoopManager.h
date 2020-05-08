@@ -21,7 +21,7 @@ public:
 	void Render();
 
 private:
-	std::unique_ptr<Castle> mHouse;
+	std::unique_ptr<Castle> mCastle;
 	std::unique_ptr<Camera> mCamera;
 	std::unique_ptr<Skybox> mSkybox;
 	std::unique_ptr<Player> mPlayer;

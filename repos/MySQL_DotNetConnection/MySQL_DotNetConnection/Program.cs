@@ -3,79 +3,183 @@ using MySql.Data.MySqlClient;
 
 namespace MySQL_DotNetConnection
 {
+    class GameDTO // Data Transfer Object
+    {
+        public string ID { get; set; }
+        public string Password { get; set; }
+        public string Name { get; set; }
+        public string Email { get; set; }
+
+        public GameDTO(string id, string password, string name, string email)
+        {
+            ID = id;
+            Password = password;
+            Name = name;
+            Email = email;
+        }
+    }
+
+    class GameDAO // Data Access Object
+    {
+        private MySqlConnection conn;
+
+        public GameDAO()
+        {
+            string connectionInfo = "Server=localhost;Port=3306;User=root;Database=GameDB;Password=1234;";
+            conn = new MySqlConnection(connectionInfo);
+        }
+
+        public bool Register(GameDTO gameDTO)
+        {
+            bool bIsSuccess = false;
+            conn.Open();
+
+            string query = $"Insert Into GameUserTable (ID, Password, Name, Email) Values ('{gameDTO.ID}', '{gameDTO.Password}', '{gameDTO.Name}', '{gameDTO.Email}')";
+            MySqlCommand command = new MySqlCommand(query, conn);
+            int result = command.ExecuteNonQuery();
+            if (result == 1)
+            {
+                Console.WriteLine("Insert Successful!");
+                bIsSuccess = true;
+            }
+            else
+            {
+                Console.WriteLine("Insert Error!");
+            }
+
+            conn.Close();
+            return bIsSuccess;
+        }
+
+        public bool GetInfo(string userID)
+        {
+            bool bIsSuccessful = false;
+            conn.Open();
+
+            string query = $"Select * From GameUserTable Where ID = '{userID}'";
+            MySqlCommand command = new MySqlCommand(query, conn);
+            MySqlDataReader reader = command.ExecuteReader();
+
+            if (reader.Read())
+            {
+                Console.WriteLine($"ID : {reader["ID"]}");
+                Console.WriteLine($"Name : {reader["Name"]}");
+                Console.WriteLine($"Email : {reader["Email"]}");
+                Console.WriteLine("==================================");
+                bIsSuccessful = true;
+            }
+            else
+            {
+                Console.WriteLine("GetInfo() Error!");
+            }
+
+            conn.Close();
+            return bIsSuccessful;
+        }
+
+        public bool Login(GameDTO gameDTO)
+        {
+            conn.Open();
+
+            string query = $"Select * From GameUserTable Where ID = '{gameDTO.ID}' And Password = '{gameDTO.Password}'";
+            MySqlCommand mySqlCommand = new MySqlCommand(query, conn);
+            MySqlDataReader mySqlDataReader = mySqlCommand.ExecuteReader();
+
+            if (mySqlDataReader.Read())
+            {
+                conn.Close();
+                return true;
+            }
+            else
+            {
+                conn.Close();
+                return false;
+            }
+        }
+    }
+
     class Program
     {
+        public enum Menu
+        {
+            Register,
+            Login,
+            GetInfo,
+            Exit
+        }
+
         static void Main(string[] args)
         {
-            string connectionString = "Server=localhost;Port=3306;User=root;Database=GameDB;Password=1234;";
-            MySqlConnection connector = new MySqlConnection(connectionString);
+            GameDAO gamedbDAO = new GameDAO();
 
-            try
+            Console.WriteLine($"1. Register 2. Login 3. GetInfo 4. Exit");
+            Menu select = (Menu)(int.Parse(Console.ReadLine()) - 1);
+            
+            switch (select)
             {
-                connector.Open();
-                Console.WriteLine($"Connection Successed!");
+                case Menu.Register:
+                    {
+                        Console.WriteLine($"============ Register ============");
+                        Console.Write($"ID : "); string id = Console.ReadLine();
+                        Console.Write($"PW : "); string pw = Console.ReadLine();
+                        Console.Write($"Name : "); string name = Console.ReadLine();
+                        Console.Write($"Email : "); string email = Console.ReadLine();
+                        Console.WriteLine($"==================================");
 
-                string query = "Select * From GameUserTable";
-                MySqlCommand command = new MySqlCommand(query, connector);
-                MySqlDataReader reader = command.ExecuteReader();
+                        if (gamedbDAO.Register(new GameDTO(id, pw, name, email)))
+                        {
+                            Console.WriteLine($"Register Successful!");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Register Failed.");
+                        }
 
-                Console.WriteLine($"-------Read Successed--------");
+                        break;
+                    }
 
-                while (reader.Read())
-                {
-                    Console.WriteLine("{0, 10}, {1, 10}, {2, 10}, {3, 18}, {4, 10}",
-                        reader["ID"],
-                        reader["Password"],
-                        reader["Name"],
-                        reader["Email"],
-                        reader["RegisterDate"]);
-                }
+                case Menu.Login:
+                    {
+                        Console.WriteLine($"============ Login ============");
+                        Console.Write($"ID : "); string id = Console.ReadLine();
+                        Console.Write($"Password : "); string pw = Console.ReadLine();
+                        Console.WriteLine($"===============================");
 
-                connector.Close();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Connection Or Query Error! : {e.Message}");
-            }
+                        if (gamedbDAO.Login(new GameDTO(id, pw, null, null)))
+                        {
+                            Console.WriteLine($"Login Successful!");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Login Failed.");
+                        }
 
-            try
-            {
-                connector.Open();
+                        break;
+                    }
 
-                DateTime dateTime = DateTime.Now;
-                string dateTimeStr = dateTime.ToString("yyyy-MM-dd");
-                string query = $"Insert Into GameUserTable (ID, Password, Name, Email, RegisterDate) Values ('AddedUser', '3213', 'No', 'query@gmail.com', '{dateTimeStr}')";
-                MySqlCommand command2 = new MySqlCommand(query, connector);
+                case Menu.GetInfo:
+                    {
+                        Console.WriteLine($"============ Get Info ============");
+                        Console.Write($"ID : "); string id = Console.ReadLine();
+                        Console.WriteLine($"===============================");
 
-                if (command2.ExecuteNonQuery() == 1)
-                {
-                    Console.WriteLine($"Insert Successed!");
-                }
-                else
-                {
-                    Console.WriteLine($"Fail to insert.");
-                }
+                        if (gamedbDAO.GetInfo(id))
+                        {
+                            Console.WriteLine("Get Complete");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Get Failed");
+                        }
 
-                Console.WriteLine($"After Insert into GameUserTable.");
-                string query2 = "Select * From GameUserTable";
-                MySqlCommand command3 = new MySqlCommand(query2, connector);
-                MySqlDataReader reader3 = command3.ExecuteReader();
+                        break;
+                    }
 
-                while (reader3.Read())
-                {
-                    Console.WriteLine("{0, 10}, {1, 15}, {2, 15}, {3, 20}, {4, 10}",
-                        reader3.GetString(0),
-                        reader3.GetString(1),
-                        reader3.GetString(2),
-                        reader3.GetString(3),
-                        reader3["RegisterDate"]);
-                }
-
-                connector.Close();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Fail Connection Or Query : {e.Message}");
+                case Menu.Exit:
+                    {
+                        
+                        break;
+                    }
             }
         }
     }

@@ -147,8 +147,8 @@ void FBXLoader::LoadByAttributeRecursive(FbxNode* node)
 			mesh = static_cast<FbxMesh*>(childNode->GetNodeAttribute());
 			assert(mesh);
 
-			LoadByeMesh(mesh, childIndex);
 			LoadAnimation(childNode, childIndex);
+			LoadByeMesh(mesh, childIndex);
 
 			break;
 		}
@@ -254,6 +254,16 @@ void FBXLoader::LoadAnimation(FbxNode* node, int childIndex)
 	// Node Attribute is eMesh
 
 	FbxMesh* mesh = node->GetMesh();
+	FbxVector4* controlPoints = mesh->GetControlPoints();
+	assert(controlPoints);
+
+	// Save Variable Fbx Control Point.
+	int controlPointCount = mesh->GetControlPointsCount();
+	for (int i = 0; i < controlPointCount; ++i)
+	{
+		mCharFbxData->FbxControlPointData[i].SetPosition(&controlPoints[i]);
+	}
+
 	int deformerCount = mesh->GetDeformerCount(FbxDeformer::eSkin);
 	if (deformerCount <= 0)
 	{
@@ -286,6 +296,7 @@ void FBXLoader::LoadAnimation(FbxNode* node, int childIndex)
 	vector<vector<XMMATRIX>> keyframeMatricesPerBone;
 	vector<XMMATRIX> keyframe;
 
+	const FbxTime::EMode fbxFreames = FbxTime::eFrames120;
 	const int boneCount = mCharFbxData->AnimSkeletonData.size();
 	mCharFbxData->InverseMatrixAnim.reserve(boneCount);
 	mCharFbxData->KeyframeMatrixPerTime.reserve(boneCount);
@@ -324,11 +335,10 @@ void FBXLoader::LoadAnimation(FbxNode* node, int childIndex)
 				node->GetGeometricScaling(FbxNode::eSourcePivot));
 			FbxAMatrix transformMatrix;
 			FbxAMatrix transformLinkMatrix;
-			FbxAMatrix globalBindposeInverseMatrix;
 
 			cluster->GetTransformMatrix(transformMatrix);
 			cluster->GetTransformLinkMatrix(transformLinkMatrix); // Bone Space => World Space
-			globalBindposeInverseMatrix = transformLinkMatrix.Inverse() * transformMatrix * geometryTransformationMatrix;
+			FbxAMatrix globalBindposeInverseMatrix = transformLinkMatrix.Inverse() * transformMatrix * geometryTransformationMatrix;
 
 			XMMATRIX globalInverseMatrix = ConvertFbxAMatrixToXMMATRIX(globalBindposeInverseMatrix);
 			mCharFbxData->InverseMatrixAnim.push_back(globalInverseMatrix);
@@ -345,7 +355,6 @@ void FBXLoader::LoadAnimation(FbxNode* node, int childIndex)
 			}
 
 
-
 			FbxAnimStack* animStack = mScene->GetSrcObject<FbxAnimStack>(0);
 			FbxString animStackName = animStack->GetName();
 			FbxTakeInfo* takeInfo = mScene->GetTakeInfo(animStackName);
@@ -353,18 +362,18 @@ void FBXLoader::LoadAnimation(FbxNode* node, int childIndex)
 			FbxTime end = takeInfo->mLocalTimeSpan.GetStop();
 
 #ifdef FBX_WRITE
-			startTime = start.GetFrameCount(FbxTime::eFrames24);
-			endTime = end.GetFrameCount(FbxTime::eFrames24);
+			startTime = start.GetFrameCount(fbxFreames);
+			endTime = end.GetFrameCount(fbxFreames);
 #endif
 
 
 			keyframe.clear();
-			mCharFbxData->EndTime = end.GetFrameCount(FbxTime::eFrames24);
+			mCharFbxData->EndTime = end.GetFrameCount(fbxFreames);
 
-			for (FbxLongLong time = start.GetFrameCount(FbxTime::eFrames24); time <= end.GetFrameCount(FbxTime::eFrames24); ++time)
+			for (FbxLongLong time = start.GetFrameCount(fbxFreames); time <= end.GetFrameCount(fbxFreames); ++time)
 			{
 				FbxTime currentTime;
-				currentTime.SetFrame(time, FbxTime::eFrames24);
+				currentTime.SetFrame(time, fbxFreames);
 
 				FbxAMatrix transformOffset = node->EvaluateGlobalTransform(currentTime) * geometryTransformationMatrix;
 				FbxAMatrix globalTransform = transformOffset.Inverse() * clusterNode->EvaluateGlobalTransform(currentTime);
@@ -424,7 +433,7 @@ void FBXLoader::LoadAnimation(FbxNode* node, int childIndex)
 
 			for (int clusterNum = 0; clusterNum < clusterCount; ++clusterNum)
 			{
-				XMMATRIX finalTransform = keyframeMatricesPerBone[clusterNum][frameNum] * mCharFbxData->InverseMatrixAnim[clusterNum];
+				XMMATRIX finalTransform = XMMatrixTranspose(mCharFbxData->InverseMatrixAnim[clusterNum] * keyframeMatricesPerBone[clusterNum][frameNum]);
 
 				keyframePerTime.push_back(finalTransform);
 
@@ -457,18 +466,6 @@ void FBXLoader::LoadAnimation(FbxNode* node, int childIndex)
 
 void FBXLoader::LoadByeMesh(FbxMesh* mesh, int childIndex)
 {
-	FbxVector4* controlPoints = mesh->GetControlPoints();
-	assert(controlPoints);
-
-
-	// Save Variable Fbx Control Point.
-	int controlPointCount = mesh->GetControlPointsCount();
-	for (int i = 0; i < controlPointCount; ++i)
-	{
-		mCharFbxData->FbxControlPointData[i].SetPosition(&controlPoints[i]);
-	}
-
-
 	int polygonSize = mesh->GetPolygonCount();
 	FbxGeometryElementNormal* normalElements = mesh->GetElementNormal();
 	assert(normalElements);
@@ -563,7 +560,7 @@ void FBXLoader::LoadByeMesh(FbxMesh* mesh, int childIndex)
 				{
 					mWriteFile
 						<< "\t\t" << "vertex[" << std::setw(4) << polygonIndex << "][" << std::setw(4) << polygonElementIndex << "]\t|\t"
-						<< std::setw(15) << controlPoints[vertexIndex].mData[0] << ", " << std::setw(15) << controlPoints[vertexIndex].mData[1] << ", " << std::setw(15) << controlPoints[vertexIndex].mData[2]
+						<< std::setw(15) << position.x << ", " << std::setw(15) << position.y << ", " << std::setw(15) << position.z
 						<< "\t|\t" << std::setw(15) << uv[0] << ", " << std::setw(15) << uv[1]
 						<< "\t|\t" << std::setw(15) << normalFbxVector4[0] << ", " << std::setw(15) << normalFbxVector4[1] << ", " << std::setw(15) << normalFbxVector4[2] << "\n";
 				}

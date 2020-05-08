@@ -5,6 +5,7 @@ Get RootNode ... OK
 childCount is ... 3
 Get Child Node 0 Name is ... Cube
 	Child 0 Node Attribute is ... eMesh
+	No Animation Data!
 	Child 0 Mesh's Ploygon Count is ... 12
 	Child 0 Mesh's List of Vertex, UV and Normal ...
 														Vertex												UV												Normal
@@ -44,7 +45,6 @@ Get Child Node 0 Name is ... Cube
 		vertex[  11][   0]	|	             -1,               1,              -1	|	           0.25,        0.156504	|	              0,               1,               0
 		vertex[  11][   1]	|	              1,               1,               1	|	            0.5,        0.406504	|	              0,               1,               0
 		vertex[  11][   2]	|	              1,               1,              -1	|	           0.25,        0.406504	|	              0,               1,               0
-	No Animation Data!
 Get Child Node 1 Name is ... Light
 	Child 1 Node AttributeType is ... 10 ( eUnknown = 0, eNull = 1, eMarker = 2, eSkeleton = 3, eMesh = 4, eNurbs = 5, ePatch = 6, eCamera = 7, eCameraStereo = 8, eCameraSwitcher = 9, eLight = 10, eOpticalReference = 11, eOpticalMarker = 12, eNurbsCurve = 13, eTrimNurbsSurface = 14, eBoundary = 15, eNurbsSurface = 16, eShape = 17, eLODGroup = 18, eSubDiv = 19, eCachedEffect = 20, Line = 21 )
 Get Child Node 2 Name is ... Camera

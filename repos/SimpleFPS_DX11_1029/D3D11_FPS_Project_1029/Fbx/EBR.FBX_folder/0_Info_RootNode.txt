@@ -5,6 +5,7 @@ Get RootNode ... OK
 childCount is ... 1
 Get Child Node 0 Name is ... Mesh_0003
 	Child 0 Node Attribute is ... eMesh
+	No Animation Data!
 	Child 0 Mesh's Ploygon Count is ... 8184
 	Child 0 Mesh's List of Vertex, UV and Normal ...
 														Vertex												UV												Normal
@@ -24560,4 +24561,3 @@ Get Child Node 0 Name is ... Mesh_0003
 		vertex[8183][   0]	|	        2.50092,        -49.6582,         5.71289	|	      0.0682983,        0.351563	|	       0.171402,        0.955597,          0.2397
 		vertex[8183][   1]	|	        2.33459,        -49.5605,         5.62134	|	      0.0707397,        0.350586	|	       0.229381,        0.593258,        0.771641
 		vertex[8183][   2]	|	        2.33459,        -49.6338,         5.72204	|	      0.0698853,        0.352539	|	       0.154721,        0.939963,         0.30419
-	No Animation Data!

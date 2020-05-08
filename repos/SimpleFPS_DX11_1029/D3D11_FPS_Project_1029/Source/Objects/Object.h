@@ -31,7 +31,7 @@ public:
 	Object();
 	~Object();
 
-	virtual void Init(const WCHAR* shaderFile, const char* fbxFile, const WCHAR textureFiles[][TEXTURE_LEN]);
+	virtual void Init(const WCHAR shaderFile[][TEXTURE_LEN], const char* fbxFile, const WCHAR textureFiles[][TEXTURE_LEN]);
 	virtual void InitDetail();
 	virtual void Update();
 	virtual void Render();

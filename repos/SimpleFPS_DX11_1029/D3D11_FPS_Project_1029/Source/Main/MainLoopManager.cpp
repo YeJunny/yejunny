@@ -4,9 +4,9 @@
 #include "../Objects/Player/Gun.h"
 #include "../Objects/Castle/Castle.h"
 #include "../Hardware/Input.h"
-#include "MainLoopManager.h"
 #include "../Objects/Player/Player.h"
 #include "../Objects/Others/Skybox.h"
+#include "MainLoopManager.h"
 using namespace std;
 
 MainLoopManager::MainLoopManager()
@@ -15,7 +15,7 @@ MainLoopManager::MainLoopManager()
 
 MainLoopManager::~MainLoopManager()
 {
-	mHouse.reset();
+	mCastle.reset();
 	mSkybox.reset();
 	mCamera.reset();
 	mPlayer.reset();
@@ -24,6 +24,8 @@ MainLoopManager::~MainLoopManager()
 
 void MainLoopManager::Init()
 {
+	int loadedObjectNum = 0;
+
 	/* Init Player */
 
 	mPlayer = make_unique<Player>();
@@ -39,7 +41,7 @@ void MainLoopManager::Init()
 	/* Init Objects */
 
 	{
-		mHouse = make_unique<Castle>();
+		mCastle = make_unique<Castle>();
 		WCHAR textureFiles[][TEXTURE_LEN] =
 		{
 			L"Fbx\\Castle_Exterior_Texture.jpg",
@@ -47,17 +49,32 @@ void MainLoopManager::Init()
 			L"Fbx\\Castle_Ground_Fountain_Texture.jpg",
 			L"Fbx\\Castle_Interior_Texture.jpg",
 		};
-		mHouse->Init(L"Shader\\House.fx", "Fbx\\Castle.fbx", textureFiles);
+		WCHAR shaderFiles[][TEXTURE_LEN] =
+		{
+			L"Shader\\CastleVS.hlsl",
+			L"Shader\\CastlePS.hlsl"
+		};
+		mCastle->Init(shaderFiles, "Fbx\\Castle.fbx", textureFiles);
 	}
 	{
 		mSkybox = make_unique<Skybox>();
 		WCHAR textureFiles[][TEXTURE_LEN] = { L"Fbx\\skyboxGood.png" };
-		mSkybox->Init(L"Shader\\Box.fx", "Fbx\\skybox.fbx", textureFiles);
+		WCHAR shaderFiles[][TEXTURE_LEN] =
+		{
+			L"Shader\\Box.fx",
+			L"Shader\\Box.fx"
+		};
+		mSkybox->Init(shaderFiles, "Fbx\\skybox.fbx", textureFiles);
 	}
 	{
 		mEnemy = make_unique<Enemy>();
 		WCHAR textureFiles[][TEXTURE_LEN] = { L"Fbx\\Enemy.jpg" };
-		mEnemy->Init(L"Shader\\Enemy.fx", "Fbx\\Enemy.fbx", textureFiles);
+		WCHAR shaderFiles[][TEXTURE_LEN] =
+		{
+			L"Shader\\EnemyVS.hlsl",
+			L"Shader\\EnemyPS.hlsl"
+		};
+		mEnemy->Init(shaderFiles, "Fbx\\Enemy.fbx", textureFiles);
 	}
 }
 
@@ -104,7 +121,7 @@ void MainLoopManager::Update()
 
 		/* Objects update */
 
-		mHouse->Update();
+		mCastle->Update();
 		mSkybox->Update();
 		mEnemy->Update();
 	}
@@ -126,7 +143,7 @@ void MainLoopManager::Render()
 
 	/* Objects Rendering */
 
-	mHouse->Render();
+	mCastle->Render();
 	mSkybox->Render();
 	mEnemy->Render();
 

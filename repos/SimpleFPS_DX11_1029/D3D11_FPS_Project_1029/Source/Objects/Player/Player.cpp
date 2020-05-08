@@ -1,7 +1,7 @@
-#include "Bullet.h"
 #include "../../Hardware/Input.h"
-#include "Player.h"
 #include "../../Hardware/Sound.h"
+#include "Bullet.h"
+#include "Player.h"
 
 Player::Player()
 	: mNumShootBullet(0)
@@ -12,6 +12,8 @@ Player::~Player()
 {
 	mShooting->Shutdown();
 	mShooting.reset();
+	mGun.reset();
+	mBullet.reset();
 }
 
 void Player::Init()
@@ -19,16 +21,31 @@ void Player::Init()
 	{
 		mGun = std::make_unique<Gun>();
 		WCHAR textureFiles[][TEXTURE_LEN] = { L"Fbx\\gun.jpg" };
-		mGun->Init(L"Shader\\Ground.fx", "Fbx\\EBR.fbx", textureFiles);
+		WCHAR shaderFiles[][TEXTURE_LEN] = 
+		{ 
+			L"Shader\\Ground.fx", 
+			L"Shader\\Ground.fx" 
+		};
+		mGun->Init(shaderFiles, "Fbx\\Gun.fbx", textureFiles);
 	}
 	{
 		mBullet.reset(new Bullet[BULLET_COUNT]);
-		WCHAR textureFiles[][TEXTURE_LEN] = { L"Fbx\\Bullet_Shell1.jpg", L"Fbx\\Bullet_Shell2.jpg" };
+		WCHAR textureFiles[][TEXTURE_LEN] = 
+		{ 
+			L"Fbx\\Bullet_Shell1.jpg", 
+			L"Fbx\\Bullet_Shell2.jpg" 
+		};
+		WCHAR shaderFiles[][TEXTURE_LEN] = 
+		{ 
+			L"Shader\\Ground.fx", 
+			L"Shader\\Ground.fx" 
+		};
 		for (int i = 0; i < BULLET_COUNT; ++i)
 		{
-			mBullet[i].Init(L"Shader\\Ground.fx", "Fbx\\Bullet.fbx", textureFiles);
+			mBullet[i].Init(shaderFiles, "Fbx\\Bullet.fbx", textureFiles);
 		}
 	}
+
 	mShooting = std::make_unique<Sound>();
 	bool bSuccess = mShooting->Initialize("Sound\\Gun_Silencer.wav");
 	assert(bSuccess);

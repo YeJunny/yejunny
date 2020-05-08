@@ -17,9 +17,9 @@ private:
 	int mWidth;
 	int mHeight;
 	int mNumOfBox;
-	int mP;
 	char* mStage;
 	char* mDrawStage;
+	int mP;
 	int* mO;
 	int* mQ;
 };

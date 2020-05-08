@@ -42,15 +42,10 @@ PS_INPUT VS(VS_INPUT Input)
 {
 	PS_INPUT Output;
 
-	float boneWeights[4] = (float[4])Input.mBoneWeights;
-	int boneIndices[4] = (int[4])Input.mBoneIndices;
-
 	float3 blendPos = 0;
 	for (int i = 0; i < 4; ++i)
 	{
-		float boneWeight = boneWeights[i];
-		matrix boneMatrix = gBoneAnimMat[boneIndices[i]];
-		blendPos += boneWeight * mul(Input.mPos, boneMatrix);
+		blendPos += Input.mBoneWeights[i] * mul(Input.mPos, gBoneAnimMat[Input.mBoneIndices[i]]);
 	}
 
 	Output.mPos = mul(float4(blendPos, 1.0f), gWorldMat);

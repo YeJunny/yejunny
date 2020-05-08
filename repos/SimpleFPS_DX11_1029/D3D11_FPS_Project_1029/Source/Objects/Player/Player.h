@@ -25,6 +25,7 @@ private:
 
 	std::unique_ptr<Gun> mGun;
 	std::unique_ptr<Bullet[]> mBullet;
+
 	std::unique_ptr<Sound> mShooting;
 };
 

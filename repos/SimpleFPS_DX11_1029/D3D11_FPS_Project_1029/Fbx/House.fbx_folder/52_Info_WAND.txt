@@ -1,9 +1,0 @@
-==============================================================================
-	First Load: Vertex, UV, Normal		Fbx\House.fbx_folder\52_Info_WAND.txt
-==============================================================================
-get WAND ... OK
-childCount is ... 2
-get child 0 name is ... WAND_2
-	child 0 Attribute is ... nullptr
-get child 1 name is ... DURCHBRUCH
-	child 1 Attribute is ... nullptr

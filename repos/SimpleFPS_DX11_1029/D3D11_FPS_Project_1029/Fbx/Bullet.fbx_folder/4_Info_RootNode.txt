@@ -7,6 +7,7 @@ Get Child Node 0 Name is ... Camera
 	Child 0 Node AttributeType is ... 7 ( eUnknown = 0, eNull = 1, eMarker = 2, eSkeleton = 3, eMesh = 4, eNurbs = 5, ePatch = 6, eCamera = 7, eCameraStereo = 8, eCameraSwitcher = 9, eLight = 10, eOpticalReference = 11, eOpticalMarker = 12, eNurbsCurve = 13, eTrimNurbsSurface = 14, eBoundary = 15, eNurbsSurface = 16, eShape = 17, eLODGroup = 18, eSubDiv = 19, eCachedEffect = 20, Line = 21 )
 Get Child Node 1 Name is ... Cylinder001
 	Child 1 Node Attribute is ... eMesh
+	No Animation Data!
 	Child 1 Mesh's Ploygon Count is ... 572
 	Child 1 Mesh's List of Vertex, UV and Normal ...
 														Vertex												UV												Normal
@@ -1726,9 +1727,9 @@ Get Child Node 1 Name is ... Cylinder001
 		vertex[ 571][   0]	|	        7.28429,     3.37622e-06,        -12.4427	|	            0.5,        0.661621	|	       0.305452,      -0.0818457,       -0.948684
 		vertex[ 571][   1]	|	        6.41051,        -3.26099,        -12.4427	|	       0.580811,        0.639968	|	       0.305451,      -0.0818457,       -0.948684
 		vertex[ 571][   2]	|	        5.46612,        -2.71575,        -12.7938	|	       0.567299,        0.616565	|	       0.305451,      -0.0818457,       -0.948684
-	No Animation Data!
 Get Child Node 2 Name is ... Sphere001
 	Child 2 Node Attribute is ... eMesh
+	No Animation Data!
 	Child 2 Mesh's Ploygon Count is ... 166
 	Child 2 Mesh's List of Vertex, UV and Normal ...
 														Vertex												UV												Normal
@@ -2230,4 +2231,3 @@ Get Child Node 2 Name is ... Sphere001
 		vertex[ 165][   0]	|	      0.0324338,         2.90606,         19.1178	|	        1.24345,        0.980752	|	     0.00186033,        0.489379,        0.872069
 		vertex[ 165][   1]	|	        1.48546,         2.51672,         19.1178	|	        1.16334,        0.980752	|	       0.248598,        0.427289,        0.869266
 		vertex[ 165][   2]	|	        1.89894,         3.28905,         18.4507	|	        1.16483,        0.968446	|	       0.388877,        0.669781,        0.632588
-	No Animation Data!

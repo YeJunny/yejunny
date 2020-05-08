@@ -38,7 +38,7 @@ Object::~Object()
 	mCharFbxData->KeyframeMatrixPerTime.clear();
 }
 
-void Object::Init(const WCHAR* shaderFile, const char* fbxFile, const WCHAR textureFiles[][TEXTURE_LEN])
+void Object::Init(const WCHAR shaderFile[][TEXTURE_LEN], const char* fbxFile, const WCHAR textureFiles[][TEXTURE_LEN])
 {
 	HRESULT hr;
 
@@ -53,6 +53,7 @@ void Object::Init(const WCHAR* shaderFile, const char* fbxFile, const WCHAR text
 	FBXLoader* fbxLoader = new FBXLoader();
 	fbxLoader->LoadFbx(mCharFbxData, fbxFile);
 	delete fbxLoader;
+
 
 	mMeshCount = mCharFbxData->PureVertexData.size();
 	mVertexBuffer = new ComPtr<ID3D11Buffer>[mMeshCount]();
@@ -111,7 +112,7 @@ void Object::Init(const WCHAR* shaderFile, const char* fbxFile, const WCHAR text
 
 	// Create Vertex Shader
 	ID3DBlob* pVSBlob = nullptr;
-	hr = Global::CompileShaderFromFile(shaderFile, "VS", "vs_4_0", &pVSBlob);
+	hr = Global::CompileShaderFromFile(shaderFile[0], "VS", "vs_4_0", &pVSBlob);
 	if (FAILED(hr))
 	{
 		Assert(hr == S_OK);
@@ -136,7 +137,7 @@ void Object::Init(const WCHAR* shaderFile, const char* fbxFile, const WCHAR text
 
 	// Create Pixel Shader
 	ID3DBlob* pPSBlob = nullptr;
-	hr = Global::CompileShaderFromFile(shaderFile, "PS", "ps_4_0", &pPSBlob);
+	hr = Global::CompileShaderFromFile(shaderFile[1], "PS", "ps_4_0", &pPSBlob);
 	if (FAILED(hr))
 	{
 		Assert(hr == S_OK);
@@ -210,13 +211,9 @@ void Object::Update()
 void Object::Render()
 {
 	ComPtr<ID3D11DeviceContext> Context = Global::GetContext();
-	static float time = 0;
+	static int time = 0;
 
 	UINT stride = sizeof(PureVertexData);
-	/*if (!mCharFbxData->bHasAnimation)
-	{
-		stride -= (sizeof(XMFLOAT4) + sizeof(XMINT4));
-	}*/
 	UINT offset = 0;
 	Context->IASetInputLayout(mVertexLayout.Get());
 	Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -240,13 +237,13 @@ void Object::Render()
 		CBufferAnimMatrix cBufferAnimMatrix;
 		for (int i = 0; i < mCharFbxData->KeyframeMatrixPerTime[0].size(); ++i)
 		{
-			cBufferAnimMatrix.FinalMatrices[i] = mCharFbxData->KeyframeMatrixPerTime[(int)time][i];
+			cBufferAnimMatrix.FinalMatrices[i] = mCharFbxData->KeyframeMatrixPerTime[time][i];
 		}
 
 		Context->UpdateSubresource(mCBufferAnimMatrix.Get(), 0, nullptr, &cBufferAnimMatrix, 0, 0);
 		Context->VSSetConstantBuffers(2, 1, mCBufferAnimMatrix.GetAddressOf());
 
-		time += 0.1f;
+		++time;
 		if (time > mCharFbxData->EndTime)
 		{
 			time = 0;
