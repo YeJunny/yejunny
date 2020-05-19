@@ -1,0 +1,172 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <FxCompile Include="Shader\EnemyPS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\CastlePS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\CastleVS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\EnemyVS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source\FBXLoader\FBXLoader.cpp">
+      <Filter>FbxLoader</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\FBXLoader\CharacterFBXData\BoneData.cpp">
+      <Filter>FbxLoader\CharacterFbxData</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\FBXLoader\CharacterFBXData\ControlPointData.cpp">
+      <Filter>FbxLoader\CharacterFbxData</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Hardware\Input.cpp">
+      <Filter>Hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Hardware\Sound.cpp">
+      <Filter>Hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Main\MainLoopManager.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Main\WinMain.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Settings\Global.cpp">
+      <Filter>Settings</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Settings\Time\Time.cpp">
+      <Filter>Settings\Time</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Objects\Player\Bullet.cpp">
+      <Filter>Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Objects\Castle\Castle.cpp">
+      <Filter>Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Objects\Enemy\Enemy.cpp">
+      <Filter>Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Objects\Player\Gun.cpp">
+      <Filter>Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Objects\Object.cpp">
+      <Filter>Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Objects\Player\Player.cpp">
+      <Filter>Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Objects\Others\Skybox.cpp">
+      <Filter>Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Objects\Camera\Camera.cpp">
+      <Filter>Objects</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Resource.h" />
+    <ClInclude Include="Source\FBXLoader\FBXLoader.h">
+      <Filter>FbxLoader</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\FBXLoader\CharacterFBXData\BoneData.h">
+      <Filter>FbxLoader\CharacterFbxData</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\FBXLoader\CharacterFBXData\CharacterFbxData.h">
+      <Filter>FbxLoader\CharacterFbxData</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\FBXLoader\CharacterFBXData\ControlPointData.h">
+      <Filter>FbxLoader\CharacterFbxData</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\FBXLoader\CharacterFBXData\PureVertexData.h">
+      <Filter>FbxLoader\CharacterFbxData</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Hardware\Input.h">
+      <Filter>Hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Hardware\Sound.h">
+      <Filter>Hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Main\MainLoopManager.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Main\WinMain.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Settings\Global.h">
+      <Filter>Settings</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Settings\Include\Framework.h">
+      <Filter>Settings\Include</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Settings\Time\Time.h">
+      <Filter>Settings\Time</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Objects\Player\Bullet.h">
+      <Filter>Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Objects\Castle\Castle.h">
+      <Filter>Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Objects\Enemy\Enemy.h">
+      <Filter>Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Objects\Player\Gun.h">
+      <Filter>Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Objects\Object.h">
+      <Filter>Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Objects\Player\Player.h">
+      <Filter>Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Objects\Others\Skybox.h">
+      <Filter>Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Objects\Camera\Camera.h">
+      <Filter>Objects</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Infinite_Shot.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Infinite_Shot.ico" />
+    <Image Include="small.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="FbxLoader">
+      <UniqueIdentifier>{a2cd6205-5396-4788-9064-24ea9991cdbf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Hardware">
+      <UniqueIdentifier>{73dc02ef-fdcd-4714-b62e-ab3aa8614c9c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Main">
+      <UniqueIdentifier>{dac74caa-2860-41d0-9809-57952efbfdac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects">
+      <UniqueIdentifier>{e4b46438-a494-4279-8f18-400b800067c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Settings">
+      <UniqueIdentifier>{dc208b73-05b3-4a9e-8ad5-6a86ae968dd7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="FbxLoader\CharacterFbxData">
+      <UniqueIdentifier>{6d6b6322-2703-47e1-abf5-d03eeb378368}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Settings\Include">
+      <UniqueIdentifier>{09456085-95a2-445f-a107-7abcade68a91}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Settings\Time">
+      <UniqueIdentifier>{3ca6c3fd-f209-449d-af5b-5606ff82a57e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{6cad7a78-ab95-4a77-81dd-b0b97d856615}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
