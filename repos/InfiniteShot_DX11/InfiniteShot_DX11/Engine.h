@@ -28,7 +28,7 @@ public:
 	HRESULT InitScene();
 	void UpdateScene();
 	void DrawScene();
-	void RenderText(std::wstring text);
+	void RenderText(std::wstring text, int inInt);
 	void ReleaseObject();
 
 public:

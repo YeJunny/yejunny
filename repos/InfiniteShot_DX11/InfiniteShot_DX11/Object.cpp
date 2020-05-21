@@ -45,13 +45,17 @@ bool Object::Initalize(const WCHAR shaderFileName[], ID3D11Device* d3d11Device, 
 
 	ID3DBlob* vsBuffer;
 	ID3DBlob* psBuffer;
+	ID3DBlob* d2dPSBuffer;
 
 	// Compile shaders from shader file
 	CompileShader(shaderFileName, "VS", "vs_5_0", &vsBuffer);
 	CompileShader(shaderFileName, "PS", "ps_5_0", &psBuffer);
+	CompileShader(shaderFileName, "D2D_PS", "ps_5_0", &d2dPSBuffer);
 
 	mD3d11Device = d3d11Device;
+	mD3d11DevCon = d3d11DevCon;
 	mEngine = engine;
+
 
 	// Create the shader objects
 	hr = mD3d11Device->CreateVertexShader(
@@ -72,50 +76,60 @@ bool Object::Initalize(const WCHAR shaderFileName[], ID3D11Device* d3d11Device, 
 
 	AssertInitialization(hr, "Direct 3D Create Pixel Shader - Failed");
 
-	mD3d11DevCon = d3d11DevCon;
+	hr = mD3d11Device->CreatePixelShader(
+		d2dPSBuffer->GetBufferPointer(),
+		d2dPSBuffer->GetBufferSize(),
+		nullptr,
+		&mD2d_PS
+	);
 
-	// Set vertex & pixel shader
-	mD3d11DevCon->VSSetShader(mVS, nullptr, 0);
-	mD3d11DevCon->PSSetShader(mPS, nullptr, 0);
+	AssertInitialization(hr, "Direct 3D Create Pixel Shader - Failed");
+
+
+	// Define light
+	mLight.Dir = XMFLOAT3(0.25f, 0.5f, -1.0f);
+	mLight.Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+	mLight.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+
 
 	// Create the vertex buffer
 	Vertex v[] =
 	{
 		// Front Face
-		Vertex(-1.0f, -1.0f, -1.0f, 0.0f, 1.0f),
-		Vertex(-1.0f,  1.0f, -1.0f, 0.0f, 0.0f),
-		Vertex(1.0f,  1.0f, -1.0f, 1.0f, 0.0f),
-		Vertex(1.0f, -1.0f, -1.0f, 1.0f, 1.0f),
+		Vertex(-1.0f, -1.0f, -1.0f, 0.0f, 1.0f,-1.0f, -1.0f, -1.0f),
+		Vertex(-1.0f,  1.0f, -1.0f, 0.0f, 0.0f,-1.0f,  1.0f, -1.0f),
+		Vertex(1.0f,  1.0f, -1.0f, 1.0f, 0.0f, 1.0f,  1.0f, -1.0f),
+		Vertex(1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f, -1.0f, -1.0f),
 
-		// Back Face (CCW)
-		Vertex(-1.0f, -1.0f, 1.0f, 1.0f, 1.0f),
-		Vertex(1.0f, -1.0f, 1.0f, 0.0f, 1.0f),
-		Vertex(1.0f,  1.0f, 1.0f, 0.0f, 0.0f),
-		Vertex(-1.0f,  1.0f, 1.0f, 1.0f, 0.0f),
+		// Back Face
+		Vertex(-1.0f, -1.0f, 1.0f, 1.0f, 1.0f,-1.0f, -1.0f, 1.0f),
+		Vertex(1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, -1.0f, 1.0f),
+		Vertex(1.0f,  1.0f, 1.0f, 0.0f, 0.0f, 1.0f,  1.0f, 1.0f),
+		Vertex(-1.0f,  1.0f, 1.0f, 1.0f, 0.0f,-1.0f,  1.0f, 1.0f),
 
 		// Top Face
-		Vertex(-1.0f, 1.0f, -1.0f, 0.0f, 1.0f),
-		Vertex(-1.0f, 1.0f,  1.0f, 0.0f, 0.0f),
-		Vertex(1.0f, 1.0f,  1.0f, 1.0f, 0.0f),
-		Vertex(1.0f, 1.0f, -1.0f, 1.0f, 1.0f),
+		Vertex(-1.0f, 1.0f, -1.0f, 0.0f, 1.0f,-1.0f, 1.0f, -1.0f),
+		Vertex(-1.0f, 1.0f,  1.0f, 0.0f, 0.0f,-1.0f, 1.0f,  1.0f),
+		Vertex(1.0f, 1.0f,  1.0f, 1.0f, 0.0f, 1.0f, 1.0f,  1.0f),
+		Vertex(1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, -1.0f),
 
-		// Bottom Face (CCW)
-		Vertex(-1.0f, -1.0f, -1.0f, 1.0f, 1.0f),
-		Vertex(1.0f, -1.0f, -1.0f, 0.0f, 1.0f),
-		Vertex(1.0f, -1.0f,  1.0f, 0.0f, 0.0f),
-		Vertex(-1.0f, -1.0f,  1.0f, 1.0f, 0.0f),
+		// Bottom Face
+		Vertex(-1.0f, -1.0f, -1.0f, 1.0f, 1.0f,-1.0f, -1.0f, -1.0f),
+		Vertex(1.0f, -1.0f, -1.0f, 0.0f, 1.0f, 1.0f, -1.0f, -1.0f),
+		Vertex(1.0f, -1.0f,  1.0f, 0.0f, 0.0f, 1.0f, -1.0f,  1.0f),
+		Vertex(-1.0f, -1.0f,  1.0f, 1.0f, 0.0f,-1.0f, -1.0f,  1.0f),
 
 		// Left Face
-		Vertex(-1.0f, -1.0f,  1.0f, 0.0f, 1.0f),
-		Vertex(-1.0f,  1.0f,  1.0f, 0.0f, 0.0f),
-		Vertex(-1.0f,  1.0f, -1.0f, 1.0f, 0.0f),
-		Vertex(-1.0f, -1.0f, -1.0f, 1.0f, 1.0f),
+		Vertex(-1.0f, -1.0f,  1.0f, 0.0f, 1.0f,-1.0f, -1.0f,  1.0f),
+		Vertex(-1.0f,  1.0f,  1.0f, 0.0f, 0.0f,-1.0f,  1.0f,  1.0f),
+		Vertex(-1.0f,  1.0f, -1.0f, 1.0f, 0.0f,-1.0f,  1.0f, -1.0f),
+		Vertex(-1.0f, -1.0f, -1.0f, 1.0f, 1.0f,-1.0f, -1.0f, -1.0f),
 
 		// Right Face
-		Vertex(1.0f, -1.0f, -1.0f, 0.0f, 1.0f),
-		Vertex(1.0f,  1.0f, -1.0f, 0.0f, 0.0f),
-		Vertex(1.0f,  1.0f,  1.0f, 1.0f, 0.0f),
-		Vertex(1.0f, -1.0f,  1.0f, 1.0f, 1.0f),
+		Vertex(1.0f, -1.0f, -1.0f, 0.0f, 1.0f, 1.0f, -1.0f, -1.0f),
+		Vertex(1.0f,  1.0f, -1.0f, 0.0f, 0.0f, 1.0f,  1.0f, -1.0f),
+		Vertex(1.0f,  1.0f,  1.0f, 1.0f, 0.0f, 1.0f,  1.0f,  1.0f),
+		Vertex(1.0f, -1.0f,  1.0f, 1.0f, 1.0f, 1.0f, -1.0f,  1.0f),
 	};
 
 	// Create index buffer
@@ -143,7 +157,7 @@ bool Object::Initalize(const WCHAR shaderFileName[], ID3D11Device* d3d11Device, 
 
 		// Right Face
 		20, 21, 22,
-		20, 22, 23
+		20, 22, 23,
 	};
 
 	D3D11_BUFFER_DESC indexBufferDesc;
@@ -179,6 +193,7 @@ bool Object::Initalize(const WCHAR shaderFileName[], ID3D11Device* d3d11Device, 
 	
 	AssertInitialization(hr, "Direct 3D Create Vertex Buffer - Failed");
 
+
 	// Loading the Texture from a File
 	hr = CreateWICTextureFromFile(mD3d11Device, L"Textures\\braynzar.jpg", nullptr, &mCubesTexture, 0);
 
@@ -211,6 +226,7 @@ bool Object::Initalize(const WCHAR shaderFileName[], ID3D11Device* d3d11Device, 
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0},
 	};
 	UINT numElements = ARRAYSIZE(layouts);
 	hr = mD3d11Device->CreateInputLayout(layouts, numElements, vsBuffer->GetBufferPointer(), vsBuffer->GetBufferSize(), &mVertLayout);
@@ -237,6 +253,19 @@ bool Object::Initalize(const WCHAR shaderFileName[], ID3D11Device* d3d11Device, 
 
 	AssertInitialization(hr, "Direct 3D Create Constant Buffer - Failed");
 
+	// Set the light buffer
+	ZeroMemory(&cbDesc, sizeof(cbDesc));
+
+	cbDesc.Usage = D3D11_USAGE_DEFAULT;
+	cbDesc.ByteWidth = sizeof(CBPerFrame);
+	cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbDesc.CPUAccessFlags = 0;
+	cbDesc.MiscFlags = 0;
+
+	hr = mD3d11Device->CreateBuffer(&cbDesc, nullptr, &mCBPerFrameBuffer);
+
+	AssertInitialization(hr, "Direct 3D Create Buffer - Failed");
+
 	mCamPosition = XMVectorSet(0.0f, 3.0f, -9.0f, 0.0f);
 	XMVECTOR camTarget = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
 	XMVECTOR camUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
@@ -246,26 +275,30 @@ bool Object::Initalize(const WCHAR shaderFileName[], ID3D11Device* d3d11Device, 
 	return true;
 }
 
-void Object::Update()
+void Object::Update(double deltaTime)
 {
 	// Keep the cubes rotating
 	static float rot = 0;
+
+	rot += 1.0f * deltaTime;
+
 	if (rot > XM_2PI)
 	{
 		rot = 0;
 	}
-	rot += 0.005f;
+
 
 	// Reset cube1World1
 	mCube1World = XMMatrixIdentity();
 
 	// Define cube1's world space matrix
 	XMVECTOR rotAxis = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	XMMATRIX Scaling = XMMatrixScaling(1.0f, 1.0f, 1.0f);
 	XMMATRIX Rotation = XMMatrixRotationAxis(rotAxis, rot);
 	XMMATRIX Translation = XMMatrixTranslation(0.0f, 0.0f, 4.0f);
 
 	// Set cube1's world space using the transformations
-	mCube1World =  Translation * Rotation;
+	mCube1World =  Scaling * Translation * Rotation;
 
 	// Reset cube2World
 	mCube2World = XMMatrixIdentity();
@@ -273,7 +306,6 @@ void Object::Update()
 	// Define cube2's world space matrics
 	rotAxis = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 	Rotation = XMMatrixRotationAxis(rotAxis, -rot);
-	XMMATRIX Scaling = XMMatrixScaling(1.3f, 1.3f, 1.3f);
 
 	// Set cube2's world space matrix
 	mCube2World =  Rotation * Scaling;
@@ -281,6 +313,16 @@ void Object::Update()
 
 void Object::Draw()
 {
+	CBPerFrame constBuffFrame;
+	constBuffFrame.Light = mLight;
+	constBuffFrame.Rotation = mCube2World;
+	mD3d11DevCon->UpdateSubresource(mCBPerFrameBuffer, 0, nullptr, &constBuffFrame, 0, 0);
+	mD3d11DevCon->PSSetConstantBuffers(0, 1, &mCBPerFrameBuffer);
+
+	// Set vertex & pixel shader
+	mD3d11DevCon->VSSetShader(mVS, nullptr, 0);
+	mD3d11DevCon->PSSetShader(mPS, nullptr, 0);
+
 	mD3d11DevCon->IASetIndexBuffer(mTriIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 	UINT stride = sizeof(Vertex);
 	UINT offset = 0;
@@ -289,6 +331,7 @@ void Object::Draw()
 	// Set the WVP matrix and send it to the constant buffer in effect file
 	XMMATRIX WVP = mCube1World * mCamView * mCamProjection;
 	CBPerObject cbPerObj;
+	cbPerObj.World = XMMatrixTranspose(mCube1World);
 	cbPerObj.WVP = XMMatrixTranspose(WVP);
 	mD3d11DevCon->UpdateSubresource(mCBPerObjectBuffer, 0, nullptr, &cbPerObj, 0, 0);
 	mD3d11DevCon->VSSetConstantBuffers(0, 1, &mCBPerObjectBuffer);
@@ -300,6 +343,7 @@ void Object::Draw()
 	mD3d11DevCon->DrawIndexed(36, 0, 0);
 
 	WVP = mCube2World * mCamView * mCamProjection;
+	cbPerObj.World = XMMatrixTranspose(mCube2World);
 	cbPerObj.WVP = XMMatrixTranspose(WVP);
 	mD3d11DevCon->UpdateSubresource(mCBPerObjectBuffer, 0, nullptr, &cbPerObj, 0, 0);
 	mD3d11DevCon->VSSetConstantBuffers(0, 1, &mCBPerObjectBuffer);
@@ -310,7 +354,7 @@ void Object::Draw()
 	mD3d11DevCon->RSSetState(mEngine->GetCWcullMode());
 	mD3d11DevCon->DrawIndexed(36, 0, 0);
 
-	mEngine->RenderText(L"Hello, World!");
+	mEngine->RenderText(L"FPS : ", static_cast<int>(mEngine->GetFps()));
 }
 
 void Object::CleanUp() const
@@ -321,6 +365,7 @@ void Object::CleanUp() const
 	mVS->Release();
 	mPS->Release();
 	mVertLayout->Release();
+	mCBPerFrameBuffer->Release();
 }
 
 void* Object::operator new(size_t i)

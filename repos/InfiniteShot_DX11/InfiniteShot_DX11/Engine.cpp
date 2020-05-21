@@ -57,7 +57,13 @@ HRESULT Engine::InitializeDirect3d11App(HINSTANCE hInstance)
 	// Use the first adapter
 	IDXGIAdapter1* adapter;
 
-	hr = DXGIFactory->EnumAdapters1(0, &adapter);
+	hr = DXGIFactory->EnumAdapters1(1, &adapter);
+
+	DXGI_ADAPTER_DESC1 adapterDescription;
+	adapter->GetDesc1(&adapterDescription);
+	OutputDebugStringA("==========================\n");
+	OutputDebugStringW(adapterDescription.Description);
+	OutputDebugStringA("\n==========================\n");
 
 	AssertInitialization(hr, "Direct 3D EnumAdapters1 - Failed");
 	
@@ -262,10 +268,10 @@ void Engine::InitD2DScreenTexture()
 	Vertex v[] =
 	{
 		// Front Face
-		Vertex(-1.0f, -1.0f, -1.0f, 0.0f, 1.0f),
-		Vertex(-1.0f,  1.0f, -1.0f, 0.0f, 0.0f),
-		Vertex( 1.0f,  1.0f, -1.0f, 1.0f, 0.0f),
-		Vertex( 1.0f, -1.0f, -1.0f, 1.0f, 1.0f),
+		Vertex(-1.0f, -1.0f, -1.0f, 0.0f, 1.0f,-1.0f, -1.0f, -1.0f),
+		Vertex(-1.0f,  1.0f, -1.0f, 0.0f, 0.0f,-1.0f,  1.0f, -1.0f),
+		Vertex(1.0f,  1.0f, -1.0f, 1.0f, 0.0f, 1.0f,  1.0f, -1.0f),
+		Vertex(1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f, -1.0f, -1.0f),
 	};
 
 	DWORD indices[] =
@@ -452,7 +458,6 @@ HRESULT Engine::InitScene()
 
 	AssertInitialization(hr, "Direct 3D Create Rasterizer state- Failed");
 
-
 	return S_OK;
 }
 
@@ -460,7 +465,7 @@ void Engine::UpdateScene()
 {
 	for (size_t i = 0; i < mObjects.size(); ++i)
 	{
-		mObjects[i]->Update();
+		mObjects[i]->Update(mFrameTime);
 	}
 }
 
@@ -486,7 +491,7 @@ void Engine::DrawScene()
 	mSwapChain->Present(0, 0);
 }
 
-void Engine::RenderText(std::wstring text)
+void Engine::RenderText(std::wstring text, int inInt)
 {
 	// Release the d3d 11 device
 	mKeyedMutex11->ReleaseSync(0);
@@ -502,7 +507,7 @@ void Engine::RenderText(std::wstring text)
 
 	// Create the string
 	std::wostringstream outputString;
-	outputString << text;
+	outputString << text << inInt;
 	std::wstring outputText = outputString.str();
 
 	// Set the font color
@@ -544,7 +549,8 @@ void Engine::RenderText(std::wstring text)
 
 	XMMATRIX WVP = XMMatrixIdentity();
 	CBPerObject cbText;
-	cbText.WVP = XMMatrixTranspose(WVP); 
+	cbText.World = XMMatrixTranspose(WVP);
+	cbText.WVP = XMMatrixTranspose(WVP);
 	mD3d11DevCon->UpdateSubresource(mCBTextBuffer, 0, nullptr, &cbText, 0, 0);
 	mD3d11DevCon->VSSetConstantBuffers(0, 1, &mCBTextBuffer);
 	mD3d11DevCon->PSSetShaderResources(0, 1, &mD2dTexture);

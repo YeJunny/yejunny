@@ -33,6 +33,7 @@ WindowManager::WindowManager()
 	, mHwnd(null)
 	, mWndClassName(nullptr)
 {
+	StartTime();
 }
 
 HRESULT WindowManager::InitializeWindow(HINSTANCE hInstance, int showWnd, bool bIswindowed, const TCHAR* titleName, const TCHAR* className, INT width, INT height)
@@ -121,5 +122,51 @@ bool WindowManager::ProcessMessage()
 		return false;
 	}
 
+	++mFrameCount;
+
+	if (GetTime() > 1.0)
+	{
+		mFps = mFrameCount;
+		mFrameCount = 0;
+		StartTime();
+	}
+
+	mFrameTime = GetFrameTime();
+
 	return true;
+}
+
+void WindowManager::StartTime()
+{
+	LARGE_INTEGER frequencyCount;
+	QueryPerformanceFrequency(&frequencyCount);
+
+	mCountsPerSecond = static_cast<double>(frequencyCount.QuadPart);
+
+	QueryPerformanceCounter(&frequencyCount);
+	mCounterStart = frequencyCount.QuadPart;
+}
+
+double WindowManager::GetTime()
+{
+	LARGE_INTEGER currentTime;
+	QueryPerformanceCounter(&currentTime);
+	return static_cast<double>((currentTime.QuadPart - mCounterStart) / mCountsPerSecond);
+}
+
+double WindowManager::GetFrameTime()
+{
+	LARGE_INTEGER currentTime;
+	__int64 tickCount;
+	QueryPerformanceCounter(&currentTime);
+
+	tickCount = currentTime.QuadPart - mFrameTimeOld;
+	mFrameTimeOld = currentTime.QuadPart;
+
+	if (tickCount < 0)
+	{
+		tickCount = 0;
+	}
+
+	return static_cast<float>(tickCount) / mCountsPerSecond;
 }
