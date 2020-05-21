@@ -1,4 +1,5 @@
 #include "Object.h"
+#include "Engine.h"
 #include <WICTextureLoader.h>
 
 using namespace DirectX;
@@ -38,7 +39,7 @@ HRESULT Object::CompileShader(LPCWSTR shaderFileName, LPCSTR entryPointName, LPC
 	return hr;
 }
 
-bool Object::Initalize(const WCHAR shaderFileName[], ID3D11Device* d3d11Device, ID3D11DeviceContext* d3d11DevCon)
+bool Object::Initalize(const WCHAR shaderFileName[], ID3D11Device* d3d11Device, ID3D11DeviceContext* d3d11DevCon, Engine* engine)
 {
 	HRESULT hr;
 
@@ -50,6 +51,7 @@ bool Object::Initalize(const WCHAR shaderFileName[], ID3D11Device* d3d11Device, 
 	CompileShader(shaderFileName, "PS", "ps_5_0", &psBuffer);
 
 	mD3d11Device = d3d11Device;
+	mEngine = engine;
 
 	// Create the shader objects
 	hr = mD3d11Device->CreateVertexShader(
@@ -59,11 +61,7 @@ bool Object::Initalize(const WCHAR shaderFileName[], ID3D11Device* d3d11Device, 
 		&mVS
 	);
 
-	if (FAILED(hr))
-	{
-		ErrorLogger::Log(hr, "Direct 3D Create Vertex Shader - Failed");
-		exit(EXIT_FAILURE);
-	}
+	AssertInitialization(hr, "Direct 3D Create Vertex Shader - Failed");
 
 	hr = mD3d11Device->CreatePixelShader(
 		psBuffer->GetBufferPointer(),
@@ -72,11 +70,7 @@ bool Object::Initalize(const WCHAR shaderFileName[], ID3D11Device* d3d11Device, 
 		&mPS
 	);
 
-	if (FAILED(hr))
-	{
-		ErrorLogger::Log(hr, "Direct 3D Create Pixel Shader - Failed");
-		exit(EXIT_FAILURE);
-	}
+	AssertInitialization(hr, "Direct 3D Create Pixel Shader - Failed");
 
 	mD3d11DevCon = d3d11DevCon;
 
@@ -183,20 +177,12 @@ bool Object::Initalize(const WCHAR shaderFileName[], ID3D11Device* d3d11Device, 
 
 	hr = mD3d11Device->CreateBuffer(&vertexBufferDesc, &vertexBufferData, &mTrianglesVertBuffer);
 	
-	if (FAILED(hr))
-	{
-		ErrorLogger::Log(hr, "Direct 3D Create Vertex Buffer - Failed");
-		exit(EXIT_FAILURE);
-	}
+	AssertInitialization(hr, "Direct 3D Create Vertex Buffer - Failed");
 
 	// Loading the Texture from a File
 	hr = CreateWICTextureFromFile(mD3d11Device, L"Textures\\braynzar.jpg", nullptr, &mCubesTexture, 0);
 
-	if (FAILED(hr))
-	{
-		ErrorLogger::Log(hr, "Direct 3D Loading Texture File - Failed");
-		exit(EXIT_FAILURE);
-	}
+	AssertInitialization(hr, "Direct 3D Loading Texture File - Failed");
 
 	// Describe the sampler
 	D3D11_SAMPLER_DESC sampDesc;
@@ -213,11 +199,7 @@ bool Object::Initalize(const WCHAR shaderFileName[], ID3D11Device* d3d11Device, 
 	// Create sampler state
 	hr = mD3d11Device->CreateSamplerState(&sampDesc, &mCubesSamplerState);
 
-	if (FAILED(hr))
-	{
-		ErrorLogger::Log(hr, "Direct 3D Create Sampler State - Failed");
-		exit(EXIT_FAILURE);
-	}
+	AssertInitialization(hr, "Direct 3D Create Sampler State - Failed");
 
 	// Set the vertex buffer
 	UINT stride = sizeof(Vertex);
@@ -233,11 +215,7 @@ bool Object::Initalize(const WCHAR shaderFileName[], ID3D11Device* d3d11Device, 
 	UINT numElements = ARRAYSIZE(layouts);
 	hr = mD3d11Device->CreateInputLayout(layouts, numElements, vsBuffer->GetBufferPointer(), vsBuffer->GetBufferSize(), &mVertLayout);
 
-	if (FAILED(hr))
-	{
-		ErrorLogger::Log(hr, "Direct 3D Create Input Layout - Failed");
-		exit(EXIT_FAILURE);
-	}
+	AssertInitialization(hr, "Direct 3D Create Input Layout - Failed");
 
 	// Set the input layout
 	mD3d11DevCon->IASetInputLayout(mVertLayout);
@@ -247,82 +225,23 @@ bool Object::Initalize(const WCHAR shaderFileName[], ID3D11Device* d3d11Device, 
 	psBuffer->Release();
 
 	// Create constant buffer
-	XMVECTOR camTarget;
-	XMVECTOR camUp;
-
 	D3D11_BUFFER_DESC cbDesc;
 	ZeroMemory(&cbDesc, sizeof(cbDesc));
 	cbDesc.Usage = D3D11_USAGE_DEFAULT;
-	cbDesc.ByteWidth = sizeof(cbPerObject);
+	cbDesc.ByteWidth = sizeof(CBPerObject);
 	cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	cbDesc.CPUAccessFlags = 0;
 	cbDesc.MiscFlags = 0;
 
 	hr = mD3d11Device->CreateBuffer(&cbDesc, nullptr, &mCBPerObjectBuffer);
 
-	if (FAILED(hr))
-	{
-		ErrorLogger::Log(hr, "Direct 3D Create Constant Buffer - Failed");
-		exit(EXIT_FAILURE);
-	}
+	AssertInitialization(hr, "Direct 3D Create Constant Buffer - Failed");
 
 	mCamPosition = XMVectorSet(0.0f, 3.0f, -9.0f, 0.0f);
-	camTarget = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
-	camUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	XMVECTOR camTarget = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+	XMVECTOR camUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 	mCamView = XMMatrixLookAtLH(mCamPosition, camTarget, camUp);
 	mCamProjection = XMMatrixPerspectiveFovLH(0.4f * XM_PI, 800 / 600.0f, 0.1f, 1000.0f);
-
-	// Create blender state
-	D3D11_BLEND_DESC blendDesc;
-	ZeroMemory(&blendDesc, sizeof(blendDesc));
-
-	D3D11_RENDER_TARGET_BLEND_DESC rtbd;
-	ZeroMemory(&rtbd, sizeof(rtbd));
-
-	rtbd.BlendEnable = true;
-	rtbd.SrcBlend = D3D11_BLEND_SRC_COLOR;
-	rtbd.DestBlend = D3D11_BLEND_DEST_COLOR;
-	rtbd.BlendOp = D3D11_BLEND_OP_ADD;
-	rtbd.SrcBlendAlpha = D3D11_BLEND_ONE;
-	rtbd.DestBlendAlpha = D3D11_BLEND_ZERO;
-	rtbd.BlendOpAlpha = D3D11_BLEND_OP_ADD;
-	rtbd.RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-
-	blendDesc.AlphaToCoverageEnable = false;
-	blendDesc.RenderTarget[0] = rtbd;
-
-	hr = mD3d11Device->CreateBlendState(&blendDesc, &mTransparency);
-
-	if (FAILED(hr))
-	{
-		ErrorLogger::Log(hr, "Direct 3D Create Blend State - Failed");
-		exit(EXIT_FAILURE);
-	}
-
-	// Create CCW & CW Culling
-	D3D11_RASTERIZER_DESC cmDesc;
-	ZeroMemory(&cmDesc, sizeof(cmDesc));
-
-	cmDesc.FillMode = D3D11_FILL_SOLID;
-	cmDesc.CullMode = D3D11_CULL_BACK;
-
-	cmDesc.FrontCounterClockwise = true;
-	hr = mD3d11Device->CreateRasterizerState(&cmDesc, &mCCWcullMode);
-
-	if (FAILED(hr))
-	{
-		ErrorLogger::Log(hr, "Direct 3D Create Rasterizer State - Failed");
-		exit(EXIT_FAILURE);
-	}
-
-	cmDesc.FrontCounterClockwise = false;
-	hr = mD3d11Device->CreateRasterizerState(&cmDesc, &mCWcullMode);
-
-	if (FAILED(hr))
-	{
-		ErrorLogger::Log(hr, "Direct 3D CreateRasterizer State - Failed");
-		exit(EXIT_FAILURE);
-	}
 
 	return true;
 }
@@ -335,7 +254,7 @@ void Object::Update()
 	{
 		rot = 0;
 	}
-	rot += 0.0005f;
+	rot += 0.005f;
 
 	// Reset cube1World1
 	mCube1World = XMMatrixIdentity();
@@ -362,68 +281,22 @@ void Object::Update()
 
 void Object::Draw()
 {
-	// "fine=tune" the blending equation
-	float blendFactor[] = { 0.1f, 0.1f, 0.1f, 0.5f };
-
-	// Set the default blend state (no blending) for opaque objects
-	mD3d11DevCon->OMSetBlendState(nullptr, nullptr, 0xffffffff);
-
-	// Render opaque objects
-
-	// Set the blend state for transparent objects
-	mD3d11DevCon->OMSetBlendState(mTransparency, blendFactor, 0xffffffff);
-
-	//*** Transparency Depth Orderings ***//
-	// Find which transparent object is further from the camera
-	// So we can render the objects in depth order to the render target
-
-	// Find distance from first cube to camera
-	XMVECTOR cubePos = XMVectorZero();
-
-	cubePos = XMVector3TransformCoord(cubePos, mCube1World);
-
-	float distX = XMVectorGetX(cubePos) - XMVectorGetX(mCamPosition);
-	float distY = XMVectorGetY(cubePos) - XMVectorGetY(mCamPosition);
-	float distZ = XMVectorGetZ(cubePos) - XMVectorGetZ(mCamPosition);
-
-	float cube1Dist = distX * distX + distY * distY + distZ * distZ;
-
-	// Find distance from second cube to camera
-	cubePos = XMVectorZero();
-	cubePos = XMVector3TransformCoord(cubePos, mCube2World);
-
-	distX = XMVectorGetX(cubePos) - XMVectorGetX(mCamPosition);
-	distY = XMVectorGetY(cubePos) - XMVectorGetY(mCamPosition);
-	distZ = XMVectorGetZ(cubePos) - XMVectorGetZ(mCamPosition);
-
-	float cube2Dist = distX * distX + distY * distY + distZ * distZ;
-
-	// If the first cubes distance is less than the second cube
-	if (cube1Dist < cube2Dist)
-	{
-		// Switch the order in which the cubes are drawn
-		XMMATRIX tempMatrix = mCube1World;
-		mCube1World = mCube2World;
-		mCube2World = tempMatrix;
-	}
+	mD3d11DevCon->IASetIndexBuffer(mTriIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	UINT stride = sizeof(Vertex);
+	UINT offset = 0;
+	mD3d11DevCon->IASetVertexBuffers(0, 1, &mTrianglesVertBuffer, &stride, &offset);
 
 	// Set the WVP matrix and send it to the constant buffer in effect file
 	XMMATRIX WVP = mCube1World * mCamView * mCamProjection;
-	cbPerObject cbPerObj;
+	CBPerObject cbPerObj;
 	cbPerObj.WVP = XMMatrixTranspose(WVP);
 	mD3d11DevCon->UpdateSubresource(mCBPerObjectBuffer, 0, nullptr, &cbPerObj, 0, 0);
 	mD3d11DevCon->VSSetConstantBuffers(0, 1, &mCBPerObjectBuffer);
 	mD3d11DevCon->PSSetShaderResources(0, 1, &mCubesTexture);
 	mD3d11DevCon->PSSetSamplers(0, 1, &mCubesSamplerState);
 
-	// Counter clockwise culling first becuase we need the back side of
-	// the cube to be rendered first, so the front side can blend with it
-	mD3d11DevCon->RSSetState(mCCWcullMode);
-
 	// Draw the first cube
-	mD3d11DevCon->DrawIndexed(36, 0, 0);
-
-	mD3d11DevCon->RSSetState(mCWcullMode);
+	mD3d11DevCon->RSSetState(mEngine->GetCWcullMode());
 	mD3d11DevCon->DrawIndexed(36, 0, 0);
 
 	WVP = mCube2World * mCamView * mCamProjection;
@@ -433,20 +306,15 @@ void Object::Draw()
 	mD3d11DevCon->PSSetShaderResources(0, 1, &mCubesTexture);
 	mD3d11DevCon->PSSetSamplers(0, 1, &mCubesSamplerState);
 
-	mD3d11DevCon->RSSetState(mCCWcullMode);
-
 	// Draw the second cube
+	mD3d11DevCon->RSSetState(mEngine->GetCWcullMode());
 	mD3d11DevCon->DrawIndexed(36, 0, 0);
 
-	mD3d11DevCon->RSSetState(mCWcullMode);
-	mD3d11DevCon->DrawIndexed(36, 0, 0);
+	mEngine->RenderText(L"Hello, World!");
 }
 
 void Object::CleanUp() const
 {
-	mTransparency->Release();
-	mCCWcullMode->Release();
-	mCWcullMode->Release();
 	mCBPerObjectBuffer->Release();
 	mTrianglesVertBuffer->Release();
 	mTriIndexBuffer->Release();
@@ -455,3 +323,12 @@ void Object::CleanUp() const
 	mVertLayout->Release();
 }
 
+void* Object::operator new(size_t i)
+{
+	return _aligned_malloc(sizeof(Object), 16);
+}
+
+void Object::operator delete(void* p)
+{
+	_aligned_free(p);
+}

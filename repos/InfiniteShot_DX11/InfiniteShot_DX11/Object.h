@@ -24,28 +24,29 @@ struct Vertex
 	DirectX::XMFLOAT2 TexCoord;
 };
 
-struct cbPerObject
+struct CBPerObject
 {
 	DirectX::XMMATRIX WVP;
 };
 
+class Engine;
+
 class Object
 {
 public:
-	bool Initalize(const WCHAR shaderFileName[], ID3D11Device* d3d11Device, ID3D11DeviceContext* d3d11DevCon);
+	bool Initalize(const WCHAR shaderFileName[], ID3D11Device* d3d11Device, ID3D11DeviceContext* d3d11DevCon, Engine* engine);
 	void Update();
 	void Draw();
 	void CleanUp() const;
+
+public:
+	void* operator new(size_t i);
+	void operator delete(void* p);
 
 protected:
 	HRESULT CompileShader(const LPCWSTR shaderFileName, LPCSTR entryPointName, LPCSTR shaderModelName, ID3DBlob** shaderBlob);
 
 protected:
-	// Blend
-	ID3D11BlendState* mTransparency;
-	ID3D11RasterizerState* mCCWcullMode;
-	ID3D11RasterizerState* mCWcullMode;
-
 	// Texture
 	ID3D11ShaderResourceView* mCubesTexture;
 	ID3D11SamplerState* mCubesSamplerState;
@@ -74,5 +75,6 @@ protected:
 	// Direct 3D Core
 	ID3D11Device* mD3d11Device;
 	ID3D11DeviceContext* mD3d11DevCon;
+	Engine* mEngine;
 };
 

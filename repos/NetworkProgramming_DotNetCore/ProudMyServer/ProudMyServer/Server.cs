@@ -10,6 +10,8 @@ namespace ProudMyServer
 
         private StartServerParameter mParam;
         private NetServer mServer;
+        private SpawnManager mSpawnManger;
+        private int HP = 20;
 
         private void ClientJoinHandler(NetClientInfo clientInfo)
         {
@@ -24,16 +26,18 @@ namespace ProudMyServer
 
         private void ReceiveUserMessage(HostID sender, RmiContext rmiContext, ByteArray payload)
         {
-            string message = Encoding.UTF8.GetString(payload.data);
-            Console.WriteLine($"Recv Message {sender} : {message}");
+            int id = BitConverter.ToInt32(payload.data);
 
-            byte[] sendBuf = Encoding.UTF8.GetBytes("Sent to client!");
-
-            foreach (HostID id in mServer.GetClientHostIDs())
+            if (id == 101)
             {
-                if (id != sender)
+                HP -= 10;
+
+                if (HP <= 0)
                 {
-                    mServer.SendUserMessage(id, RmiContext.FastEncryptedReliableSend, new ByteArray(sendBuf));
+                    id = 102;
+                    byte[] buf = BitConverter.GetBytes(id);
+                    ByteArray sendPayload = new ByteArray(buf);
+                    mServer.SendUserMessage(sender, RmiContext.ReliableSend, sendPayload);
                 }
             }
         }
@@ -41,6 +45,7 @@ namespace ProudMyServer
         public Server(ushort port)
         {
             mServer = new NetServer();
+            mSpawnManger = new SpawnManager(ref mServer);
 
             mParam = new StartServerParameter();
 
@@ -54,6 +59,8 @@ namespace ProudMyServer
         public void Start()
         {
             mServer.Start(mParam);
+
+            mSpawnManger.Start();
         }
 
         public void Run()

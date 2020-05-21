@@ -24,3 +24,12 @@ void ErrorLogger::Log(HRESULT hr, std::string message)
 	assert(nullptr);
 	OutputDebugStringW(errorMessage.c_str());
 }
+
+void ErrorLogger::AssertInitializationInternal(HRESULT hr, std::string message)
+{
+	if (FAILED(hr))
+	{
+		Log(hr, message);
+		exit(EXIT_FAILURE);
+	}
+}

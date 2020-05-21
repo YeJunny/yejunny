@@ -28,6 +28,6 @@ PS_INPUT VS(VS_INPUT Input)
 
 float4 PS(PS_INPUT Input) : SV_TARGET
 {
-    //return float4(1.0f, 1.0f, 1.0f, 1.0f);
-    return ObjTexture.Sample(ObjSamplerState, Input.mTexCoord);
+    float4 diffuse = ObjTexture.Sample(ObjSamplerState, Input.mTexCoord);
+    return diffuse;
 }

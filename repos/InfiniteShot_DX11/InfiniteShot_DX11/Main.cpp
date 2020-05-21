@@ -8,23 +8,17 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
 {
 	Engine engine;
 
-	if (!engine.InitializeWindow(hInstance, nCmdShow, true, L"Infinite Shot!", L"InfiniteShotClass", 800, 600))
-	{
-		ErrorLogger::Log(E_FAIL, "Window Initialization");
-		exit(EXIT_FAILURE);
-	}
+	HRESULT hr = engine.InitializeWindow(hInstance, nCmdShow, true, L"Infinite Shot!", L"InfiniteShotClass", 800, 600);
+	
+	AssertInitialization(hr, "Window Initialization");
 
-	if (!engine.InitializeDirect3d11App(hInstance))
-	{
-		ErrorLogger::Log(E_FAIL, "Direct3D Initialization - Failed");
-		exit(EXIT_FAILURE);
-	}
+	hr = engine.InitializeDirect3d11App(hInstance);
+	
+	AssertInitialization(hr, "Direct3D Initialization - Failed");
 
-	if (!engine.InitScene())
-	{
-		ErrorLogger::Log(E_FAIL, "Initialize Scene = Failed");
-		exit(EXIT_FAILURE);
-	}
+	hr = engine.InitScene();
+	
+	AssertInitialization(hr, "Initialize Scene = Failed");
 
 	while (engine.ProcessMessage())
 	{

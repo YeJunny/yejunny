@@ -28,10 +28,14 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 }
 
 WindowManager::WindowManager()
+	: mWidth(0)
+	, mHeight(0)
+	, mHwnd(null)
+	, mWndClassName(nullptr)
 {
 }
 
-bool WindowManager::InitializeWindow(HINSTANCE hInstance, int showWnd, bool bIswindowed, const TCHAR* titleName, const TCHAR* className, INT width, INT height)
+HRESULT WindowManager::InitializeWindow(HINSTANCE hInstance, int showWnd, bool bIswindowed, const TCHAR* titleName, const TCHAR* className, INT width, INT height)
 {
 	mWndClassName = className;
 	mWidth = width;
@@ -98,7 +102,7 @@ bool WindowManager::InitializeWindow(HINSTANCE hInstance, int showWnd, bool bIsw
 	ShowWindow(mHwnd, showWnd);
 	UpdateWindow(mHwnd);
 
-	return true;
+	return S_OK;
 }
 
 bool WindowManager::ProcessMessage()
