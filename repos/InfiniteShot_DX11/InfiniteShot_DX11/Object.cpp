@@ -87,8 +87,10 @@ bool Object::Initalize(const WCHAR shaderFileName[], ID3D11Device* d3d11Device, 
 
 
 	// Define light
-	mLight.Dir = XMFLOAT3(0.25f, 0.5f, -1.0f);
-	mLight.Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+	mLight.Pos = XMFLOAT3(0, 0, 0);
+	mLight.Range = 100.0f;
+	mLight.Att = XMFLOAT3(0.0f, 0.2f, 0.0f);
+	mLight.Ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
 	mLight.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 
 
@@ -299,6 +301,15 @@ void Object::Update(double deltaTime)
 
 	// Set cube1's world space using the transformations
 	mCube1World =  Scaling * Translation * Rotation;
+
+	// Set lights
+	XMVECTOR lightVector = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+
+	lightVector = XMVector3TransformCoord(lightVector, mCube1World);
+
+	mLight.Pos.x = XMVectorGetX(lightVector);
+	mLight.Pos.y = XMVectorGetY(lightVector);
+	mLight.Pos.z = XMVectorGetZ(lightVector);
 
 	// Reset cube2World
 	mCube2World = XMMatrixIdentity();
