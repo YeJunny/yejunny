@@ -11,7 +11,7 @@ namespace ProudMyServer
         private Thread mThread;
         private NetServer mServer;
 
-        public SpawnManager(ref NetServer server)
+        public SpawnManager(NetServer server)
         {
             mThread = new Thread(new ThreadStart(Run));
             mServer = server;

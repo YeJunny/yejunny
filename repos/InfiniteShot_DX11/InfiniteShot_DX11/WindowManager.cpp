@@ -38,6 +38,7 @@ WindowManager::WindowManager()
 
 HRESULT WindowManager::InitializeWindow(HINSTANCE hInstance, int showWnd, bool bIswindowed, const TCHAR* titleName, const TCHAR* className, INT width, INT height)
 {
+	mInstance = hInstance;
 	mWndClassName = className;
 	mWidth = width;
 	mHeight = height;

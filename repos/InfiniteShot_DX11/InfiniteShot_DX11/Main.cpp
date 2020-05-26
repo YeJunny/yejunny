@@ -9,15 +9,15 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
 	Engine engine;
 
 	HRESULT hr = engine.InitializeWindow(hInstance, nCmdShow, true, L"Infinite Shot!", L"InfiniteShotClass", 800, 600);
-	
 	AssertInitialization(hr, "Window Initialization");
 
 	hr = engine.InitializeDirect3d11App(hInstance);
-	
 	AssertInitialization(hr, "Direct3D Initialization - Failed");
 
-	hr = engine.InitScene();
+	hr = engine.LoadResource();
+	AssertInitialization(hr, "Load Resource - Failed");
 	
+	hr = engine.InitScene();
 	AssertInitialization(hr, "Initialize Scene = Failed");
 
 	while (engine.ProcessMessage())

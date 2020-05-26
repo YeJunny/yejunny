@@ -1,0 +1,13 @@
+Castle
+Shaders\\Effects.fx
+Models\\Castle\\Castle.FBX
+Textures\\Castle\\Castle_Exterior_Texture.jpg
+Textures\\Castle\\Castle_TowersDoors_Windows_Texture.jpg
+Textures\\Castle\\Castle_Ground_Fountain_Texture.jpg
+Textures\\Castle\\Castle_Interior_Texture.jpg
+End
+Enemy
+Shaders\\Effects.fx
+Models\\Enemy\\Enemy.FBX
+Textures\\Enemy\\Enemy.jpg
+End

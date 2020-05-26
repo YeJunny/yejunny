@@ -1,10 +1,11 @@
 #include "Engine.h"
+#include "Camera.h"
+#include <thread>
 using namespace DirectX;
 
 HRESULT Engine::InitializeWindow(HINSTANCE hInstance, int showWnd, bool bIsWindowed, const TCHAR* titleName, const TCHAR* className, INT width, INT height)
 {
 	HRESULT hr = WindowManager::InitializeWindow(hInstance, showWnd, bIsWindowed, titleName, className, width, height);
-	
 	AssertInitialization(hr, "Initialize error!");
 	
 	return S_OK;
@@ -18,7 +19,7 @@ bool Engine::ProcessMessage()
 HRESULT Engine::InitializeDirect3d11App(HINSTANCE hInstance)
 {
 	HRESULT hr;
-
+	
 	//Describe backbuffer
 	DXGI_MODE_DESC backbufferDesc;
 
@@ -44,20 +45,20 @@ HRESULT Engine::InitializeDirect3d11App(HINSTANCE hInstance)
 	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	swapChainDesc.BufferCount = 1;
 	swapChainDesc.OutputWindow = mHwnd;
-	swapChainDesc.Windowed = TRUE;
+	swapChainDesc.Windowed = false;
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 
 	// Create DXGI Factory to enumerate adapters
 	IDXGIFactory1* DXGIFactory;
 
 	hr = CreateDXGIFactory1(__uuidof(IDXGIFactory1), (void**)&DXGIFactory);
-
 	AssertInitialization(hr, "Direct 3D Create DXGI Factory - Failed");
 
 	// Use the first adapter
 	IDXGIAdapter1* adapter;
 
 	hr = DXGIFactory->EnumAdapters1(1, &adapter);
+	AssertInitialization(hr, "Direct 3D EnumAdapters1 - Failed");
 
 	DXGI_ADAPTER_DESC1 adapterDescription;
 	adapter->GetDesc1(&adapterDescription);
@@ -65,8 +66,6 @@ HRESULT Engine::InitializeDirect3d11App(HINSTANCE hInstance)
 	OutputDebugStringW(adapterDescription.Description);
 	OutputDebugStringA("\n==========================\n");
 
-	AssertInitialization(hr, "Direct 3D EnumAdapters1 - Failed");
-	
 	DXGIFactory->Release();
 
 
@@ -85,7 +84,6 @@ HRESULT Engine::InitializeDirect3d11App(HINSTANCE hInstance)
 		nullptr,
 		&mD3d11DevCon
 	);
-
 	AssertInitialization(hr, "Direct 3D Create Device & Swap Chain - Failed");
 
 	// Initalizer direct2d, direct10.1, directwrite
@@ -97,12 +95,10 @@ HRESULT Engine::InitializeDirect3d11App(HINSTANCE hInstance)
 	ID3D11Texture2D* backBuffer;
 
 	hr = mSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&backBuffer));
-	
 	AssertInitialization(hr, "Direct 3D Get Buffer - Failed");
 
 	// Creating render target
 	hr = mD3d11Device->CreateRenderTargetView(backBuffer, nullptr, &mRenderTargetView);
-
 	AssertInitialization(hr, "Direct 3D Create Render Target - Failed");
 
 	backBuffer->Release();
@@ -123,12 +119,11 @@ HRESULT Engine::InitializeDirect3d11App(HINSTANCE hInstance)
 
 	// Create depth stencil
 	ID3D11Texture2D* depthStencilBuffer;
-	hr = mD3d11Device->CreateTexture2D(&depthStencilDesc, nullptr, &depthStencilBuffer);
 
+	hr = mD3d11Device->CreateTexture2D(&depthStencilDesc, nullptr, &depthStencilBuffer);
 	AssertInitialization(hr, "Direct 3D Create Depth Stencil Buffer - Failed");
 
 	hr = mD3d11Device->CreateDepthStencilView(depthStencilBuffer, nullptr, &mDepthStencilView);
-
 	AssertInitialization(hr, "Direct 3D Create Depth Stencil View - Failed");
 
 	depthStencilBuffer->Release();
@@ -148,7 +143,6 @@ HRESULT Engine::InitD2D_D3D101_DWrite(IDXGIAdapter1* adapter)
 		D3D10_1_SDK_VERSION,
 		&mD3d101Device
 	);
-
 	AssertInitialization(hr, "Direct 3D Create Device 10.1 - Failed");
 
 	// Create shared texture that direct 3d 10.1 will render on
@@ -164,14 +158,12 @@ HRESULT Engine::InitD2D_D3D101_DWrite(IDXGIAdapter1* adapter)
 	sharedTexDesc.Usage = D3D11_USAGE_DEFAULT;
 	sharedTexDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
 	sharedTexDesc.MiscFlags = D3D11_RESOURCE_MISC_SHARED_KEYEDMUTEX;
-
+	
 	hr = mD3d11Device->CreateTexture2D(&sharedTexDesc, nullptr, &mSharedTex11);
-
 	AssertInitialization(hr, "Direct 3D Create Texture 2D - Failed");
 
 	// Get the keyed mutex for the shared texture (for D3D11)
 	hr = mSharedTex11->QueryInterface(__uuidof(IDXGIKeyedMutex), (void**)&mKeyedMutex11);
-
 	AssertInitialization(hr, "Direct 3D Texture2D Query Interface - Failed");
 
 	// Get the shared handle needed to open the ahared texture in D3D10.1
@@ -179,11 +171,9 @@ HRESULT Engine::InitD2D_D3D101_DWrite(IDXGIAdapter1* adapter)
 	HANDLE sharedHandle10;
 
 	hr = mSharedTex11->QueryInterface(__uuidof(IDXGIResource), (void**)&sharedResource10);
-
 	AssertInitialization(hr, "Direct 3D Texture2D Query Interface = Failed");
 
 	hr = sharedResource10->GetSharedHandle(&sharedHandle10);
-
 	AssertInitialization(hr, "Direct 3D IDXGIResource Query Interface = Failed");
 
 	sharedResource10->Release();
@@ -192,17 +182,14 @@ HRESULT Engine::InitD2D_D3D101_DWrite(IDXGIAdapter1* adapter)
 	IDXGISurface1* sharedSurface10;
 
 	hr = mD3d101Device->OpenSharedResource(sharedHandle10, __uuidof(IDXGISurface1), (void**)&sharedSurface10);
-
 	AssertInitialization(hr, "Direct 3D 10.1 Open Shared Resource - Failed");
 
 	hr = sharedSurface10->QueryInterface(__uuidof(IDXGIKeyedMutex), (void**)&mKeyedMutex10);
-
 	AssertInitialization(hr, "Direct 3D 10.1 IDXGISurface1 Query Interface - Failed");
 
 	// Create d2d factory
 	ID2D1Factory* D2DFactory;
 	hr = D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, __uuidof(ID2D1Factory), (void**)&D2DFactory);
-
 	AssertInitialization(hr, "Direct 2D 1 Create Factory - Failed");
 
 	D2D1_RENDER_TARGET_PROPERTIES renderTargetProperties;
@@ -213,7 +200,6 @@ HRESULT Engine::InitD2D_D3D101_DWrite(IDXGIAdapter1* adapter)
 	renderTargetProperties.pixelFormat = D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
 	hr = D2DFactory->CreateDxgiSurfaceRenderTarget(sharedSurface10, &renderTargetProperties, &mD2dRenderTarget);
-
 	AssertInitialization(hr, "Direct 2D 1 Create Dxgi Surface Render Target - Failed");
 
 	sharedSurface10->Release();
@@ -222,7 +208,6 @@ HRESULT Engine::InitD2D_D3D101_DWrite(IDXGIAdapter1* adapter)
 
 	// Create a solid color brush to draw something with 
 	hr = mD2dRenderTarget->CreateSolidColorBrush(D2D1::ColorF(1.0f, 1.0f, 0.0f, 1.0f), &mBrush);
-
 	AssertInitialization(hr, "Direct 2D 1 Create Solid Color Brush - Failed");
 
 
@@ -232,7 +217,6 @@ HRESULT Engine::InitD2D_D3D101_DWrite(IDXGIAdapter1* adapter)
 		__uuidof(IDWriteFactory),
 		reinterpret_cast<IUnknown**>(&mDWriteFactory)
 	);
-
 	AssertInitialization(hr, "Create Direct Write - Failed");
 	
 	hr = mDWriteFactory->CreateTextFormat(
@@ -245,15 +229,12 @@ HRESULT Engine::InitD2D_D3D101_DWrite(IDXGIAdapter1* adapter)
 		L"en-us",
 		&mTextFormat
 	);
-
 	AssertInitialization(hr, "Direct Write Create Text Format - Failed");
 
 	hr = mTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING);
-
 	AssertInitialization(hr, "Direct Write Set Text Alignment - Failed");
 
 	hr = mTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
-
 	AssertInitialization(hr, "Direct Write Set Paragraph Alignment - Failed");
 
 	// Kepping D3D 10.1 Debug Output Quiet
@@ -294,8 +275,8 @@ void Engine::InitD2DScreenTexture()
 	ZeroMemory(&indexBufferData, sizeof(indexBufferData));
 
 	indexBufferData.pSysMem = indices;
-	HRESULT hr = mD3d11Device->CreateBuffer(&indexBufferDesc, &indexBufferData, &mD2dIndexBuffer);
 
+	HRESULT hr = mD3d11Device->CreateBuffer(&indexBufferDesc, &indexBufferData, &mD2dIndexBuffer);
 	AssertInitialization(hr, "Direct 3D 11 Create Buffer - Failed");
 
 	D3D11_BUFFER_DESC vertexBufferDesc;
@@ -310,57 +291,17 @@ void Engine::InitD2DScreenTexture()
 	D3D11_SUBRESOURCE_DATA vertexBufferData;
 	vertexBufferData.pSysMem = v;
 	hr = mD3d11Device->CreateBuffer(&vertexBufferDesc, &vertexBufferData, &mD2dVertBuffer);
-
 	AssertInitialization(hr, "Direct 3D 11 Create Buffer - Failed");
 
 	// Create a shader resource view from the texture D2D will render to,
 	// So we can use it to texutre a square which overlays our scene
 	hr = mD3d11Device->CreateShaderResourceView(mSharedTex11, nullptr, &mD2dTexture);
-
 	AssertInitialization(hr, "Direct 3D 11 Create Shader Resource View - failed");
-}
-
-void Engine::ReleaseObject()
-{
-	// Release the objects
-	for (int i = mObjects.size() - 1; i >= 0; --i)
-	{
-		mObjects[i]->CleanUp();
-		delete[] mObjects[i];
-	}
-
-	// Release the COM Ojbects
-	mTextTransparency->Release();
-	mCBTextBuffer->Release();
-	mTextSamplerState->Release();
-	mD3d101Device->Release();
-	mKeyedMutex10->Release();
-	mKeyedMutex11->Release();
-	mD2dRenderTarget->Release();
-	mD2dTexture->Release();
-	mBrush->Release();
-	mSharedTex11->Release();
-	mDWriteFactory->Release();
-	mTextFormat->Release();
-	mSwapChain->Release();
-	mDepthStencilView->Release();
-	mRenderTargetView->Release();
-	mD3d11DevCon->Release();
-	mD3d11Device->Release();
 }
 
 HRESULT Engine::InitScene()
 {
 	InitD2DScreenTexture();
-
-	// Create objects
-	Object* triangle = new Object();
-	mObjects.push_back(triangle);
-
-	for (size_t i = 0; i < mObjects.size(); ++i)
-	{
-		mObjects[i]->Initalize(L"Shaders\\Effects.fx", mD3d11Device, mD3d11DevCon, this);
-	}
 
 	// Set primitive topology
 	mD3d11DevCon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -400,7 +341,6 @@ HRESULT Engine::InitScene()
 	blendDesc.RenderTarget[0] = rtbd;
 
 	HRESULT hr = mD3d11Device->CreateBlendState(&blendDesc, &mTextTransparency);
-
 	AssertInitialization(hr, "Direct 3D 11 Create Blend State - Failed");
 
 	// Create constant buffer
@@ -413,7 +353,6 @@ HRESULT Engine::InitScene()
 	cbDesc.MiscFlags = 0;
 
 	hr = mD3d11Device->CreateBuffer(&cbDesc, nullptr, &mCBTextBuffer);
-
 	AssertInitialization(hr, "Direct 3D Create Constant Buffer - Failed");
 
 	// Describe the sampler
@@ -429,7 +368,6 @@ HRESULT Engine::InitScene()
 
 	// Create sampler state
 	hr = mD3d11Device->CreateSamplerState(&sampDesc, &mTextSamplerState);
-
 	AssertInitialization(hr, "Direct 3D Create Sampler State - Failed");
 
 	// Create CCW & CW & No Culling
@@ -440,8 +378,8 @@ HRESULT Engine::InitScene()
 	cmDesc.CullMode = D3D11_CULL_BACK;
 
 	cmDesc.FrontCounterClockwise = true;
-	hr = mD3d11Device->CreateRasterizerState(&cmDesc, &mCCWcullMode);
 
+	hr = mD3d11Device->CreateRasterizerState(&cmDesc, &mCCWcullMode);
 	AssertInitialization(hr, "Direct 3D Create Rasterizer State - Failed");
 
 	cmDesc.FrontCounterClockwise = false;
@@ -455,14 +393,78 @@ HRESULT Engine::InitScene()
 	cullDesc.CullMode = D3D11_CULL_NONE;
 
 	hr = mD3d11Device->CreateRasterizerState(&cullDesc, &mNoCullMode);
-
 	AssertInitialization(hr, "Direct 3D Create Rasterizer state- Failed");
+
+	return S_OK;
+}
+
+HRESULT Engine::LoadResource()
+{
+	std::vector<std::thread> objectInitializer;
+
+	mCamera = new Camera(mInstance, mHwnd);
+
+	while (true)
+	{
+		try
+		{
+			std::wfstream modelsInit;
+			modelsInit.open("Settings\\ModelsInitialization.txt");
+
+			WCHAR temp[128];
+
+			std::wstring wName;
+			std::wstring wShader;
+			std::wstring wModel;
+			std::vector<std::wstring> wTextures;
+
+			while (true)
+			{
+				if (!(modelsInit >> wName >> wShader >> wModel))
+				{
+					break;
+				}
+
+				while (true)
+				{
+					modelsInit >> temp;
+					if (!wcscmp(temp, L"End"))
+					{
+						break;
+					}
+					wTextures.push_back(temp);
+				}
+
+
+				std::string model;
+				model.assign(wModel.begin(), wModel.end());
+
+				Object* object = new Object();
+				object->Setup(mD3d11Device, mD3d11DevCon, this);
+				object->ImportModel(model.c_str(), wTextures);
+				object->Initalize(wShader.c_str());
+				object->SetName(wName);
+
+				mObjects.push_back(object);
+			}
+
+
+			break;
+		}
+		catch (std::ifstream::failure e)
+		{
+			ErrorLogger::Log("File Error : ModelsInitialization.txt");
+			ErrorLogger::Log(e.what());
+		}
+	}
 
 	return S_OK;
 }
 
 void Engine::UpdateScene()
 {
+	mCamera->DetectInput(mFrameTime);
+
 	for (size_t i = 0; i < mObjects.size(); ++i)
 	{
 		mObjects[i]->Update(mFrameTime);
@@ -489,6 +491,42 @@ void Engine::DrawScene()
 
 	// Present the back buffer to the screen
 	mSwapChain->Present(0, 0);
+}
+
+
+void Engine::ReleaseObject()
+{
+	mSwapChain->SetFullscreenState(false, nullptr);
+	PostMessage(mHwnd, WM_DESTROY, 0, 0);
+
+	// Release the objects
+	mCamera->CleanUp();
+	delete mCamera;
+
+	for (int i = mObjects.size() - 1; i >= 0; --i)
+	{
+		mObjects[i]->CleanUp();
+		delete[] mObjects[i];
+	}
+
+	// Release the COM Ojbects
+	mTextTransparency->Release();
+	mCBTextBuffer->Release();
+	mTextSamplerState->Release();
+	mD3d101Device->Release();
+	mKeyedMutex10->Release();
+	mKeyedMutex11->Release();
+	mD2dRenderTarget->Release();
+	mD2dTexture->Release();
+	mBrush->Release();
+	mSharedTex11->Release();
+	mDWriteFactory->Release();
+	mTextFormat->Release();
+	mSwapChain->Release();
+	mDepthStencilView->Release();
+	mRenderTargetView->Release();
+	mD3d11DevCon->Release();
+	mD3d11Device->Release();
 }
 
 void Engine::RenderText(std::wstring text, int inInt)

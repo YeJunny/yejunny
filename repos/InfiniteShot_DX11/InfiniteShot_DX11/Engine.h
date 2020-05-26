@@ -5,6 +5,7 @@
 #pragma comment(lib, "DXGI.lib")
 #pragma comment(lib, "D2D1.lib")
 #pragma comment(lib, "dwrite.lib")
+#pragma comment(lib, "dxguid.lib")
 
 #include <d3d11.h>
 #include <d3d10_1.h>
@@ -19,6 +20,24 @@
 #include "Object.h"
 #include "WindowManager.h"
 
+class Camera;
+
+struct Vertex
+{
+	Vertex(float x, float y, float z,
+		float u, float v,
+		float nx, float ny, float nz)
+		: Pos(x, y, z)
+		, TexCoord(u, v)
+		, Normal(nx, ny, nz)
+	{
+	}
+
+	DirectX::XMFLOAT3 Pos;
+	DirectX::XMFLOAT2 TexCoord;
+	DirectX::XMFLOAT3 Normal;
+};
+
 class Engine : public WindowManager
 {
 public:
@@ -26,16 +45,18 @@ public:
 	HRESULT InitializeDirect3d11App(HINSTANCE hInstance);
 	bool ProcessMessage();
 	HRESULT InitScene();
+	HRESULT LoadResource();
 	void UpdateScene();
 	void DrawScene();
 	void RenderText(std::wstring text, int inInt);
 	void ReleaseObject();
 
 public:
+	Camera* GetCamera() const { return mCamera; }
 	ID3D11RasterizerState* GetCWcullMode() const { return mCWcullMode; }
 	ID3D11RasterizerState* GetCCWcullMode() const { return mCCWcullMode; }
 	ID3D11RasterizerState* GetNoCullMode() const { return mNoCullMode; }
-
+	
 private:
 	HRESULT InitD2D_D3D101_DWrite(IDXGIAdapter1* adapter);
 	void InitD2DScreenTexture();
@@ -47,32 +68,34 @@ private:
 	};
 
 	// Drawing Text
-	ID3D11BlendState* mTextTransparency = nullptr;
-	ID3D11Buffer* mCBTextBuffer = nullptr;
-	ID3D11SamplerState* mTextSamplerState = nullptr;
-	ID3D10Device1* mD3d101Device = nullptr;
-	IDXGIKeyedMutex* mKeyedMutex11 = nullptr;
-	IDXGIKeyedMutex* mKeyedMutex10 = nullptr;
-	ID2D1RenderTarget* mD2dRenderTarget = nullptr;
-	ID2D1SolidColorBrush* mBrush = nullptr;
-	ID3D11Texture2D* mBackbuffer11 = nullptr;
-	ID3D11Texture2D* mSharedTex11 = nullptr;
-	ID3D11Buffer* mD2dVertBuffer = nullptr;
-	ID3D11Buffer* mD2dIndexBuffer = nullptr;
-	ID3D11ShaderResourceView* mD2dTexture = nullptr;
-	IDWriteFactory* mDWriteFactory = nullptr;
-	IDWriteTextFormat* mTextFormat = nullptr;
+	ID3D11BlendState*			mTextTransparency	= nullptr;
+	ID3D11Buffer*				mCBTextBuffer		= nullptr;
+	ID3D11SamplerState*			mTextSamplerState	= nullptr;
+	ID3D10Device1*				mD3d101Device		= nullptr;
+	IDXGIKeyedMutex*			mKeyedMutex11		= nullptr;
+	IDXGIKeyedMutex*			mKeyedMutex10		= nullptr;
+	ID2D1RenderTarget*			mD2dRenderTarget	= nullptr;
+	ID2D1SolidColorBrush*		mBrush				= nullptr;
+	ID3D11Texture2D*			mBackbuffer11		= nullptr;
+	ID3D11Texture2D*			mSharedTex11		= nullptr;
+	ID3D11Buffer*				mD2dVertBuffer		= nullptr;
+	ID3D11Buffer*				mD2dIndexBuffer		= nullptr;
+	ID3D11ShaderResourceView*	mD2dTexture			= nullptr;
+	IDWriteFactory*				mDWriteFactory		= nullptr;
+	IDWriteTextFormat*			mTextFormat			= nullptr;
 
 	// Core
-	IDXGISwapChain* mSwapChain = nullptr;
-	ID3D11Device* mD3d11Device = nullptr;
-	ID3D11DeviceContext* mD3d11DevCon = nullptr;
-	ID3D11RenderTargetView* mRenderTargetView = nullptr;
-	ID3D11DepthStencilView* mDepthStencilView = nullptr;
-	ID3D11RasterizerState* mCCWcullMode = nullptr;
-	ID3D11RasterizerState* mCWcullMode = nullptr;
-	ID3D11RasterizerState* mNoCullMode = nullptr;
+	IDXGISwapChain*				mSwapChain			= nullptr;
+	ID3D11Device*				mD3d11Device		= nullptr;
+	ID3D11DeviceContext*		mD3d11DevCon		= nullptr;
+	ID3D11RenderTargetView*		mRenderTargetView	= nullptr;
+	ID3D11DepthStencilView*		mDepthStencilView	= nullptr;
+	ID3D11RasterizerState*		mCCWcullMode		= nullptr;
+	ID3D11RasterizerState*		mCWcullMode			= nullptr;
+	ID3D11RasterizerState*		mNoCullMode			= nullptr;
 
-	std::vector<Object*> mObjects;
+	// Objects
+	Camera*						mCamera;
+	std::vector<Object*>		mObjects;
 };
 

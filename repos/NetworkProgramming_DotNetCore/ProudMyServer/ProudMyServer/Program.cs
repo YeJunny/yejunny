@@ -3,6 +3,7 @@ using System.ComponentModel.Design;
 using System.Text;
 using System.Threading;
 using Nettention.Proud;
+using SendText;
 
 namespace ProudMyServer
 {
@@ -10,25 +11,40 @@ namespace ProudMyServer
     {
         public static System.Guid version = new System.Guid("{ 0x3ae33249, 0xecc6, 0x4980, { 0xbc, 0x5d, 0x7b, 0xa, 0x99, 0x9c, 0x7, 0x39 } }");
 
-        public enum EMenu
+        public static Proxy Proxy;
+        public static Stub Stub;
+
+        public static bool LoginStub(HostID hostID, RmiContext rmiContext, string id, string pw)
         {
-            List,
-            o,
-            q,
-            Exit,
-        };
+            Console.WriteLine($"ID: {id}");
+            Console.WriteLine($"PW: {pw}");
+
+            return true;
+        }
 
         static void Main(string[] args)
         {
-            Server server = new Server(5000);
+            NetServer server = new NetServer();
 
-            server.Start();
+            StartServerParameter Param = new StartServerParameter();
 
-            server.Spawn();
+            Param.protocolVersion = new Nettention.Proud.Guid(version);
+            Param.tcpPorts.Add(5000);
+            Param.udpPorts.Add(5000);
+
+            Proxy = new Proxy();
+            Stub = new Stub();
+
+            server.AttachProxy(Proxy);
+            server.AttachStub(Stub);
+
+            Stub.Login = LoginStub;
+
+            server.Start(Param);
 
             while (true)
             {
-                server.Run();
+                
             }
         }
     }

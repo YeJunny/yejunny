@@ -23,6 +23,7 @@ protected:
 protected:
 	LPCTSTR mWndClassName;
 	HWND mHwnd;
+	HINSTANCE mInstance;
 	int mWidth;
 	int mHeight;
 

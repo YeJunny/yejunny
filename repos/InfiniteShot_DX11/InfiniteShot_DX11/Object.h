@@ -7,49 +7,14 @@
 #include <DirectXMath.h>
 #include <vector>
 #include "ErrorLogger.h"
+#include "Model.h"
+#include "Light.h"
 
 #ifndef null
 	#define null (NULL)
 #endif
 
-struct Vertex
-{
-	Vertex(float x, float y, float z,
-		float u, float v,
-		float nx, float ny, float nz)
-		: Pos(x, y, z)
-		, TexCoord(u, v)
-		, Normal(nx, ny, nz)
-	{
-	}
-
-	DirectX::XMFLOAT3 Pos;
-	DirectX::XMFLOAT2 TexCoord;
-	DirectX::XMFLOAT3 Normal;
-};
-
-struct Light
-{
-	Light()
-	{
-		ZeroMemory(this, sizeof(Light));
-	}
-
-	DirectX::XMFLOAT3 Dir;
-	float Pad;
-	DirectX::XMFLOAT3 Pos;
-	float Range;
-	DirectX::XMFLOAT3 Att;
-	float pad2;
-	DirectX::XMFLOAT4 Ambient;
-	DirectX::XMFLOAT4 Diffuse;
-};
-
-struct CBPerFrame
-{
-	Light Light;
-	DirectX::XMMATRIX Rotation;
-};
+class Engine;
 
 struct CBPerObject
 {
@@ -57,15 +22,23 @@ struct CBPerObject
 	DirectX::XMMATRIX World;
 };
 
-class Engine;
+struct CBPerFrame
+{
+	Light Light;
+};
 
 class Object
 {
 public:
-	bool Initalize(const WCHAR shaderFileName[], ID3D11Device* d3d11Device, ID3D11DeviceContext* d3d11DevCon, Engine* engine);
+	void Setup(ID3D11Device* d3d11Device, ID3D11DeviceContext* d3d11DevCon, Engine* engine);
+	bool Initalize(const WCHAR shaderFileName[]);
+	HRESULT ImportModel(const CHAR fbxFileName[], const std::vector<std::wstring> textureFileNames);
 	void Update(double deltaTime);
 	void Draw();
-	void CleanUp() const;
+	void CleanUp();
+
+public:
+	void SetName(std::wstring name) { mName = name; }
 
 public:
 	void* operator new(size_t i);
@@ -75,35 +48,28 @@ protected:
 	HRESULT CompileShader(const LPCWSTR shaderFileName, LPCSTR entryPointName, LPCSTR shaderModelName, ID3DBlob** shaderBlob);
 
 protected:
-	// Light
-	ID3D11Buffer* mCBPerFrameBuffer;
-	ID3D11PixelShader* mD2d_PS;
-	Light mLight;
+	// Model
+	Model_::Model mModel;
+	ID3D11ShaderResourceView** mModelTextureParts;
+	std::wstring mName;
 
 	// Texture
-	ID3D11ShaderResourceView* mCubesTexture;
-	ID3D11SamplerState* mCubesSamplerState;
+	ID3D11SamplerState* mObjectSamplerState;
 
 	// Constant buffer
 	ID3D11Buffer* mCBPerObjectBuffer;
+	ID3D11Buffer* mCBPerFrameBuffer;
 
 	// Vertex & index buffer
-	ID3D11Buffer* mTrianglesVertBuffer;
-	ID3D11Buffer* mTriIndexBuffer;
+	ID3D11Buffer** mModelBufferParts;
 
 	// Shader
 	ID3D11VertexShader* mVS;
 	ID3D11PixelShader* mPS;
+	ID3D11PixelShader* mD2d_PS;
 
 	// Input layout
 	ID3D11InputLayout* mVertLayout;
-
-	// Matrics
-	DirectX::XMVECTOR mCamPosition;
-	DirectX::XMMATRIX mCamView;
-	DirectX::XMMATRIX mCamProjection;
-	DirectX::XMMATRIX mCube1World;
-	DirectX::XMMATRIX mCube2World;
 
 	// Direct 3D Core
 	ID3D11Device* mD3d11Device;

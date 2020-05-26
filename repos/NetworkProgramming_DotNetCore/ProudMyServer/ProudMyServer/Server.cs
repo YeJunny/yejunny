@@ -8,8 +8,8 @@ namespace ProudMyServer
     {
         private string mGuid = "{0xa90a5fc4,0x2b62,0x46f8,{0xbb,0xc4,0xf6,0xea,0xc1,0xef,0x70,0x26}}";
 
-        private StartServerParameter mParam;
-        private NetServer mServer;
+        public StartServerParameter Param { private set; get; }
+        public NetServer Serv { private set; get; }
         private SpawnManager mSpawnManger;
         private int HP = 20;
 
@@ -37,28 +37,28 @@ namespace ProudMyServer
                     id = 102;
                     byte[] buf = BitConverter.GetBytes(id);
                     ByteArray sendPayload = new ByteArray(buf);
-                    mServer.SendUserMessage(sender, RmiContext.ReliableSend, sendPayload);
+                    Serv.SendUserMessage(sender, RmiContext.ReliableSend, sendPayload);
                 }
             }
         }
 
         public Server(ushort port)
         {
-            mServer = new NetServer();
-            mSpawnManger = new SpawnManager(ref mServer);
+            Serv = new NetServer();
+            mSpawnManger = new SpawnManager(Serv);
 
-            mParam = new StartServerParameter();
+            Param = new StartServerParameter();
 
-            mParam.protocolVersion = new Nettention.Proud.Guid(mGuid);
-            mParam.tcpPorts.Add(port);
+            Param.protocolVersion = new Nettention.Proud.Guid(mGuid);
+            Param.tcpPorts.Add(port);
 
-            mServer.ClientJoinHandler = ClientJoinHandler;
-            mServer.ClientLeaveHandler = ClientLeaveHandler;
+            Serv.ClientJoinHandler = ClientJoinHandler;
+            Serv.ClientLeaveHandler = ClientLeaveHandler;
         }
 
         public void Start()
         {
-            mServer.Start(mParam);
+            Serv.Start(Param);
 
             mSpawnManger.Start();
         }
@@ -72,12 +72,12 @@ namespace ProudMyServer
         {
             int hostID = 100;
 
-            HostID[] hostIDs = mServer.GetClientHostIDs();
+            HostID[] hostIDs = Serv.GetClientHostIDs();
 
             foreach (HostID id in hostIDs)
             {
                 ByteArray payload = new ByteArray(BitConverter.GetBytes(hostID));
-                mServer.SendUserMessage(id, RmiContext.ReliableSend, payload);
+                Serv.SendUserMessage(id, RmiContext.ReliableSend, payload);
             }
         }
     }

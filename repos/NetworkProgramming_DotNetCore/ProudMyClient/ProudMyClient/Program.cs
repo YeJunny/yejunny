@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using Nettention.Proud;
+using SendText;
 
 namespace ProudMyClient
 {
@@ -10,12 +11,20 @@ namespace ProudMyClient
 
         public static bool bIsConntected = false;
 
+        public static Proxy Proxy;
+        public static Stub Stub;
+
         public static void JoinServerCompleteHandler(ErrorInfo errorInfo, ByteArray replyFromServer)
         {
             if (errorInfo.errorType == ErrorType.Ok)
             {
                 Console.WriteLine($"Connected Completed!");
                 bIsConntected = true;
+
+                string userID = "qwer";
+                string userPW = "1234";
+
+                Proxy.Login(HostID.HostID_Server, RmiContext.ReliableSend, userID, userPW);
             }
             else
             {
@@ -30,11 +39,38 @@ namespace ProudMyClient
             Console.WriteLine($"Recv from server : {recvMsg}");
         }
 
+        static bool SendText(HostID id, RmiContext rmi, string text)
+        {
+
+            return true;
+        }
+
 
         static void Main(string[] args)
         {
             NetClient client = new NetClient();
 
+            NetConnectionParam param = new NetConnectionParam();
+
+            param.serverIP = "127.0.0.1";
+            param.serverPort = 5000;
+            param.protocolVersion = new Nettention.Proud.Guid(version);
+
+            Proxy = new Proxy();
+            Stub = new Stub();
+
+            client.AttachProxy(Proxy);
+            client.AttachStub(Stub);
+
+            client.Connect(param);
+
+
+            while (true)
+            {
+                Proxy.Login(HostID.HostID_Server, RmiContext.ReliableSend, "123", "456");
+            }
+
+            /*
             NetConnectionParam param = new NetConnectionParam();
 
             param.serverIP = "127.0.0.1";
@@ -61,7 +97,7 @@ namespace ProudMyClient
                 }
 
                 client.FrameMove();
-            }
+                */
         }
     }
 }
