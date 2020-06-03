@@ -1,6 +1,12 @@
 #include "Engine.h"
 #include "Camera.h"
+#include "Monster.h"
+#include "Skymap.h"
 #include <thread>
+#include <wincodec.h>
+#include <wrl.h>
+#include <ScreenGrab.h>
+#include <WICTextureLoader.h>
 using namespace DirectX;
 
 HRESULT Engine::InitializeWindow(HINSTANCE hInstance, int showWnd, bool bIsWindowed, const TCHAR* titleName, const TCHAR* className, INT width, INT height)
@@ -129,6 +135,124 @@ HRESULT Engine::InitializeDirect3d11App(HINSTANCE hInstance)
 	depthStencilBuffer->Release();
 
 	return S_OK;
+}
+
+void Engine::ImportAllModelThread(bool* bIsEnd)
+{
+	while (true)
+	{
+		try
+		{
+			std::wfstream modelsInit;
+			modelsInit.open("Settings\\ModelsInitialization.txt");
+
+			WCHAR textureFileName[128];
+
+			std::wstring nameW;
+			std::wstring shaderFileNameW;
+			std::wstring modelFileNameW;
+			std::vector<std::wstring> texturesFileNames;
+
+			while (true)
+			{
+				if (!(modelsInit >> nameW >> shaderFileNameW >> modelFileNameW))
+				{
+					break;
+				}
+
+				while (true)
+				{
+					modelsInit >> textureFileName;
+					if (!wcscmp(textureFileName, L"End"))
+					{
+						break;
+					}
+					texturesFileNames.push_back(textureFileName);
+				}
+
+
+				std::string modelFileName;
+				modelFileName.assign(modelFileNameW.begin(), modelFileNameW.end());
+
+				Object* object;
+				
+				if (nameW.find(L"Monster") != std::wstring::npos)
+				{
+					object = new Monster();
+				}
+				else
+				{
+					object = new Object();
+				}
+				object->SetName(nameW);
+
+				mObjects.push_back(object);
+
+				object->Setup(mD3d11Device, mD3d11DevCon, this);
+				object->ImportModel(modelFileName.c_str());
+				object->SetTextureFileNamesVector(texturesFileNames);
+				object->Initalize(shaderFileNameW.c_str());
+
+				texturesFileNames.clear();
+			}
+
+
+			modelsInit.close();
+
+			break;
+		}
+		catch (std::ifstream::failure e)
+		{
+			ErrorLogger::Log("File Error : ModelsInitialization.txt");
+			ErrorLogger::Log(e.what());
+		}
+	}
+
+	for (int num = 0; num < mObjects.size(); ++num)
+	{
+		mObjects[num]->ImportTextures();
+	}
+
+	
+	// End of thread
+	*bIsEnd = true;
+}
+
+void Engine::DrawLoading(ID3D11ShaderResourceView** loadingTex)
+{
+	float bgColor[] = { 0, 0, 0, 0.0f };
+	mD3d11DevCon->ClearRenderTargetView(mRenderTargetView, bgColor);
+	mD3d11DevCon->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
+	CBPerObject cbPerObject;
+	cbPerObject.World = XMMatrixTranspose(XMMatrixScaling(0.5f, 0.1f, 1.0f));
+	cbPerObject.WVP = XMMatrixTranspose(XMMatrixScaling(0.5f, 0.1f, 1.0f));
+
+	UINT strides = sizeof(Vertex);
+	UINT offset = 0;
+
+	mD3d11DevCon->IASetVertexBuffers(0, 1, GetSquareVertBuffer(), &strides, &offset);
+	mD3d11DevCon->IASetIndexBuffer(*GetSquareIdxBuffer(), DXGI_FORMAT_R32_UINT, 0);
+	mD3d11DevCon->IASetInputLayout(mBaseVertLayout);
+
+	mD3d11DevCon->PSSetShaderResources(0, 1, loadingTex);
+
+	mD3d11DevCon->VSSetShader(mBaseVertShader, nullptr, 0);
+	mD3d11DevCon->PSSetShader(mBasePixelShader, nullptr, 0);
+
+	mD3d11DevCon->UpdateSubresource(mBaseCB, 0, nullptr, &cbPerObject, 0, 0);
+	mD3d11DevCon->VSSetConstantBuffers(0, 1, &mBaseCB);
+
+	mD3d11DevCon->OMSetRenderTargets(1, &mRenderTargetView, mDepthStencilView);
+
+	mD3d11DevCon->DrawIndexed(6, 0, 0);
+
+	if (!mObjects.empty())
+	{
+		RenderText(L"Loding Model Resources Name : " + mObjects.back()->GetName() + L" ... ", mPercent);
+	}
+
+	mSwapChain->Present(0, 0);
 }
 
 HRESULT Engine::InitD2D_D3D101_DWrite(IDXGIAdapter1* adapter)
@@ -303,6 +427,77 @@ HRESULT Engine::InitScene()
 {
 	InitD2DScreenTexture();
 
+	ID3DBlob* vsBuffer;
+	ID3DBlob* psBuffer;
+	ID3DBlob* d2dVSBuffer;
+	ID3DBlob* d2dPSBuffer;
+
+	// Compile shaders from shader file
+	HRESULT hr = Engine::CompileShader(L"Shaders\\BaseEffects.fx", "VS", "vs_5_0", &vsBuffer);
+	AssertInitialization(hr, "Direct 3D CompileShader - Failed");
+	hr = Engine::CompileShader(L"Shaders\\BaseEffects.fx", "PS", "ps_5_0", &psBuffer);
+	AssertInitialization(hr, "Direct 3D CompileShader - Failed");
+	hr = Engine::CompileShader(L"Shaders\\TextEffects.fx", "D2D_VS", "vs_5_0", &d2dVSBuffer);
+	AssertInitialization(hr, "Direct 3D CompileShader - Failed");
+	hr = Engine::CompileShader(L"Shaders\\TextEffects.fx", "D2D_PS", "ps_5_0", &d2dPSBuffer);
+	AssertInitialization(hr, "Direct 3D CompileShader - Failed");
+
+	// Create the shader objects
+	hr = mD3d11Device->CreateVertexShader(
+		vsBuffer->GetBufferPointer(),
+		vsBuffer->GetBufferSize(),
+		nullptr,
+		&mBaseVertShader
+	);
+	AssertInitialization(hr, "Direct 3D Create Vertex Shader - Failed");
+
+	hr = mD3d11Device->CreatePixelShader(
+		psBuffer->GetBufferPointer(),
+		psBuffer->GetBufferSize(),
+		nullptr,
+		&mBasePixelShader
+	);
+	AssertInitialization(hr, "Direct 3D Create Pixel Shader - Failed");
+
+	hr = mD3d11Device->CreateVertexShader(
+		d2dVSBuffer->GetBufferPointer(),
+		d2dVSBuffer->GetBufferSize(),
+		nullptr,
+		&mTextVertShader
+	);
+	AssertInitialization(hr, "Direct 3D Create Vertex Shader - Failed");
+
+	hr = mD3d11Device->CreatePixelShader(
+		d2dPSBuffer->GetBufferPointer(),
+		d2dPSBuffer->GetBufferSize(),
+		nullptr,
+		&mTextPixelShader
+	);
+	AssertInitialization(hr, "Direct 3D Create Pixel Shader - Failed");
+
+
+	// Create the input layout
+	D3D11_INPUT_ELEMENT_DESC layouts[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0},
+	};
+	UINT numElements = ARRAYSIZE(layouts);
+
+	hr = mD3d11Device->CreateInputLayout(layouts, numElements, vsBuffer->GetBufferPointer(), vsBuffer->GetBufferSize(), &mBaseVertLayout);
+	AssertInitialization(hr, "Direct 3D Create Input Layout - Failed");
+
+
+	// Set the input layout
+	mD3d11DevCon->IASetInputLayout(mBaseVertLayout);
+
+
+	vsBuffer->Release();
+	psBuffer->Release();
+	d2dVSBuffer->Release();
+	d2dPSBuffer->Release();
+
 	// Set primitive topology
 	mD3d11DevCon->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -340,7 +535,7 @@ HRESULT Engine::InitScene()
 	blendDesc.AlphaToCoverageEnable = false;
 	blendDesc.RenderTarget[0] = rtbd;
 
-	HRESULT hr = mD3d11Device->CreateBlendState(&blendDesc, &mTextTransparency);
+	hr = mD3d11Device->CreateBlendState(&blendDesc, &mTransparencyBlendState);
 	AssertInitialization(hr, "Direct 3D 11 Create Blend State - Failed");
 
 	// Create constant buffer
@@ -352,7 +547,7 @@ HRESULT Engine::InitScene()
 	cbDesc.CPUAccessFlags = 0;
 	cbDesc.MiscFlags = 0;
 
-	hr = mD3d11Device->CreateBuffer(&cbDesc, nullptr, &mCBTextBuffer);
+	hr = mD3d11Device->CreateBuffer(&cbDesc, nullptr, &mBaseCB);
 	AssertInitialization(hr, "Direct 3D Create Constant Buffer - Failed");
 
 	// Describe the sampler
@@ -367,7 +562,7 @@ HRESULT Engine::InitScene()
 	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
 	// Create sampler state
-	hr = mD3d11Device->CreateSamplerState(&sampDesc, &mTextSamplerState);
+	hr = mD3d11Device->CreateSamplerState(&sampDesc, &mBaseSamplerState);
 	AssertInitialization(hr, "Direct 3D Create Sampler State - Failed");
 
 	// Create CCW & CW & No Culling
@@ -400,63 +595,40 @@ HRESULT Engine::InitScene()
 
 HRESULT Engine::LoadResource()
 {
-	std::vector<std::thread> objectInitializer;
+	// Import Model
+	bool bIsEndAllModel = false;
+	std::thread allModelThread(&Engine::ImportAllModelThread, this, &bIsEndAllModel);
 
-	mCamera = new Camera(mInstance, mHwnd);
+	ID3D11ShaderResourceView* loadingTex;
+	HRESULT hr = CreateWICTextureFromFile(mD3d11Device, L"Textures\\Loading.png", nullptr, &loadingTex, 0);
+	AssertInitialization(hr, "Direct 3D Create WIC Texture From File - Failed");
 
-	while (true)
+
+	int tempPercent = 0;
+	while (!bIsEndAllModel)
 	{
-		try
+		if (tempPercent != mPercent)
 		{
-			std::wfstream modelsInit;
-			modelsInit.open("Settings\\ModelsInitialization.txt");
+			tempPercent = mPercent;
 
-			WCHAR temp[128];
-
-			std::wstring wName;
-			std::wstring wShader;
-			std::wstring wModel;
-			std::vector<std::wstring> wTextures;
-
-			while (true)
-			{
-				if (!(modelsInit >> wName >> wShader >> wModel))
-				{
-					break;
-				}
-
-				while (true)
-				{
-					modelsInit >> temp;
-					if (!wcscmp(temp, L"End"))
-					{
-						break;
-					}
-					wTextures.push_back(temp);
-				}
-
-
-				std::string model;
-				model.assign(wModel.begin(), wModel.end());
-
-				Object* object = new Object();
-				object->Setup(mD3d11Device, mD3d11DevCon, this);
-				object->ImportModel(model.c_str(), wTextures);
-				object->Initalize(wShader.c_str());
-				object->SetName(wName);
-
-				mObjects.push_back(object);
-			}
-
-
-			break;
-		}
-		catch (std::ifstream::failure e)
-		{
-			ErrorLogger::Log("File Error : ModelsInitialization.txt");
-			ErrorLogger::Log(e.what());
+			DrawLoading(&loadingTex);
 		}
 	}
+	loadingTex->Release();
+
+
+	allModelThread.join();
+
+
+	// Create camera
+	mCamera = new Camera();
+	mCamera->Init(mInstance, mHwnd, this);
+
+
+	// Create skymap
+	mSkymap = new Skymap();
+	mSkymap->CreateSpere(10, 10, this);
+
 
 	return S_OK;
 }
@@ -464,6 +636,8 @@ HRESULT Engine::LoadResource()
 void Engine::UpdateScene()
 {
 	mCamera->DetectInput(mFrameTime);
+
+	mSkymap->Update(mFrameTime);
 
 	for (size_t i = 0; i < mObjects.size(); ++i)
 	{
@@ -482,12 +656,19 @@ void Engine::DrawScene()
 	mD3d11DevCon->OMSetRenderTargets(1, &mRenderTargetView, mDepthStencilView);
 
 	mD3d11DevCon->OMSetBlendState(nullptr, null, 0xffffffff);
-
-	// Draw the triangle
+	
+	// Draw objects
 	for (size_t i = 0; i < mObjects.size(); ++i)
 	{
 		mObjects[i]->Draw();
 	}
+
+	mSkymap->Draw();
+
+	mCamera->DrawWeapon();
+
+
+	RenderText(L"FPS : ", static_cast<int>(mFps));
 
 	// Present the back buffer to the screen
 	mSwapChain->Present(0, 0);
@@ -501,7 +682,9 @@ void Engine::ReleaseObject()
 
 	// Release the objects
 	mCamera->CleanUp();
+	mSkymap->CleanUp();
 	delete mCamera;
+	delete mSkymap;
 
 	for (int i = mObjects.size() - 1; i >= 0; --i)
 	{
@@ -510,9 +693,9 @@ void Engine::ReleaseObject()
 	}
 
 	// Release the COM Ojbects
-	mTextTransparency->Release();
-	mCBTextBuffer->Release();
-	mTextSamplerState->Release();
+	mTransparencyBlendState->Release();
+	mBaseCB->Release();
+	mBaseSamplerState->Release();
 	mD3d101Device->Release();
 	mKeyedMutex10->Release();
 	mKeyedMutex11->Release();
@@ -531,6 +714,10 @@ void Engine::ReleaseObject()
 
 void Engine::RenderText(std::wstring text, int inInt)
 {
+	// Set shaders
+	mD3d11DevCon->VSSetShader(mTextVertShader, nullptr, 0);
+	mD3d11DevCon->PSSetShader(mTextPixelShader, nullptr, 0);
+
 	// Release the d3d 11 device
 	mKeyedMutex11->ReleaseSync(0);
 
@@ -574,28 +761,68 @@ void Engine::RenderText(std::wstring text, int inInt)
 	// Use the d3d11 device
 	mKeyedMutex11->AcquireSync(1, 5);
 
+#ifdef _DEBUG
+	/*ID3D11Resource* d2dResource = nullptr;
+	mD2dTexture->GetResource(&d2dResource);
+	SaveWICTextureToFile(mD3d11DevCon, d2dResource,
+		GUID_ContainerFormatBmp, L"Text.bmp");
+	d2dResource->Release();*/
+#endif
+
 	// Set the blend state for d2d render target texture objects
-	mD3d11DevCon->OMSetBlendState(mTextTransparency, nullptr, 0xffffffff);
+	mD3d11DevCon->OMSetBlendState(mTransparencyBlendState, nullptr, 0xffffffff);
 
-	// Set the d2d index buffer
-	mD3d11DevCon->IASetIndexBuffer(mD2dIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
-
-	// Set the d2d vertex buffer
 	UINT stride = sizeof(Vertex);
 	UINT offset = 0;
-	mD3d11DevCon->IASetVertexBuffers(0, 1, &mD2dVertBuffer, &stride, &offset);
 
 	XMMATRIX WVP = XMMatrixIdentity();
 	CBPerObject cbText;
-	cbText.World = XMMatrixTranspose(WVP);
 	cbText.WVP = XMMatrixTranspose(WVP);
-	mD3d11DevCon->UpdateSubresource(mCBTextBuffer, 0, nullptr, &cbText, 0, 0);
-	mD3d11DevCon->VSSetConstantBuffers(0, 1, &mCBTextBuffer);
+
+	mD3d11DevCon->IASetVertexBuffers(0, 1, &mD2dVertBuffer, &stride, &offset);
+	mD3d11DevCon->IASetIndexBuffer(mD2dIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	
+	mD3d11DevCon->UpdateSubresource(mBaseCB, 0, nullptr, &cbText, 0, 0);
+	mD3d11DevCon->VSSetConstantBuffers(0, 1, &mBaseCB);
 	mD3d11DevCon->PSSetShaderResources(0, 1, &mD2dTexture);
-	mD3d11DevCon->PSSetSamplers(0, 1, &mTextSamplerState);
+	mD3d11DevCon->PSSetSamplers(0, 1, &mBaseSamplerState);
 
 	mD3d11DevCon->RSSetState(mCWcullMode);
 
-	// Draw the second cube
 	mD3d11DevCon->DrawIndexed(6, 0, 0);
+}
+
+HRESULT Engine::CompileShader(LPCWSTR shaderFileName, LPCSTR entryPointName, LPCSTR shaderModelName, ID3DBlob** shaderBlob)
+{
+	HRESULT hr;
+
+	UINT shaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
+
+#ifdef _DEBUG
+	shaderFlags |= D3DCOMPILE_DEBUG;
+#endif
+
+	ID3DBlob* errorBlob = nullptr;
+
+	hr = D3DCompileFromFile(shaderFileName, nullptr, null, entryPointName, shaderModelName, shaderFlags, null, shaderBlob, &errorBlob);
+
+	if (FAILED(hr))
+	{
+		if (errorBlob)
+		{
+			ErrorLogger::Log(hr, (char*)errorBlob->GetBufferPointer());
+			errorBlob->Release();
+			exit(EXIT_FAILURE);
+		}
+
+		ErrorLogger::Log(hr, "Direct 3D Compile Shader - Failed");
+		exit(EXIT_FAILURE);
+	}
+
+	if (errorBlob)
+	{
+		errorBlob->Release();
+	}
+
+	return hr;
 }

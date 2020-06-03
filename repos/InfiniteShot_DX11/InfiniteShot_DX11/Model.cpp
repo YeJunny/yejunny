@@ -1,7 +1,8 @@
+#include "Engine.h"
 #include "Model.h"
 using namespace Model_;
 
-HRESULT Model::ImportModelFromFile(std::string modelFileName)
+HRESULT Model::ImportModelFromFile(std::string modelFileName, Engine* engine)
 {
 	// Create memory manager
 	FbxManager* fbxManager = nullptr;
@@ -49,6 +50,11 @@ HRESULT Model::ImportModelFromFile(std::string modelFileName)
 	mLogDirectory = modelFileName + "Log\\";
 	modelFileName.clear();
 
+
+	mEngine = engine;
+	mEngine->SetPercent(0);
+
+
 	std::wstring modelFileNameW;
 	modelFileNameW.assign(mLogDirectory.begin(), mLogDirectory.end());
 	int result = _wmkdir(modelFileNameW.c_str());
@@ -62,7 +68,14 @@ HRESULT Model::ImportModelFromFile(std::string modelFileName)
 	}
 	
 
+	mEngine->SetPercent(10);
+
+
 	ImportBaseRecursive(rootNode);
+	ImportVertexInfo();
+
+
+	mEngine->SetPercent(100);
 
 
 	fbxManager->Destroy();
@@ -83,9 +96,9 @@ HRESULT Model::ImportBaseRecursive(FbxNode* pNode)
 {
 	//=======================================//
 #ifdef LOG_WRITE_FBX_DATA
-	static int recurNum = 0;
+	/*static int recurNum = 0;
 	char tempStr[10];
-	_itoa_s(recurNum, tempStr, 10);
+	_itoa_s(recurNum, tempStr, 10);*/
 #endif
 	//========================================//
 
@@ -96,12 +109,15 @@ HRESULT Model::ImportBaseRecursive(FbxNode* pNode)
 	}
 
 	UINT childAllNum = pNode->GetChildCount();
-
+	if (childAllNum <= 0)
+	{
+		return S_OK;
+	}
 
 	//============================================================//
 #ifdef LOG_WRITE_FBX_DATA
-	std::string logDirFileName = mLogDirectory + "log" + std::string(tempStr) + "_" + pNode->GetName() + ".txt";
-	++recurNum;
+	std::string logDirFileName = mLogDirectory + "Log_" + pNode->GetName() + ".txt";
+	//++recurNum;
 	mLogStream.open(logDirFileName.c_str());
 	if (mLogStream.is_open())
 	{
@@ -111,8 +127,8 @@ HRESULT Model::ImportBaseRecursive(FbxNode* pNode)
 			<< "|	Data Set	: Vertices, TexCoord, Normal, Animation, ... |\n"
 			<< "|	File Name	: " + logDirFileName << "|\n"
 			<< "+------------------------------------------------------------------------------------------+\n"
-			<< "Do!		Get " << pNode->GetName() << "		Complete!\n"
-			<< "Data:	childAllNum : " << childAllNum << "		Complete!\n";
+			<< "Do!		Get " << pNode->GetName() << "\n"
+			<< "[Result]		childAllNum : " << childAllNum << "\n";
 	}
 #endif
 	//=============================================================//
@@ -129,23 +145,23 @@ HRESULT Model::ImportBaseRecursive(FbxNode* pNode)
 		if (mLogStream.is_open())
 		{
 			mLogStream
-				<< "Data:		childNode : " << childIndex << "\n"
-				<< "Data:		childNode->GetName() : " << childNode->GetName() << "\n";
+				<< "Do!		Get Attribute\n"
+				<< "[Result]		child Node Index : " << childIndex	<< " | child Mode Name : " << childNode->GetName() << "\n";
 		}
 #endif
 		//=======================================================================//
 
 
-		// Is child node, null or root or parent node.
-		if (!childNode->GetNodeAttribute() || childNode->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::EType::eNull)
+		FbxNodeAttribute* currNodeAttrib = childNode->GetNodeAttribute();
+		FbxNodeAttribute::EType currNodeAttribType = currNodeAttrib->GetAttributeType();
+		if (!currNodeAttrib || currNodeAttribType == FbxNodeAttribute::EType::eNull)
 		{
 			//============================================================================//
 #ifdef LOG_WRITE_FBX_DATA
 			if (mLogStream.is_open())
 			{
 				mLogStream
-					<< "\tData:		chlidIndex : " << childIndex << "\n"
-					<< "\tData:		attribute : null or root node or parent node\n";
+					<< "[Result]		this attribute : nullptr or parent node\n";
 			}
 #endif
 			//=============================================================================//
@@ -158,43 +174,14 @@ HRESULT Model::ImportBaseRecursive(FbxNode* pNode)
 		}
 
 
-		FbxMesh* mesh = nullptr;
-		FbxNodeAttribute::EType NodeAttributeType = childNode->GetNodeAttribute()->GetAttributeType();
-
-
-		switch (NodeAttributeType)
-		{
-		case FbxNodeAttribute::eMesh:
-		{
-			//======================================================================//
-#ifdef LOG_WRITE_FBX_DATA
-			if (mLogStream.is_open())
-			{
-				mLogStream
-					<< "\tData:		attribute : eMesh ( " << childIndex << ")\n";
-			}
-#endif
-			//======================================================================//
-
-
-			mesh = static_cast<FbxMesh*>(childNode->GetNodeAttribute());
-			AssertIsSuccess(childNode, "Fbx Sdk Child Node Get Node Attribute - Failed");
-
-
-			ImportAnim(childNode, childIndex);
-			ImportVertexInfo(mesh, childIndex);
-
-
-			break;
-		}
-		case FbxNodeAttribute::eSkeleton:
+		if (currNodeAttribType == FbxNodeAttribute::eSkeleton)
 		{
 			//====================================================================================//
 #ifdef LOG_WRITE_FBX_DATA
 			if (mLogStream.is_open())
 			{
 				mLogStream
-					<< "\tData:		attribute : eSkeleton ( " << childIndex << ")\n";
+					<< "\t[Result]		this attribute : eSkeleton (child Index:" << childIndex << ")\n";
 			}
 #endif
 			//===================================================================================//
@@ -202,26 +189,54 @@ HRESULT Model::ImportBaseRecursive(FbxNode* pNode)
 
 			ImportSkeletonRecursive(childNode);
 
-
-			continue;
 		}
-		default:
+		else if (currNodeAttribType == FbxNodeAttribute::eMesh)
 		{
-			//=========================================================================================================//
-#ifdef LOG_WRITE_FBX_DATA
-			if (mLogStream.is_open())
-			{
-				mLogStream
-					<< "\tData:		attributeType : " << NodeAttributeType << " ( eUnknown = 0, eNull = 1, eMarker = 2, eSkeleton = 3, eMesh = 4, eNurbs = 5, ePatch = 6, eCamera = 7, eCameraStereo = 8, eCameraSwitcher = 9, eLight = 10, eOpticalReference = 11, eOpticalMarker = 12, eNurbsCurve = 13, eTrimNurbsSurface = 14, eBoundary = 15, eNurbsSurface = 16, eShape = 17, eLODGroup = 18, eSubDiv = 19, eCachedEffect = 20, Line = 21 )\n";
-			}
-#endif
-			//========================================================================================================//
-
-
-			continue;
+			mMeshNodes.push_back(childNode);
 		}
-		} // End Attribute Switch.
-	} // End Child Index Loop.
+	}
+
+
+	mEngine->SetPercent(30);
+
+
+	return S_OK;
+}
+
+HRESULT Model_::Model::ImportVertexInfo()
+{
+	while (!mMeshNodes.empty())
+	{
+		FbxNode* currNode = mMeshNodes.back();
+		mMeshNodes.pop_back();
+
+		if (!currNode)
+		{
+			return S_OK;
+		}
+
+
+		//======================================================================//
+#ifdef LOG_WRITE_FBX_DATA
+		if (mLogStream.is_open())
+		{
+			mLogStream
+				<< "\t[Result]		attribute : eMesh\n";
+		}
+#endif
+		//======================================================================//
+
+
+		FbxMesh* mesh = static_cast<FbxMesh*>(currNode->GetNodeAttribute());
+		AssertIsSuccess(currNode, "Fbx Sdk Child Node Get Node Attribute - Failed");
+
+
+		mEngine->AddPercent(5);
+
+
+		ImportAnim(currNode);
+		ImportVertexInfoInternal(mesh);
+	}
 
 
 #ifdef LOG_WRITE_FBX_DATA
@@ -231,7 +246,7 @@ HRESULT Model::ImportBaseRecursive(FbxNode* pNode)
 	return S_OK;
 }
 
-HRESULT Model::ImportVertexInfo(FbxMesh* pMesh, int childIndex)
+HRESULT Model::ImportVertexInfoInternal(FbxMesh* pMesh)
 {
 	int polygonSize = pMesh->GetPolygonCount();
 	FbxGeometryElementNormal* normalElements = pMesh->GetElementNormal();
@@ -247,9 +262,9 @@ HRESULT Model::ImportVertexInfo(FbxMesh* pMesh, int childIndex)
 	if (mLogStream.is_open())
 	{
 		mLogStream
-			<< "\tData:		Child " << childIndex << " Mesh's Ploygon Count is ... " << polygonSize << "\n"
-			<< "\tData:		Child " << childIndex << " Mesh's List of Vertex, UV and Normal ...\n"
-			<< "\t\t\t\t\t\t\t\t\t\t\t\t\t\tData:		" << "Vertex\t\t\t\t\t\t\t\t\t\t\t\t" << "UV\t\t\t\t\t\t\t\t\t\t\t\t" << "Normal\n";
+			<< "\t[Result]		Mesh's Ploygon Count is ... " << polygonSize << "\n"
+			<< "\t[Result]		Mesh's List of Vertex, UV and Normal ...\n"
+			<< "\t\t\t\t\t\t\t\t\t\t\t\t\t\t[Result]		" << "Vertex\t\t\t\t\t\t\t\t\t\t\t\t" << "UV\t\t\t\t\t\t\t\t\t\t\t\t" << "Normal\n";
 	}
 #endif
 	//============================================================================================================================//
@@ -292,8 +307,8 @@ HRESULT Model::ImportVertexInfo(FbxMesh* pMesh, int childIndex)
 
 
 				Vertex vertexElement;
-				DirectX::XMFLOAT3 position = mContrlPoint[vertexIndex].Pos;
-				vertexElement.Pos = DirectX::XMFLOAT4(position.x, position.y, position.z, 0.0f);
+				DirectX::XMFLOAT3& position = mContrlPoint[vertexIndex].Pos;
+				vertexElement.Pos = DirectX::XMFLOAT3(position.x, position.y, position.z);
 				vertexElement.TexCoord = DirectX::XMFLOAT2(static_cast<float>(uv[0]), 1 - static_cast<float>(uv[1]));
 				vertexElement.Normal =
 					DirectX::XMFLOAT3(
@@ -328,7 +343,7 @@ HRESULT Model::ImportVertexInfo(FbxMesh* pMesh, int childIndex)
 				if (mLogStream.is_open())
 				{
 					mLogStream
-						<< "\t\tData:		" << "vertex[" << std::setw(4) << polygonIndex << "][" << std::setw(4) << polygonElementIndex << "]\t|\t"
+						<< "\t\t[Result]		" << "vertex[" << std::setw(4) << polygonIndex << "][" << std::setw(4) << polygonElementIndex << "]\t|\t"
 						<< std::setw(15) << position.x << ", " << std::setw(15) << position.y << ", " << std::setw(15) << position.z
 						<< "\t|\t" << std::setw(15) << uv[0] << ", " << std::setw(15) << uv[1]
 						<< "\t|\t" << std::setw(15) << normalFbxVector4[0] << ", " << std::setw(15) << normalFbxVector4[1] << ", " << std::setw(15) << normalFbxVector4[2] << "\n";
@@ -339,6 +354,11 @@ HRESULT Model::ImportVertexInfo(FbxMesh* pMesh, int childIndex)
 
 			}
 		}
+
+
+		mEngine->AddPercent(15);
+
+
 		break;
 	}
 	case FbxGeometryElement::eByControlPoint:
@@ -364,20 +384,6 @@ HRESULT Model::ImportSkeletonRecursive(FbxNode* pNode, int depth, int parentInde
 {
 	static int skeleIndex = 0;
 
-
-	//===============================================================================================//
-#ifdef LOG_WRITE_FBX_DATA
-	if (mLogStream.is_open())
-	{
-		mLogStream
-			<< "\t\tData:	pNode->GetName() : " << pNode->GetName() << " (" << skeleIndex << ")\n"
-			<< "\tData:		Parent Index : " << parentIndex << "\n"
-			<< "\tData:		Depth : " << depth << "\n";
-	}
-#endif
-	//===============================================================================================//
-
-
 	Skeleton skeleton;
 	skeleton.Name = pNode->GetName();
 	skeleton.ParentIndex = parentIndex;
@@ -385,6 +391,17 @@ HRESULT Model::ImportSkeletonRecursive(FbxNode* pNode, int depth, int parentInde
 	mSkele.push_back(skeleton);
 
 	++skeleIndex;
+
+	//===============================================================================================//
+#ifdef LOG_WRITE_FBX_DATA
+	if (mLogStream.is_open())
+	{
+		mLogStream
+			<< "\t\t[Result]		this Skele Node Name : " << skeleton.Name << " | skele Index:" << skeleIndex << ") | parent Index : " << parentIndex << " | depth : " << depth << "\n";
+	}
+#endif
+	//===============================================================================================//
+
 
 	for (int i = 0; i < pNode->GetChildCount(); ++i)
 	{
@@ -394,7 +411,7 @@ HRESULT Model::ImportSkeletonRecursive(FbxNode* pNode, int depth, int parentInde
 	return S_OK;
 }
 
-HRESULT Model::ImportAnim(FbxNode* pNode, int childIndex)
+HRESULT Model::ImportAnim(FbxNode* pNode)
 {
 	// Node Attribute is eMesh
 
@@ -434,7 +451,7 @@ HRESULT Model::ImportAnim(FbxNode* pNode, int childIndex)
 	if (mLogStream.is_open())
 	{
 		mLogStream <<
-			"\tData:	deformerCount : " << deformerAllNum << " (" << childIndex << ")\n" <<
+			"\t[Result]		deformerCount : " << deformerAllNum<< "\n" <<
 			"\tNote:	If Miss Skeleton Index, No Skinning Data!\n";
 	}
 
@@ -479,10 +496,7 @@ HRESULT Model::ImportAnim(FbxNode* pNode, int childIndex)
 			if (mLogStream.is_open())
 			{
 				mLogStream <<
-					"\t\tData:		deformerIndex : " << deformerIndex << "\n" <<
-					"\t\tData:		clusterIndex : " << clusterIndex << "\n" <<
-					"\t\tData:		Node Name : " << name << "\n" <<
-					"\t\tData:		Skeleton Index : " << skeleIndex << "\n";
+					"\t\t[Result]		deformerIndex : " << deformerIndex << " | clusterIndex : " << clusterIndex << " | Node Name : " << name << " | Skeleton Index : " << skeleIndex << "\n";
 			}
 #endif
 			//=============================================================================//
@@ -530,7 +544,7 @@ HRESULT Model::ImportAnim(FbxNode* pNode, int childIndex)
 
 
 			keyFrame.clear();
-			mEndTime = end.GetFrameCount(fbxFreames);
+			mTotalFrames = end.GetFrameCount(fbxFreames);
 
 			for (FbxLongLong time = start.GetFrameCount(fbxFreames); time <= end.GetFrameCount(fbxFreames); ++time)
 			{
@@ -568,14 +582,14 @@ HRESULT Model::ImportAnim(FbxNode* pNode, int childIndex)
 			if (mLogStream.is_open())
 			{
 				mLogStream <<
-					"\tData:	Control Point Data\n" <<
-					"\t\tData:		[Time] : " << startTimeLog << ", " << endTimeLog << "\n" <<
-					"\t\tData:		[Position] : " << iter->second.Pos.x << ", " << iter->second.Pos.y << ", " << iter->second.Pos.z << "\n" <<
-					"\t\tData:		[Skeletons] : \n";
+					"\t[Result]	Control Point Data\n" <<
+					"\t\t[Result]		[Time] : " << startTimeLog << ", " << endTimeLog << "\n" <<
+					"\t\t[Result]		[Position] : " << iter->second.Pos.x << ", " << iter->second.Pos.y << ", " << iter->second.Pos.z << "\n" <<
+					"\t\t[Result]		[Skeletons] : \n";
 				for (auto tempIter = iter->second.TempAnimInfo.begin(); tempIter != iter->second.TempAnimInfo.end(); ++tempIter)
 				{
 					mLogStream <<
-						"\t\t\tData:		Index : " << tempIter->Index << ", Weight : " << tempIter->Weight << "\n";
+						"\t\t\t[Result]		Index : " << tempIter->Index << ", Weight : " << tempIter->Weight << "\n";
 				}
 			}
 #endif
@@ -588,7 +602,7 @@ HRESULT Model::ImportAnim(FbxNode* pNode, int childIndex)
 		//====================================================================================//
 #ifdef LOG_WRITE_FBX_DATA
 		mLogStream <<
-			"\tData:		Final Matrix\n";
+			"\t[Result]		Final Matrix\n";
 #endif
 		//====================================================================================//
 
@@ -599,8 +613,8 @@ HRESULT Model::ImportAnim(FbxNode* pNode, int childIndex)
 			//===================================================//
 #ifdef LOG_WRITE_FBX_DATA
 			mLogStream <<
-				"\t\tData:		Rrame Number : " << frameNum << "\n" <<
-				"\t\tData:		Matrix Content : \n";
+				"\t\t[Result]		Rrame Number : " << frameNum << "\n" <<
+				"\t\t[Result]		Matrix Content : \n";
 #endif
 			//===================================================//
 
@@ -621,7 +635,7 @@ HRESULT Model::ImportAnim(FbxNode* pNode, int childIndex)
 					{
 						DirectX::XMStoreFloat4(&element, keyFramePerTime[clusterNum].r[j]);
 						mLogStream <<
-							"\t\t\tData:	|" <<
+							"\t\t\t[Result]	|" <<
 							element.x << ", " <<
 							element.y << ", " <<
 							element.z << ", " <<

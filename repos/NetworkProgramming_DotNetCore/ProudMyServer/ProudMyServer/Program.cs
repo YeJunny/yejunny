@@ -1,7 +1,4 @@
 ﻿using System;
-using System.ComponentModel.Design;
-using System.Text;
-using System.Threading;
 using Nettention.Proud;
 using SendText;
 
@@ -14,13 +11,6 @@ namespace ProudMyServer
         public static Proxy Proxy;
         public static Stub Stub;
 
-        public static bool LoginStub(HostID hostID, RmiContext rmiContext, string id, string pw)
-        {
-            Console.WriteLine($"ID: {id}");
-            Console.WriteLine($"PW: {pw}");
-
-            return true;
-        }
 
         static void Main(string[] args)
         {
@@ -28,9 +18,9 @@ namespace ProudMyServer
 
             StartServerParameter Param = new StartServerParameter();
 
-            Param.protocolVersion = new Nettention.Proud.Guid(version);
             Param.tcpPorts.Add(5000);
             Param.udpPorts.Add(5000);
+            Param.protocolVersion = new Nettention.Proud.Guid(version);
 
             Proxy = new Proxy();
             Stub = new Stub();
@@ -38,9 +28,9 @@ namespace ProudMyServer
             server.AttachProxy(Proxy);
             server.AttachStub(Stub);
 
-            Stub.Login = LoginStub;
-
             server.Start(Param);
+
+            Console.WriteLine("Start Server Successful!!!");
 
             while (true)
             {

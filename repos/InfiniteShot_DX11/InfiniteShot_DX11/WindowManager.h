@@ -14,6 +14,9 @@ public:
 	HRESULT InitializeWindow(HINSTANCE hInstance, int showWnd, bool bIswindowed, const TCHAR* titleName, const TCHAR* className, INT width, INT height);
 	bool ProcessMessage();
 	double GetFps() const { return mFps; }
+	HWND GetHanleer() const { return mHwnd; }
+	int GetClientWidth() const { return mWidth; }
+	int GetClientHeight() const { return mHeight; }
 
 protected:
 	void StartTime();
@@ -23,6 +26,7 @@ protected:
 protected:
 	LPCTSTR mWndClassName;
 	HWND mHwnd;
+	HWND mHwndSetting;
 	HINSTANCE mInstance;
 	int mWidth;
 	int mHeight;

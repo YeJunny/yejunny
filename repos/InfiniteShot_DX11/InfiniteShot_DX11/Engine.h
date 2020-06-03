@@ -21,6 +21,7 @@
 #include "WindowManager.h"
 
 class Camera;
+class Skymap;
 
 struct Vertex
 {
@@ -50,52 +51,73 @@ public:
 	void DrawScene();
 	void RenderText(std::wstring text, int inInt);
 	void ReleaseObject();
+	static HRESULT CompileShader(const LPCWSTR shaderFileName, LPCSTR entryPointName, LPCSTR shaderModelName, ID3DBlob** shaderBlob);
 
 public:
+	ID3D11Device* GetD3d11Deivce() const { return mD3d11Device; }
+	ID3D11DeviceContext* GetD3d11DevCon() const { return mD3d11DevCon; }
 	Camera* GetCamera() const { return mCamera; }
 	ID3D11RasterizerState* GetCWcullMode() const { return mCWcullMode; }
 	ID3D11RasterizerState* GetCCWcullMode() const { return mCCWcullMode; }
 	ID3D11RasterizerState* GetNoCullMode() const { return mNoCullMode; }
-	
+	void SetPercent(int percent) { mPercent = percent; }
+	void AddPercent(int percent) { mPercent += percent; }
+	ID3D11InputLayout* GetBaseInputLayout() const { return mBaseVertLayout; }
+	ID3D11VertexShader* GetBaseVertShader() const { return mBaseVertShader; }
+	ID3D11PixelShader* GetBasePixelShader() const { return mBasePixelShader; }
+	ID3D11Buffer** GetSquareVertBuffer() { return &mD2dVertBuffer; }
+	ID3D11Buffer** GetSquareIdxBuffer() { return &mD2dIndexBuffer; }
+	ID3D11BlendState* GetTransparencyBlendState() const { return mTransparencyBlendState; }
+	ID3D11SamplerState** GetBaseSamplerState() { return &mBaseSamplerState; }
+	std::vector<Object*> const& GetObjects() const { return mObjects; }
+
 private:
 	HRESULT InitD2D_D3D101_DWrite(IDXGIAdapter1* adapter);
 	void InitD2DScreenTexture();
+	void ImportAllModelThread(bool* bIsEnd);
+	void DrawLoading(ID3D11ShaderResourceView** loadingTex);
 
 private:
-	enum EObjectName
-	{
-		Triangle,
-	};
-
 	// Drawing Text
-	ID3D11BlendState*			mTextTransparency	= nullptr;
-	ID3D11Buffer*				mCBTextBuffer		= nullptr;
-	ID3D11SamplerState*			mTextSamplerState	= nullptr;
-	ID3D10Device1*				mD3d101Device		= nullptr;
-	IDXGIKeyedMutex*			mKeyedMutex11		= nullptr;
-	IDXGIKeyedMutex*			mKeyedMutex10		= nullptr;
-	ID2D1RenderTarget*			mD2dRenderTarget	= nullptr;
-	ID2D1SolidColorBrush*		mBrush				= nullptr;
-	ID3D11Texture2D*			mBackbuffer11		= nullptr;
-	ID3D11Texture2D*			mSharedTex11		= nullptr;
-	ID3D11Buffer*				mD2dVertBuffer		= nullptr;
-	ID3D11Buffer*				mD2dIndexBuffer		= nullptr;
-	ID3D11ShaderResourceView*	mD2dTexture			= nullptr;
-	IDWriteFactory*				mDWriteFactory		= nullptr;
-	IDWriteTextFormat*			mTextFormat			= nullptr;
+	ID3D11BlendState*			mTransparencyBlendState		= nullptr;
+	ID3D11Buffer*				mBaseCB						= nullptr;
+	ID3D11SamplerState*			mBaseSamplerState			= nullptr;
+	ID3D10Device1*				mD3d101Device				= nullptr;
+	IDXGIKeyedMutex*			mKeyedMutex11				= nullptr;
+	IDXGIKeyedMutex*			mKeyedMutex10				= nullptr;
+	ID2D1RenderTarget*			mD2dRenderTarget			= nullptr;
+	ID2D1SolidColorBrush*		mBrush						= nullptr;
+	ID3D11Texture2D*			mBackbuffer11				= nullptr;
+	ID3D11Texture2D*			mSharedTex11				= nullptr;
+	ID3D11Buffer*				mD2dVertBuffer				= nullptr;
+	ID3D11Buffer*				mD2dIndexBuffer				= nullptr;
+	ID3D11ShaderResourceView*	mD2dTexture					= nullptr;
+	IDWriteFactory*				mDWriteFactory				= nullptr;
+	IDWriteTextFormat*			mTextFormat					= nullptr;
 
 	// Core
-	IDXGISwapChain*				mSwapChain			= nullptr;
-	ID3D11Device*				mD3d11Device		= nullptr;
-	ID3D11DeviceContext*		mD3d11DevCon		= nullptr;
-	ID3D11RenderTargetView*		mRenderTargetView	= nullptr;
-	ID3D11DepthStencilView*		mDepthStencilView	= nullptr;
-	ID3D11RasterizerState*		mCCWcullMode		= nullptr;
-	ID3D11RasterizerState*		mCWcullMode			= nullptr;
-	ID3D11RasterizerState*		mNoCullMode			= nullptr;
+	IDXGISwapChain*				mSwapChain					= nullptr;
+	ID3D11Device*				mD3d11Device				= nullptr;
+	ID3D11DeviceContext*		mD3d11DevCon				= nullptr;
+	ID3D11RenderTargetView*		mRenderTargetView			= nullptr;
+	ID3D11DepthStencilView*		mDepthStencilView			= nullptr;
+	ID3D11RasterizerState*		mCCWcullMode				= nullptr;
+	ID3D11RasterizerState*		mCWcullMode					= nullptr;
+	ID3D11RasterizerState*		mNoCullMode					= nullptr;
+
+	// Shaders
+	ID3D11InputLayout*			mBaseVertLayout				= nullptr;
+	ID3D11VertexShader*			mBaseVertShader				= nullptr;
+	ID3D11PixelShader*			mBasePixelShader			= nullptr;
+	ID3D11VertexShader*			mTextVertShader				= nullptr;
+	ID3D11PixelShader*			mTextPixelShader			= nullptr;
 
 	// Objects
+	Skymap*						mSkymap;
 	Camera*						mCamera;
 	std::vector<Object*>		mObjects;
+
+	// Temp
+	int							mPercent;
 };
 

@@ -13,14 +13,51 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			{
 				DestroyWindow(hwnd);
 			}
-			exit(EXIT_SUCCESS);
 		}
 		break;
 	}
 	case WM_DESTROY:
 	{
 		PostQuitMessage(0);
-		exit(EXIT_SUCCESS);
+		exit(S_OK);
+	}
+	}
+
+	return DefWindowProc(hwnd, msg, wParam, lParam);
+}
+
+LRESULT CALLBACK WndProcSettings(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	static HWND hX, hY, hZ;
+	static HWND hScaleX, hScaleY, hScaleZ;
+	static HWND hRotX, hRotY, hRotZ;
+
+	switch (msg)
+	{
+	case WM_CREATE:
+		hX = CreateWindow(L"edit", NULL, WS_CHILD | WS_VISIBLE | WS_BORDER |
+			ES_AUTOHSCROLL, 60, 130, 60, 25, hwnd, (HMENU)1, GetModuleHandle(nullptr), NULL);
+		hY = CreateWindow(L"edit", NULL, WS_CHILD | WS_VISIBLE | WS_BORDER |
+			ES_AUTOHSCROLL, 120, 130, 60, 25, hwnd, (HMENU)2, GetModuleHandle(nullptr), NULL);
+		hZ = CreateWindow(L"edit", NULL, WS_CHILD | WS_VISIBLE | WS_BORDER |
+			ES_AUTOHSCROLL, 180, 130, 60, 25, hwnd, (HMENU)3, GetModuleHandle(nullptr), NULL);
+		hScaleX = CreateWindow(L"edit", NULL, WS_CHILD | WS_VISIBLE | WS_BORDER |
+			ES_AUTOHSCROLL, 60, 160, 60, 25, hwnd, (HMENU)4, GetModuleHandle(nullptr), NULL);
+		hScaleY = CreateWindow(L"edit", NULL, WS_CHILD | WS_VISIBLE | WS_BORDER |
+			ES_AUTOHSCROLL, 120, 160, 60, 25, hwnd, (HMENU)5, GetModuleHandle(nullptr), NULL);
+		hScaleZ = CreateWindow(L"edit", NULL, WS_CHILD | WS_VISIBLE | WS_BORDER |
+			ES_AUTOHSCROLL, 180, 160, 60, 25, hwnd, (HMENU)6, GetModuleHandle(nullptr), NULL);
+		hRotX = CreateWindow(L"edit", NULL, WS_CHILD | WS_VISIBLE | WS_BORDER |
+			ES_AUTOHSCROLL, 60, 190, 60, 25, hwnd, (HMENU)7, GetModuleHandle(nullptr), NULL);
+		hRotY = CreateWindow(L"edit", NULL, WS_CHILD | WS_VISIBLE | WS_BORDER |
+			ES_AUTOHSCROLL, 120, 190, 60, 25, hwnd, (HMENU)8, GetModuleHandle(nullptr), NULL);
+		hRotZ = CreateWindow(L"edit", NULL, WS_CHILD | WS_VISIBLE | WS_BORDER |
+			ES_AUTOHSCROLL, 180, 190, 60, 25, hwnd, (HMENU)9, GetModuleHandle(nullptr), NULL);
+		return 0;
+	case WM_DESTROY:
+	{
+		PostQuitMessage(0);
+		exit(S_OK);
 	}
 	}
 
@@ -94,15 +131,64 @@ HRESULT WindowManager::InitializeWindow(HINSTANCE hInstance, int showWnd, bool b
 		hInstance,
 		null
 	);
-
-	if (!mHwnd)
-	{
-		ErrorLogger::Log(E_FAIL, "Error creating window");
-		exit(EXIT_FAILURE);
-	}
+	AssertIsSuccess(mHwnd, "Error creating window");
 
 	ShowWindow(mHwnd, showWnd);
 	UpdateWindow(mHwnd);
+
+
+	const WCHAR settingsClassName[] = L"SettingClass";
+
+	WNDCLASS wcSettings;
+
+	wcSettings.cbSize = sizeof(WNDCLASS);
+	wcSettings.style = CS_HREDRAW | CS_VREDRAW;
+	wcSettings.cbClsExtra = null;
+	wcSettings.cbWndExtra = null;
+	wcSettings.hInstance = hInstance;
+	wcSettings.hIcon = LoadIcon(null, IDI_WINLOGO);
+	wcSettings.hCursor = LoadCursor(null, IDC_ARROW);
+	wcSettings.hbrBackground = (HBRUSH)(COLOR_WINDOW + 2);
+	wcSettings.lpszMenuName = null;
+	wcSettings.hIconSm = LoadIcon(null, IDI_APPLICATION);
+	wcSettings.lpszClassName = settingsClassName;
+	wcSettings.lpfnWndProc = WndProcSettings;
+
+	if (!RegisterClassEx((WNDCLASSEX*)&wcSettings))
+	{
+		ErrorLogger::Log(E_FAIL, "Error registering class");
+		exit(EXIT_FAILURE);
+	}
+
+	RECT mainRect;
+	if (!GetWindowRect(mHwnd, &mainRect))
+	{
+		ErrorLogger::Log(E_FAIL, "Error Get Window Rect");
+		exit(EXIT_FAILURE);
+	}
+
+	mHwndSetting = CreateWindowEx(
+		null,
+		settingsClassName,
+		settingsClassName,
+		WS_OVERLAPPEDWINDOW,
+		mainRect.right - 5,
+		mainRect.top,
+		300,
+		mHeight,
+		null,
+		null,
+		hInstance,
+		null
+	);
+	AssertIsSuccess(mHwndSetting, "Error creating window");
+
+	ShowWindow(mHwndSetting, showWnd);
+	UpdateWindow(mHwndSetting);
+	
+
+	//SetParent(mHwndSetting, mHwnd);
+
 
 	return S_OK;
 }

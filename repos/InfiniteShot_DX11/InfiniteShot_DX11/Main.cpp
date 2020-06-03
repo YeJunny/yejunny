@@ -14,12 +14,12 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
 	hr = engine.InitializeDirect3d11App(hInstance);
 	AssertInitialization(hr, "Direct3D Initialization - Failed");
 
-	hr = engine.LoadResource();
-	AssertInitialization(hr, "Load Resource - Failed");
-	
 	hr = engine.InitScene();
 	AssertInitialization(hr, "Initialize Scene = Failed");
 
+	hr = engine.LoadResource();
+	AssertInitialization(hr, "Load Resource - Failed");
+	
 	while (engine.ProcessMessage())
 	{
 		engine.UpdateScene();

@@ -27,53 +27,64 @@ struct CBPerFrame
 	Light Light;
 };
 
+struct CBAnimMat
+{
+	DirectX::XMMATRIX AnimMat[50];
+};
+
 class Object
 {
 public:
 	void Setup(ID3D11Device* d3d11Device, ID3D11DeviceContext* d3d11DevCon, Engine* engine);
-	bool Initalize(const WCHAR shaderFileName[]);
-	HRESULT ImportModel(const CHAR fbxFileName[], const std::vector<std::wstring> textureFileNames);
-	void Update(double deltaTime);
+	virtual bool Initalize(const WCHAR shaderFileName[]);
+	HRESULT ImportModel(const CHAR fbxFileName[]);
+	HRESULT ImportTextures();
+	virtual void Update(double deltaTime);
 	void Draw();
-	void CleanUp();
+	virtual void CleanUp();
 
 public:
 	void SetName(std::wstring name) { mName = name; }
+	std::wstring GetName() const { return mName; }
+	void SetTextureFileNamesVector(std::vector<std::wstring> const& textureFileNames) { mTextureFileNames = textureFileNames; }
+	void SetMatWorld(DirectX::XMMATRIX& worldMat) { mWorld = worldMat; };
 
 public:
 	void* operator new(size_t i);
 	void operator delete(void* p);
 
 protected:
-	HRESULT CompileShader(const LPCWSTR shaderFileName, LPCSTR entryPointName, LPCSTR shaderModelName, ID3DBlob** shaderBlob);
+	// Transform
+	DirectX::XMMATRIX			mWorld;
 
-protected:
 	// Model
-	Model_::Model mModel;
-	ID3D11ShaderResourceView** mModelTextureParts;
-	std::wstring mName;
+	Model_::Model				mModel;
+	ID3D11ShaderResourceView**	mModelTextureParts;
+	std::wstring				mName;
+	ID3D11Buffer*				mAnimMatCB;
+	double						mCurrTimeAnim				= 0;
 
 	// Texture
-	ID3D11SamplerState* mObjectSamplerState;
+	ID3D11SamplerState*			mObjectSamplerState;
+	std::vector<std::wstring>	mTextureFileNames;
 
 	// Constant buffer
-	ID3D11Buffer* mCBPerObjectBuffer;
-	ID3D11Buffer* mCBPerFrameBuffer;
+	ID3D11Buffer*				mCBPerObjectBuffer;
+	ID3D11Buffer*				mCBPerFrameBuffer;
 
 	// Vertex & index buffer
-	ID3D11Buffer** mModelBufferParts;
+	ID3D11Buffer**				mModelBufferParts;
 
 	// Shader
-	ID3D11VertexShader* mVS;
-	ID3D11PixelShader* mPS;
-	ID3D11PixelShader* mD2d_PS;
+	ID3D11VertexShader*			mVS;
+	ID3D11PixelShader*			mPS;
 
 	// Input layout
-	ID3D11InputLayout* mVertLayout;
+	ID3D11InputLayout*			mVertLayout;
 
 	// Direct 3D Core
-	ID3D11Device* mD3d11Device;
-	ID3D11DeviceContext* mD3d11DevCon;
-	Engine* mEngine;
+	ID3D11Device*				mD3d11Device;
+	ID3D11DeviceContext*		mD3d11DevCon;
+	Engine*						mEngine;
 };
 
