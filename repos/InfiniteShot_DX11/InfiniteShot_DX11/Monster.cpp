@@ -33,6 +33,8 @@ void Monster::CleanUp()
 
 float Monster::Picked(int num, DirectX::XMVECTOR& pos, DirectX::XMVECTOR& dir)
 {
+    /*
+
     //Loop through each triangle in the object
     for (int i = 0; i < indexPosArray.size() / 3; i++)
     {
@@ -111,8 +113,13 @@ float Monster::Picked(int num, DirectX::XMVECTOR& pos, DirectX::XMVECTOR& dir)
         }
     }
     //return the max float value (near infinity) if an object was not picked
+
+    */
+
     return FLT_MAX;
 }
+
+/*
 
 bool PointInTriangle(XMVECTOR& triV1, XMVECTOR& triV2, XMVECTOR& triV3, XMVECTOR& point)
 {
@@ -141,3 +148,5 @@ bool PointInTriangle(XMVECTOR& triV1, XMVECTOR& triV2, XMVECTOR& triV3, XMVECTOR
     }
     return false;
 }
+
+*/

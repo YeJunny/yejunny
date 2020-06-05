@@ -324,8 +324,8 @@ void Camera::DetectInput(double deltaTime)
 				if (closestDist < FLT_MAX)
 				{
 					(*iter)->SetMonsterHit(1, hitIndex);
-					pickedDist = closestDist;
-					++mScore;
+					//pickedDist = closestDist;
+					//++mScore;
 				}
 			}
 

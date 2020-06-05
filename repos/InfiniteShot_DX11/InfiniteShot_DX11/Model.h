@@ -32,6 +32,11 @@ namespace Model_
 		DirectX::XMINT4 Indices;
 	};
 
+	struct Indices
+	{
+		DWORD index[3];
+	};
+
 	struct Skeleton
 	{
 		int ParentIndex;
@@ -58,6 +63,7 @@ namespace Model_
 
 	public:
 		std::vector<std::vector<Vertex>> const& GetVertices() const { return mVertices; }
+		std::vector<std::vector<Indices>> const& GetIndices() const { return mIndices; }
 		bool GetHasAnim() const { return mbHasAnim; }
 		int GetTotalFramesAnim() const { return mTotalFrames; }
 		std::vector<std::vector<DirectX::XMMATRIX>> const& GetAnimKeyFRamePerTime() const { return mAnimKeyFramePerTime; }
@@ -65,16 +71,22 @@ namespace Model_
 	private:
 		HRESULT ImportBaseRecursive(FbxNode* pNode);
 		HRESULT ImportVertexInfo();
-		HRESULT ImportVertexInfoInternal(FbxMesh* pMesh);
+		HRESULT ImportVertexInfoInternal(FbxNode* pNode);
 		HRESULT ImportSkeletonRecursive(FbxNode* pNode, int depth = 0, int parentIndex = -1, int index = 0);
 		HRESULT ImportAnim(FbxNode* pNode);
 		UINT GetSkeleIndex(FbxString skeleName) const;
 		DirectX::XMMATRIX GetXMMATRIX(const FbxAMatrix const* fbxMatrix);
+		void AddAllControlPoint(FbxNode* pNode);
+		void AddNormal(FbxMesh* pMesh, const int ctrlIndex);
+		void AddTexCoord(const FbxMesh* pMesh, const int ctrlIndex, const int layer);
+		void AddPos(const int ctrlIndex);
+		void AddAnim(const int ctrlIndex);
 
 	private:
 		bool mbHasAnim = false;
 		int mTotalFrames = 0;
 		std::vector<std::vector<Vertex>> mVertices;
+		std::vector<std::vector<Indices>> mIndices;
 		std::vector<DirectX::XMMATRIX> mAnimInvMatrix;
 		std::vector<std::vector<DirectX::XMMATRIX>> mAnimKeyFramePerTime;
 
@@ -85,6 +97,8 @@ namespace Model_
 		std::vector<FbxNode*> mMeshNodes;
 		std::vector<Skeleton> mSkele;
 		std::unordered_map<UINT, ContrlPoint> mContrlPoint;
+
+		std::vector<Vertex> mTempVertices;
 
 		Engine* mEngine;
 	};

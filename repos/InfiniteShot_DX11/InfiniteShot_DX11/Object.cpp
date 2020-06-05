@@ -38,6 +38,7 @@ bool Object::Initalize(const WCHAR shaderFileName[])
 	AssertInitialization(hr, "Direct 3D Create Pixel Shader - Failed");
 
 
+	// Create vertex buffer
 	D3D11_BUFFER_DESC vertexBufferDesc;
 	ZeroMemory(&vertexBufferDesc, sizeof(vertexBufferDesc));
 
@@ -49,7 +50,7 @@ bool Object::Initalize(const WCHAR shaderFileName[])
 	D3D11_SUBRESOURCE_DATA vertexBufferData;
 	ZeroMemory(&vertexBufferData, sizeof(vertexBufferData));
 
-	mModelBufferParts = new ID3D11Buffer*[mModel.GetVertices().size()];
+	mModelVertBufParts = new ID3D11Buffer*[mModel.GetVertices().size()];
 
 	// Create part of vertex buffer in a model
 	for (int num = 0; num < mModel.GetVertices().size(); ++num)
@@ -57,9 +58,34 @@ bool Object::Initalize(const WCHAR shaderFileName[])
 		vertexBufferDesc.ByteWidth = sizeof(Model_::Vertex) * mModel.GetVertices()[num].size();
 		vertexBufferData.pSysMem = mModel.GetVertices()[num].data();
 
-		hr = mD3d11Device->CreateBuffer(&vertexBufferDesc, &vertexBufferData, &mModelBufferParts[num]);
+		hr = mD3d11Device->CreateBuffer(&vertexBufferDesc, &vertexBufferData, &mModelVertBufParts[num]);
 		AssertInitialization(hr, "Direct 3D Create Vertex Buffer - Failed");
 	}
+
+
+	// Create index buffer
+	D3D11_BUFFER_DESC indexBufferDesc;
+	ZeroMemory(&indexBufferDesc, sizeof(indexBufferDesc));
+
+	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	indexBufferDesc.CPUAccessFlags = 0;
+	indexBufferDesc.MiscFlags = 0;
+
+	D3D11_SUBRESOURCE_DATA indexBufferData;
+	ZeroMemory(&indexBufferData, sizeof(indexBufferData));
+
+	mModelIndexBufParts = new ID3D11Buffer*[mModel.GetIndices().size()];
+
+	for (int num = 0; num < mModel.GetIndices().size(); ++num)
+	{
+		indexBufferDesc.ByteWidth = sizeof(Model_::Indices) * mModel.GetIndices()[num].size();
+		indexBufferData.pSysMem = mModel.GetIndices()[num].data();
+
+		hr = mD3d11Device->CreateBuffer(&indexBufferDesc, &indexBufferData, &mModelIndexBufParts[num]);
+		AssertInitialization(hr, "Direct 3D Create Index Buffer - Failed");
+	}
+
 
 	// Describe the sampler
 	D3D11_SAMPLER_DESC sampDesc;
@@ -237,9 +263,10 @@ void Object::Draw()
 	
 	for (int num = 0; num < mModel.GetVertices().size(); ++num)
 	{
-		mD3d11DevCon->IASetVertexBuffers(0, 1, &mModelBufferParts[num], &stride, &offset);
+		mD3d11DevCon->IASetVertexBuffers(0, 1, &mModelVertBufParts[num], &stride, &offset);
+		mD3d11DevCon->IASetIndexBuffer(mModelIndexBufParts[num], DXGI_FORMAT_R32_UINT, 0);
 		mD3d11DevCon->PSSetShaderResources(0, 1, &mModelTextureParts[num]);
-		mD3d11DevCon->Draw(mModel.GetVertices()[num].size(), 0);
+		mD3d11DevCon->DrawIndexed(mModel.GetIndices()[num].size() * 3, 0, 0);
 	}
 }
 
@@ -253,10 +280,12 @@ void Object::CleanUp()
 	for (int i = 0; i < mModel.GetVertices().size(); ++i)
 	{
 		mModelTextureParts[i]->Release();
-		mModelBufferParts[i]->Release();
+		mModelVertBufParts[i]->Release();
+		mModelIndexBufParts[i]->Release();
 	}
 	delete[] mModelTextureParts;
-	delete[] mModelBufferParts;
+	delete[] mModelVertBufParts;
+	delete[] mModelIndexBufParts;
 	mModel.ReleaseModel();
 }
 

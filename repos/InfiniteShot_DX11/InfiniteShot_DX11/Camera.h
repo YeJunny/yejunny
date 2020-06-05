@@ -6,6 +6,7 @@
 #include <dinput.h>
 #include <d3d11.h>
 #include <string>
+#include <vector>
 using namespace DirectX;
 
 class Engine;

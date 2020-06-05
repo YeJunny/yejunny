@@ -73,7 +73,8 @@ protected:
 	ID3D11Buffer*				mCBPerFrameBuffer;
 
 	// Vertex & index buffer
-	ID3D11Buffer**				mModelBufferParts;
+	ID3D11Buffer**				mModelVertBufParts;
+	ID3D11Buffer**				mModelIndexBufParts;
 
 	// Shader
 	ID3D11VertexShader*			mVS;
