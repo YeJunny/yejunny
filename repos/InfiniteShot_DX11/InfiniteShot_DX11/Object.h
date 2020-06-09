@@ -40,7 +40,7 @@ public:
 	HRESULT ImportModel(const CHAR fbxFileName[]);
 	HRESULT ImportTextures();
 	virtual void Update(double deltaTime);
-	void Draw();
+	virtual void Draw();
 	virtual void CleanUp();
 
 public:
@@ -48,12 +48,20 @@ public:
 	std::wstring GetName() const { return mName; }
 	void SetTextureFileNamesVector(std::vector<std::wstring> const& textureFileNames) { mTextureFileNames = textureFileNames; }
 	void SetMatWorld(DirectX::XMMATRIX& worldMat) { mWorld = worldMat; };
+	void SetBoxCollider(float width, float height, float depth);
 
 public:
-	void* operator new(size_t i);
-	void operator delete(void* p);
+	/*void* operator new(size_t i);
+	void operator delete(void* p);*/
 
 protected:
+	// Box Collider
+	DirectX::XMFLOAT3			mColliVert[8];
+	DWORD						mColliIndex[36];
+	ID3D11Buffer*				mColliVertBuf				= nullptr;
+	ID3D11Buffer*				mColliIndexBuf				= nullptr;
+	ID3D11InputLayout*			mColliVertLayout			= nullptr;
+
 	// Transform
 	DirectX::XMMATRIX			mWorld;
 
@@ -74,7 +82,6 @@ protected:
 
 	// Vertex & index buffer
 	ID3D11Buffer**				mModelVertBufParts;
-	ID3D11Buffer**				mModelIndexBufParts;
 
 	// Shader
 	ID3D11VertexShader*			mVS;

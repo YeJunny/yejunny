@@ -11,6 +11,7 @@ using namespace DirectX;
 
 class Engine;
 class Monster;
+class MonsterInfo;
 class Object;
 
 class Camera
@@ -27,6 +28,8 @@ private:
 	void UpdateCamera();
 	void DrawAim() const;
 	void ConvertMouseToRay(int mouseX, int mouseY, XMVECTOR* pos, XMVECTOR* dir);
+	void InitWeapon();
+	void InitMonster();
 
 public:
 	XMVECTOR const& GetPosMat() const { return mCamPosition; }
@@ -37,13 +40,18 @@ public:
 		XMINT3 pos = { mMouseLastState.lX, mMouseLastState.lY, mMouseLastState.lZ };
 		return pos;
 	}
+	int GetScore() const { return mScore; }
+	int GetPickedDist() const { return mPickedDist; }
 
 private:
 	const XMVECTOR				DEFAULT_FORWARD				= XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
 	const XMVECTOR				DEFAULT_RIGHT				= XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
 
+	int							mScore						= 0;
+
 	// Attack
 	std::vector<Monster*>		mMonsters;
+	float						mPickedDist					= 0;
 
 	// Aim
 	ID3D11ShaderResourceView*	mTexAim;

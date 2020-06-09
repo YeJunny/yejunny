@@ -174,24 +174,28 @@ void Engine::ImportAllModelThread(bool* bIsEnd)
 				std::string modelFileName;
 				modelFileName.assign(modelFileNameW.begin(), modelFileNameW.end());
 
-				Object* object;
-				
+
 				if (nameW.find(L"Monster") != std::wstring::npos)
 				{
-					object = new Monster();
+					Object* object = new Monster();
+					object->SetName(nameW);
+					mObjects.push_back(object);
+					object->Setup(mD3d11Device, mD3d11DevCon, this);
+					object->ImportModel(modelFileName.c_str());
+					object->SetTextureFileNamesVector(texturesFileNames); 
+					object->SetBoxCollider(2.5f, 2.0f, 1.0f);
+					reinterpret_cast<Monster*>(object)->Initalize(10, shaderFileNameW.c_str());
 				}
 				else
 				{
-					object = new Object();
+					Object* object = new Object();
+					object->SetName(nameW);
+					mObjects.push_back(object);
+					object->Setup(mD3d11Device, mD3d11DevCon, this);
+					object->ImportModel(modelFileName.c_str());
+					object->SetTextureFileNamesVector(texturesFileNames); 
+					object->Initalize(shaderFileNameW.c_str());
 				}
-				object->SetName(nameW);
-
-				mObjects.push_back(object);
-
-				object->Setup(mD3d11Device, mD3d11DevCon, this);
-				object->ImportModel(modelFileName.c_str());
-				object->SetTextureFileNamesVector(texturesFileNames);
-				object->Initalize(shaderFileNameW.c_str());
 
 				texturesFileNames.clear();
 			}
@@ -579,7 +583,10 @@ HRESULT Engine::InitScene()
 
 	cmDesc.FrontCounterClockwise = false;
 	hr = mD3d11Device->CreateRasterizerState(&cmDesc, &mCWcullMode);
+	AssertInitialization(hr, "Direct 3D CreateRasterizer State - Failed");
 
+	cmDesc.FillMode = D3D11_FILL_WIREFRAME;
+	hr = mD3d11Device->CreateRasterizerState(&cmDesc, &mWireFrameCWMode);
 	AssertInitialization(hr, "Direct 3D CreateRasterizer State - Failed");
 
 	D3D11_RASTERIZER_DESC cullDesc;
@@ -668,7 +675,7 @@ void Engine::DrawScene()
 	mCamera->DrawWeapon();
 
 
-	RenderText(L"FPS : ", static_cast<int>(mFps));
+	RenderPlayerInfo();
 
 	// Present the back buffer to the screen
 	mSwapChain->Present(0, 0);
@@ -782,6 +789,89 @@ void Engine::RenderText(std::wstring text, int inInt)
 	mD3d11DevCon->IASetVertexBuffers(0, 1, &mD2dVertBuffer, &stride, &offset);
 	mD3d11DevCon->IASetIndexBuffer(mD2dIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 	
+	mD3d11DevCon->UpdateSubresource(mBaseCB, 0, nullptr, &cbText, 0, 0);
+	mD3d11DevCon->VSSetConstantBuffers(0, 1, &mBaseCB);
+	mD3d11DevCon->PSSetShaderResources(0, 1, &mD2dTexture);
+	mD3d11DevCon->PSSetSamplers(0, 1, &mBaseSamplerState);
+
+	mD3d11DevCon->RSSetState(mCWcullMode);
+
+	mD3d11DevCon->DrawIndexed(6, 0, 0);
+}
+
+void Engine::RenderPlayerInfo()
+{
+	// Set shaders
+	mD3d11DevCon->VSSetShader(mTextVertShader, nullptr, 0);
+	mD3d11DevCon->PSSetShader(mTextPixelShader, nullptr, 0);
+
+	// Release the d3d 11 device
+	mKeyedMutex11->ReleaseSync(0);
+
+	// Use d3d10.1 device
+	mKeyedMutex10->AcquireSync(0, 5);
+
+	// Draw d2d content
+	mD2dRenderTarget->BeginDraw();
+
+	// Clear d2d background
+	mD2dRenderTarget->Clear(D2D1::ColorF(0.0f, 0.0f, 0.0f, 0.0f));
+
+	// Create the string
+	std::wostringstream outputString;
+	outputString
+		<< L"FPS : " << mFps << "\n"
+		<< L"Score : " << mCamera->GetScore() << "\n"
+		<< L"Distance : " << mCamera->GetPickedDist();
+	std::wstring outputText = outputString.str();
+
+	// Set the font color
+	D2D1_COLOR_F fontColor = D2D1::ColorF(1.0f, 1.0f, 1.0f, 1.0f);
+
+	// Set the brush color d2d will use to draw with
+	mBrush->SetColor(fontColor);
+
+	// Create the d2d render area
+	D2D1_RECT_F layoutRect = D2D1::RectF(0, 0, static_cast<FLOAT>(mWidth), static_cast<FLOAT>(mHeight));
+
+	// Draw the text
+	mD2dRenderTarget->DrawText(
+		outputText.c_str(),
+		wcslen(outputText.c_str()),
+		mTextFormat,
+		layoutRect,
+		mBrush
+	);
+
+	mD2dRenderTarget->EndDraw();
+
+	// Release the d3d10.1 device
+	mKeyedMutex10->ReleaseSync(1);
+
+	// Use the d3d11 device
+	mKeyedMutex11->AcquireSync(1, 5);
+
+#ifdef _DEBUG
+	/*ID3D11Resource* d2dResource = nullptr;
+	mD2dTexture->GetResource(&d2dResource);
+	SaveWICTextureToFile(mD3d11DevCon, d2dResource,
+		GUID_ContainerFormatBmp, L"Text.bmp");
+	d2dResource->Release();*/
+#endif
+
+	// Set the blend state for d2d render target texture objects
+	mD3d11DevCon->OMSetBlendState(mTransparencyBlendState, nullptr, 0xffffffff);
+
+	UINT stride = sizeof(Vertex);
+	UINT offset = 0;
+
+	XMMATRIX WVP = XMMatrixIdentity();
+	CBPerObject cbText;
+	cbText.WVP = XMMatrixTranspose(WVP);
+
+	mD3d11DevCon->IASetVertexBuffers(0, 1, &mD2dVertBuffer, &stride, &offset);
+	mD3d11DevCon->IASetIndexBuffer(mD2dIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
 	mD3d11DevCon->UpdateSubresource(mBaseCB, 0, nullptr, &cbText, 0, 0);
 	mD3d11DevCon->VSSetConstantBuffers(0, 1, &mBaseCB);
 	mD3d11DevCon->PSSetShaderResources(0, 1, &mD2dTexture);

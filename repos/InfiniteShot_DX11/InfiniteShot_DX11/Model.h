@@ -63,7 +63,6 @@ namespace Model_
 
 	public:
 		std::vector<std::vector<Vertex>> const& GetVertices() const { return mVertices; }
-		std::vector<std::vector<Indices>> const& GetIndices() const { return mIndices; }
 		bool GetHasAnim() const { return mbHasAnim; }
 		int GetTotalFramesAnim() const { return mTotalFrames; }
 		std::vector<std::vector<DirectX::XMMATRIX>> const& GetAnimKeyFRamePerTime() const { return mAnimKeyFramePerTime; }
@@ -77,16 +76,15 @@ namespace Model_
 		UINT GetSkeleIndex(FbxString skeleName) const;
 		DirectX::XMMATRIX GetXMMATRIX(const FbxAMatrix const* fbxMatrix);
 		void AddAllControlPoint(FbxNode* pNode);
-		void AddNormal(FbxMesh* pMesh, const int ctrlIndex);
-		void AddTexCoord(const FbxMesh* pMesh, const int ctrlIndex, const int layer);
-		void AddPos(const int ctrlIndex);
-		void AddAnim(const int ctrlIndex);
+		void AddNormal(const FbxGeometryElementNormal const* vertexNormal, const int vertCount);
+		void AddTexCoord(const FbxGeometryElementUV const* vertexUV, const int texIndex);
+		void AddPos(const int vertIndex);
+		void AddAnim(const int vertIndex);
 
 	private:
 		bool mbHasAnim = false;
 		int mTotalFrames = 0;
 		std::vector<std::vector<Vertex>> mVertices;
-		std::vector<std::vector<Indices>> mIndices;
 		std::vector<DirectX::XMMATRIX> mAnimInvMatrix;
 		std::vector<std::vector<DirectX::XMMATRIX>> mAnimKeyFramePerTime;
 
@@ -98,7 +96,7 @@ namespace Model_
 		std::vector<Skeleton> mSkele;
 		std::unordered_map<UINT, ContrlPoint> mContrlPoint;
 
-		std::vector<Vertex> mTempVertices;
+		Vertex mTempVertex;
 
 		Engine* mEngine;
 	};

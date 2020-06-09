@@ -63,30 +63,6 @@ bool Object::Initalize(const WCHAR shaderFileName[])
 	}
 
 
-	// Create index buffer
-	D3D11_BUFFER_DESC indexBufferDesc;
-	ZeroMemory(&indexBufferDesc, sizeof(indexBufferDesc));
-
-	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	indexBufferDesc.CPUAccessFlags = 0;
-	indexBufferDesc.MiscFlags = 0;
-
-	D3D11_SUBRESOURCE_DATA indexBufferData;
-	ZeroMemory(&indexBufferData, sizeof(indexBufferData));
-
-	mModelIndexBufParts = new ID3D11Buffer*[mModel.GetIndices().size()];
-
-	for (int num = 0; num < mModel.GetIndices().size(); ++num)
-	{
-		indexBufferDesc.ByteWidth = sizeof(Model_::Indices) * mModel.GetIndices()[num].size();
-		indexBufferData.pSysMem = mModel.GetIndices()[num].data();
-
-		hr = mD3d11Device->CreateBuffer(&indexBufferDesc, &indexBufferData, &mModelIndexBufParts[num]);
-		AssertInitialization(hr, "Direct 3D Create Index Buffer - Failed");
-	}
-
-
 	// Describe the sampler
 	D3D11_SAMPLER_DESC sampDesc;
 	ZeroMemory(&sampDesc, sizeof(sampDesc));
@@ -213,7 +189,7 @@ HRESULT Object::ImportTextures()
 
 void Object::Update(double deltaTime)
 {
-	mCurrTimeAnim += deltaTime;
+	mCurrTimeAnim += 120 * deltaTime;
 
 	if (mCurrTimeAnim >= mModel.GetTotalFramesAnim())
 	{
@@ -238,6 +214,9 @@ void Object::Draw()
 	mD3d11DevCon->UpdateSubresource(mCBPerFrameBuffer, 0, nullptr, &constBuffFrame, 0, 0);
 	mD3d11DevCon->PSSetConstantBuffers(0, 1, &mCBPerFrameBuffer);
 
+	UINT stride = sizeof(Model_::Vertex);
+	UINT offset = 0;
+
 
 	if (mModel.GetHasAnim())
 	{
@@ -258,15 +237,25 @@ void Object::Draw()
 	mD3d11DevCon->VSSetShader(mVS, nullptr, 0);
 	mD3d11DevCon->PSSetShader(mPS, nullptr, 0);
 
-	UINT stride = sizeof(Model_::Vertex);
-	UINT offset = 0; 
 	
 	for (int num = 0; num < mModel.GetVertices().size(); ++num)
 	{
 		mD3d11DevCon->IASetVertexBuffers(0, 1, &mModelVertBufParts[num], &stride, &offset);
-		mD3d11DevCon->IASetIndexBuffer(mModelIndexBufParts[num], DXGI_FORMAT_R32_UINT, 0);
 		mD3d11DevCon->PSSetShaderResources(0, 1, &mModelTextureParts[num]);
-		mD3d11DevCon->DrawIndexed(mModel.GetIndices()[num].size() * 3, 0, 0);
+		mD3d11DevCon->Draw(mModel.GetVertices()[num].size(), 0);
+	}
+
+	if (mVertLayout)
+	{
+		mD3d11DevCon->RSSetState(mEngine->GetWireFrameCWMode());
+
+		mD3d11DevCon->VSSetShader(mEngine->GetBaseVertShader(), nullptr, 0);
+		mD3d11DevCon->PSSetShader(mEngine->GetBasePixelShader(), nullptr, 0);
+
+		stride = sizeof(XMFLOAT3);
+		mD3d11DevCon->IASetVertexBuffers(0, 1, &mColliVertBuf, &stride, &offset);
+
+		mD3d11DevCon->DrawIndexed(36, 0, 0);
 	}
 }
 
@@ -281,20 +270,102 @@ void Object::CleanUp()
 	{
 		mModelTextureParts[i]->Release();
 		mModelVertBufParts[i]->Release();
-		mModelIndexBufParts[i]->Release();
 	}
 	delete[] mModelTextureParts;
 	delete[] mModelVertBufParts;
-	delete[] mModelIndexBufParts;
 	mModel.ReleaseModel();
 }
 
-void* Object::operator new(size_t i)
+void Object::SetBoxCollider(float width, float height, float depth)
 {
-	return _aligned_malloc(sizeof(Object), 16);
+	XMFLOAT3 v[8] =
+	{
+		XMFLOAT3(-width, -height, -depth),
+		XMFLOAT3(-width, +height, -depth),
+		XMFLOAT3(+width, +height, -depth),
+		XMFLOAT3(+width, -height, -depth),
+		XMFLOAT3(-width, -height, +depth),
+		XMFLOAT3(-width, +height, +depth),
+		XMFLOAT3(+width, +height, +depth),
+		XMFLOAT3(+width, -height, +depth),
+	};
+
+	for (int i = 0; i < 8; ++i)
+	{
+		mColliVert[i] = v[i];
+	}
+
+
+	DWORD indices[] = {
+		// front face
+		0, 1, 2,
+		0, 2, 3,
+
+		// back face
+		4, 6, 5,
+		4, 7, 6,
+
+		// left face
+		4, 5, 1,
+		4, 1, 0,
+
+		// right face
+		3, 2, 6,
+		3, 6, 7,
+
+		// top face
+		1, 5, 6,
+		1, 6, 2,
+
+		// bottom face
+		4, 0, 3,
+		4, 3, 7
+	};
+
+	for (int i = 0; i < 36; ++i)
+	{
+		mColliIndex[i] = indices[i];
+	}
+
+
+	D3D11_BUFFER_DESC indexBufferDesc;
+	ZeroMemory(&indexBufferDesc, sizeof(indexBufferDesc));
+
+	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	indexBufferDesc.ByteWidth = sizeof(indices);
+	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	indexBufferDesc.CPUAccessFlags = 0;
+	indexBufferDesc.MiscFlags = 0;
+
+	D3D11_SUBRESOURCE_DATA indexBufferData;
+	ZeroMemory(&indexBufferData, sizeof(indexBufferData));
+
+	indexBufferData.pSysMem = indices;
+
+	HRESULT hr = mD3d11Device->CreateBuffer(&indexBufferDesc, &indexBufferData, &mColliIndexBuf);
+	AssertInitialization(hr, "Direct 3D 11 Create Buffer - Failed");
+
+	D3D11_BUFFER_DESC vertexBufferDesc;
+	ZeroMemory(&vertexBufferDesc, sizeof(vertexBufferDesc));
+
+	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	vertexBufferDesc.ByteWidth = sizeof(v);
+	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vertexBufferDesc.CPUAccessFlags = 0;
+	vertexBufferDesc.MiscFlags = 0;
+
+	D3D11_SUBRESOURCE_DATA vertexBufferData;
+	vertexBufferData.pSysMem = v;
+	hr = mD3d11Device->CreateBuffer(&vertexBufferDesc, &vertexBufferData, &mColliVertBuf);
+	AssertInitialization(hr, "Direct 3D 11 Create Buffer - Failed");
 }
 
-void Object::operator delete(void* p)
-{
-	_aligned_free(p);
-}
+//void* Object::operator new(size_t i)
+//{
+//	return _aligned_malloc(sizeof(Object), 16);
+//}
+//
+//void Object::operator delete(void* p)
+//{
+//	_aligned_free(p);
+//}

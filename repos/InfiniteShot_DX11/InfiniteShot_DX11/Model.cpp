@@ -23,7 +23,7 @@ HRESULT Model::ImportModelFromFile(std::string modelFileName, Engine* engine)
 	FbxScene* fbxScene = FbxScene::Create(fbxManager, "myScene");
 	AssertIsSuccess(fbxScene, "Fbx Sdk Create Scene - Failed");
 
-	bIsSuccess = fbxImporter->Import(fbxScene);
+	fbxImporter->Import(fbxScene);
 	AssertIsSuccess(bIsSuccess, "Fbx Sdk Importer Import Scene - Failed");
 
 	fbxImporter->Destroy();
@@ -258,68 +258,69 @@ HRESULT Model::ImportVertexInfoInternal(FbxNode* pNode)
 			mLogStream
 				<< "\t[Result]		Mesh's Ploygon Count is ... " << polygonAllNum << "\n"
 				<< "\t[Result[		All Control Point Num : " << mContrlPoint.size() << "\n"
-				<< "\t[Result]		This Mesh Indices List\n";
+				<< "\t\t\t\t\t\t\t\t\t\t\t\t\t\t[Result]		" << "Vertex\t\t\t\t\t\t\t\t\t\t\t\t" << "TexCoord\t\t\t\t\t\t\t\t\t\t\t\t" << "Normal\n";
 		}
 #endif
 	//============================================================================================================================//
 
 
-	std::vector<Indices> indices;
+	std::vector<Vertex> oneMeshVertices;
+	int layer = 0;
+
+	if (currMesh->GetElementNormalCount() < 1)
+	{
+		AssertIsSuccess(false, "Model Add Normal - Failed");
+	}
+
+	if (layer >= 2 || currMesh->GetElementUVCount() <= layer)
+	{
+		AssertIsSuccess(false, "Model Add Tex Coord - Failed");
+	}
+
+	FbxGeometryElementNormal* normalElem = currMesh->GetElementNormal();
+	AssertIsSuccess(normalElem, "Fbx Sdk Mesh Get Element Normal - Failed");
+
+	FbxGeometryElementUV* texElem = currMesh->GetElementUV(layer);
+	AssertIsSuccess(texElem, "Fbx Sdk Mesh Get Element UV - Failed");
+
 
 	for (UINT num = 0; num < polygonAllNum; ++num)
 	{
-		Indices tempIndices;
-
 		for (UINT i = 0; i < 3; ++i)
 		{
-			int ctrlPointIndex = currMesh->GetPolygonVertex(num, i);
-
-			tempIndices.index[i] = ctrlPointIndex;
-		}
-
-		indices.push_back(tempIndices);
+			int vertIndex = currMesh->GetPolygonVertex(num, i);
+			int texIndex = currMesh->GetTextureUVIndex(num, i);
+			int vertCount = oneMeshVertices.size() - 1;
 
 
-		//============================================================================================================================//
+			AddNormal(normalElem, vertCount);
+			AddTexCoord(texElem, texIndex);
+			AddPos(vertIndex);
+			AddAnim(vertIndex);
+
+
+			oneMeshVertices.push_back(mTempVertex);
+
+
+			//======================================================================================================================//
 #ifdef LOG_WRITE_FBX_DATA
-		if (mLogStream.is_open())
-		{
-			mLogStream
-				<< "\t[Result]		Polygon Num : " << num << " , Indices : "
-				<< tempIndices.index[0] << " " << tempIndices.index[1] << " " << tempIndices.index[2] << "\n";
+			if (mLogStream.is_open())
+			{
+				mLogStream
+					<< "\t\t[Result]		" << "vertex[" << std::setw(4) << num << "][" << std::setw(4) << i << "]\t|\t"
+					<< std::setw(15) << mTempVertex.Pos.x << ", " << std::setw(15) << mTempVertex.Pos.y << ", " << std::setw(15) << mTempVertex.Pos.z
+					<< "\t|\t" << std::setw(15) << mTempVertex.TexCoord.x << ", " << std::setw(15) << mTempVertex.TexCoord.y
+					<< "\t|\t" << std::setw(15) << mTempVertex.Normal.x << ", " << std::setw(15) << mTempVertex.Normal.y << ", " << std::setw(15) << mTempVertex.Normal.z << "\n";
+			}
+#endif
+			//======================================================================================================================//
 		}
-#endif
-		//============================================================================================================================//
-	}
-
-	mIndices.push_back(indices);
-
-
-	//============================================================================================================================//
-#ifdef LOG_WRITE_FBX_DATA
-	if (mLogStream.is_open())
-	{
-		mLogStream
-			<< "\t[Result]		Mesh's List of Vertex, UV and Normal ...\n"
-			<< "\t\t\t\t\t\t\t\t\t\t\t\t\t\t[Result]		" << "Vertex\t\t\t\t\t\t\t\t\t\t\t\t" << "UV\t\t\t\t\t\t\t\t\t\t\t\t" << "Normal\n";
-	}
-#endif
-	//============================================================================================================================//
-
-
-	for (int ctrlIndex = 0; ctrlIndex < mContrlPoint.size(); ++ctrlIndex)
-	{
-		mTempVertices.push_back(Vertex());
-
-		AddNormal(currMesh, ctrlIndex);
-		AddTexCoord(currMesh, ctrlIndex, 0);
-		AddPos(ctrlIndex);
-		AddAnim(ctrlIndex);
 	}
 
 
-	mVertices.push_back(mTempVertices);
-	mTempVertices.clear();
+	mVertices.push_back(oneMeshVertices);
+	
+	oneMeshVertices.clear();
 
 
 	mEngine->AddPercent(15);
@@ -640,7 +641,6 @@ void Model_::Model::AddAllControlPoint(FbxNode* pNode)
 
 	mContrlPoint.clear();
 
-
 	// Save Variable Fbx Control Point.
 	for (int i = 0; i < pMesh->GetControlPointsCount(); ++i)
 	{
@@ -650,14 +650,8 @@ void Model_::Model::AddAllControlPoint(FbxNode* pNode)
 	}
 }
 
-void Model_::Model::AddNormal(FbxMesh* pMesh, const int ctrlIndex)
+void Model_::Model::AddNormal(const FbxGeometryElementNormal const* vertexNormal, const int vertCount)
 {
-	if (pMesh->GetElementNormalCount() < 1)
-	{
-		AssertIsSuccess(false, "Model Add Normal - Failed");
-	}
-
-	FbxGeometryElementNormal* vertexNormal = pMesh->GetElementNormal(0);
 	switch (vertexNormal->GetMappingMode())
 	{
 	case FbxGeometryElement::eByControlPoint:
@@ -665,18 +659,18 @@ void Model_::Model::AddNormal(FbxMesh* pMesh, const int ctrlIndex)
 		{
 		case FbxGeometryElement::eDirect:
 		{
-			mTempVertices[ctrlIndex].Normal.x = static_cast<float>(vertexNormal->GetDirectArray().GetAt(ctrlIndex).mData[0]);
-			mTempVertices[ctrlIndex].Normal.y = static_cast<float>(vertexNormal->GetDirectArray().GetAt(ctrlIndex).mData[1]);
-			mTempVertices[ctrlIndex].Normal.z = static_cast<float>(vertexNormal->GetDirectArray().GetAt(ctrlIndex).mData[2]);
+			mTempVertex.Normal.x = static_cast<float>(vertexNormal->GetDirectArray().GetAt(vertCount).mData[0]);
+			mTempVertex.Normal.y = static_cast<float>(vertexNormal->GetDirectArray().GetAt(vertCount).mData[1]);
+			mTempVertex.Normal.z = static_cast<float>(vertexNormal->GetDirectArray().GetAt(vertCount).mData[2]);
 		}
 		break;
 
 		case FbxGeometryElement::eIndexToDirect:
 		{
-			int index = vertexNormal->GetIndexArray().GetAt(ctrlIndex);
-			mTempVertices[ctrlIndex].Normal.x = static_cast<float>(vertexNormal->GetDirectArray().GetAt(index).mData[0]);
-			mTempVertices[ctrlIndex].Normal.y = static_cast<float>(vertexNormal->GetDirectArray().GetAt(index).mData[1]);
-			mTempVertices[ctrlIndex].Normal.z = static_cast<float>(vertexNormal->GetDirectArray().GetAt(index).mData[2]);
+			int tempIndex = vertexNormal->GetIndexArray().GetAt(vertCount);
+			mTempVertex.Normal.x = static_cast<float>(vertexNormal->GetDirectArray().GetAt(tempIndex).mData[0]);
+			mTempVertex.Normal.y = static_cast<float>(vertexNormal->GetDirectArray().GetAt(tempIndex).mData[1]);
+			mTempVertex.Normal.z = static_cast<float>(vertexNormal->GetDirectArray().GetAt(tempIndex).mData[2]);
 		}
 		break;
 
@@ -690,18 +684,18 @@ void Model_::Model::AddNormal(FbxMesh* pMesh, const int ctrlIndex)
 		{
 		case FbxGeometryElement::eDirect:
 		{
-			mTempVertices[ctrlIndex].Normal.x = static_cast<float>(vertexNormal->GetDirectArray().GetAt(ctrlIndex).mData[0]);
-			mTempVertices[ctrlIndex].Normal.y = static_cast<float>(vertexNormal->GetDirectArray().GetAt(ctrlIndex).mData[1]);
-			mTempVertices[ctrlIndex].Normal.z = static_cast<float>(vertexNormal->GetDirectArray().GetAt(ctrlIndex).mData[2]);
+			mTempVertex.Normal.x = static_cast<float>(vertexNormal->GetDirectArray().GetAt(vertCount).mData[0]);
+			mTempVertex.Normal.y = static_cast<float>(vertexNormal->GetDirectArray().GetAt(vertCount).mData[1]);
+			mTempVertex.Normal.z = static_cast<float>(vertexNormal->GetDirectArray().GetAt(vertCount).mData[2]);
 		}
 		break;
 
 		case FbxGeometryElement::eIndexToDirect:
 		{
-			int index = vertexNormal->GetIndexArray().GetAt(ctrlIndex);
-			mTempVertices[ctrlIndex].Normal.x = static_cast<float>(vertexNormal->GetDirectArray().GetAt(index).mData[0]);
-			mTempVertices[ctrlIndex].Normal.y = static_cast<float>(vertexNormal->GetDirectArray().GetAt(index).mData[1]);
-			mTempVertices[ctrlIndex].Normal.z = static_cast<float>(vertexNormal->GetDirectArray().GetAt(index).mData[2]);
+			int tempIndex = vertexNormal->GetIndexArray().GetAt(vertCount);
+			mTempVertex.Normal.x = static_cast<float>(vertexNormal->GetDirectArray().GetAt(tempIndex).mData[0]);
+			mTempVertex.Normal.y = static_cast<float>(vertexNormal->GetDirectArray().GetAt(tempIndex).mData[1]);
+			mTempVertex.Normal.z = static_cast<float>(vertexNormal->GetDirectArray().GetAt(tempIndex).mData[2]);
 		}
 		break;
 
@@ -710,28 +704,10 @@ void Model_::Model::AddNormal(FbxMesh* pMesh, const int ctrlIndex)
 		}
 		break;
 	}
-
-	//======================================================================================================================//
-#ifdef LOG_WRITE_FBX_DATA
-	if (mLogStream.is_open())
-	{
-		int currVertexCount = mTempVertices.size() - 1;
-		mLogStream
-			<< "\t\t[Result]		" << "normal[" << std::setw(4) << mVertices.size() << "][" << std::setw(4) << ctrlIndex
-			<< "]\t|\t" << std::setw(15) << mTempVertices[currVertexCount].Normal.x << ", " << std::setw(15) << mTempVertices[currVertexCount].Normal.y << ", " << std::setw(15) << mTempVertices[currVertexCount].Normal.z << "\n";
-	}
-#endif
-	//======================================================================================================================//
 }
 
-void Model_::Model::AddTexCoord(const FbxMesh* pMesh, const int ctrlIndex, const int layer)
+void Model_::Model::AddTexCoord(const FbxGeometryElementUV const* vertexUV, const int texIndex)
 {
-	if (layer >= 2 || pMesh->GetElementUVCount() <= layer)
-	{
-		AssertIsSuccess(false, "Model Add Tex Coord - Failed");
-	}
-	const FbxGeometryElementUV* vertexUV = pMesh->GetElementUV(layer);
-
 	switch (vertexUV->GetMappingMode())
 	{
 	case FbxGeometryElement::eByControlPoint:
@@ -739,16 +715,16 @@ void Model_::Model::AddTexCoord(const FbxMesh* pMesh, const int ctrlIndex, const
 		{
 		case FbxGeometryElement::eDirect:
 		{
-			mTempVertices[ctrlIndex].TexCoord.x = static_cast<float>(vertexUV->GetDirectArray().GetAt(ctrlIndex).mData[0]);
-			mTempVertices[ctrlIndex].TexCoord.y = 1 - static_cast<float>(vertexUV->GetDirectArray().GetAt(ctrlIndex).mData[1]);
+			mTempVertex.TexCoord.x = static_cast<float>(vertexUV->GetDirectArray().GetAt(texIndex).mData[0]);
+			mTempVertex.TexCoord.y = 1 - static_cast<float>(vertexUV->GetDirectArray().GetAt(texIndex).mData[1]);
 		}
 		break;
 
 		case FbxGeometryElement::eIndexToDirect:
 		{
-			int index = vertexUV->GetIndexArray().GetAt(ctrlIndex);
-			mTempVertices[ctrlIndex].TexCoord.x = static_cast<float>(vertexUV->GetDirectArray().GetAt(index).mData[0]);
-			mTempVertices[ctrlIndex].TexCoord.y = 1 - static_cast<float>(vertexUV->GetDirectArray().GetAt(index).mData[1]);
+			int tempIndex = vertexUV->GetIndexArray().GetAt(texIndex);
+			mTempVertex.TexCoord.x = static_cast<float>(vertexUV->GetDirectArray().GetAt(tempIndex).mData[0]);
+			mTempVertex.TexCoord.y = 1 - static_cast<float>(vertexUV->GetDirectArray().GetAt(tempIndex).mData[1]);
 		}
 		break;
 
@@ -763,8 +739,8 @@ void Model_::Model::AddTexCoord(const FbxMesh* pMesh, const int ctrlIndex, const
 		case FbxGeometryElement::eDirect:
 		case FbxGeometryElement::eIndexToDirect:
 		{
-			mTempVertices[ctrlIndex].TexCoord.x = static_cast<float>(vertexUV->GetDirectArray().GetAt(ctrlIndex).mData[0]);
-			mTempVertices[ctrlIndex].TexCoord.y = 1 - static_cast<float>(vertexUV->GetDirectArray().GetAt(ctrlIndex).mData[1]);
+			mTempVertex.TexCoord.x = static_cast<float>(vertexUV->GetDirectArray().GetAt(texIndex).mData[0]);
+			mTempVertex.TexCoord.y = 1 - static_cast<float>(vertexUV->GetDirectArray().GetAt(texIndex).mData[1]);
 		}
 		break;
 
@@ -773,55 +749,31 @@ void Model_::Model::AddTexCoord(const FbxMesh* pMesh, const int ctrlIndex, const
 		}
 		break;
 	}
-
-	//======================================================================================================================//
-#ifdef LOG_WRITE_FBX_DATA
-	if (mLogStream.is_open())
-	{
-		int currVertexCount = mTempVertices.size() - 1;
-		mLogStream
-			<< "\t\t[Result]		" << "texCoord[" << std::setw(4) << mVertices.size() << "][" << std::setw(4) << ctrlIndex
-			<< "]\t|\t" << std::setw(15) << mTempVertices[currVertexCount].TexCoord.x << ", " << std::setw(15) << mTempVertices[currVertexCount].TexCoord.y << "\n";
-	}
-#endif
-	//======================================================================================================================//
 }
 
-void Model_::Model::AddPos(const int ctrlIndex)
+void Model_::Model::AddPos(const int vertIndex)
 {
-	mTempVertices[ctrlIndex].Pos.x = mContrlPoint[ctrlIndex].Pos.x;
-	mTempVertices[ctrlIndex].Pos.y = mContrlPoint[ctrlIndex].Pos.y;
-	mTempVertices[ctrlIndex].Pos.z = mContrlPoint[ctrlIndex].Pos.z;
-
-	//======================================================================================================================//
-#ifdef LOG_WRITE_FBX_DATA
-	if (mLogStream.is_open())
-	{
-		int currVertexCount = mTempVertices.size() - 1;
-		mLogStream
-			<< "\t\t[Result]		" << "pos[" << std::setw(4) << mVertices.size() << "][" << std::setw(4) << ctrlIndex
-			<< "]\t|\t" << std::setw(15) << mTempVertices[currVertexCount].Pos.x << ", " << std::setw(15) << mTempVertices[currVertexCount].Pos.y << ", " << std::setw(15) << mTempVertices[currVertexCount].Pos.z << "\n";
-	}
-#endif
-	//======================================================================================================================//
+	mTempVertex.Pos.x = mContrlPoint[vertIndex].Pos.x;
+	mTempVertex.Pos.y = mContrlPoint[vertIndex].Pos.y;
+	mTempVertex.Pos.z = mContrlPoint[vertIndex].Pos.z;
 }
 
-void Model_::Model::AddAnim(const int ctrlIndex)
+void Model_::Model::AddAnim(const int vertIndex)
 {
 	if (mbHasAnim)
 	{
-		mTempVertices[ctrlIndex].Weights =
+		mTempVertex.Weights =
 			DirectX::XMFLOAT4(
-				mContrlPoint[ctrlIndex].TempAnimInfo.data()[0].Weight,
-				mContrlPoint[ctrlIndex].TempAnimInfo.data()[1].Weight,
-				mContrlPoint[ctrlIndex].TempAnimInfo.data()[2].Weight,
-				mContrlPoint[ctrlIndex].TempAnimInfo.data()[3].Weight);
+				mContrlPoint[vertIndex].TempAnimInfo.data()[0].Weight,
+				mContrlPoint[vertIndex].TempAnimInfo.data()[1].Weight,
+				mContrlPoint[vertIndex].TempAnimInfo.data()[2].Weight,
+				mContrlPoint[vertIndex].TempAnimInfo.data()[3].Weight);
 
-		mTempVertices[ctrlIndex].Indices =
+		mTempVertex.Indices =
 			DirectX::XMINT4(
-				mContrlPoint[ctrlIndex].TempAnimInfo.data()[0].Index,
-				mContrlPoint[ctrlIndex].TempAnimInfo.data()[1].Index,
-				mContrlPoint[ctrlIndex].TempAnimInfo.data()[2].Index,
-				mContrlPoint[ctrlIndex].TempAnimInfo.data()[3].Index);
+				mContrlPoint[vertIndex].TempAnimInfo.data()[0].Index,
+				mContrlPoint[vertIndex].TempAnimInfo.data()[1].Index,
+				mContrlPoint[vertIndex].TempAnimInfo.data()[2].Index,
+				mContrlPoint[vertIndex].TempAnimInfo.data()[3].Index);
 	}
 }

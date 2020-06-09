@@ -17,7 +17,7 @@ namespace ProudMyServer
             NetServer server = new NetServer();
 
             StartServerParameter Param = new StartServerParameter();
-
+            
             Param.tcpPorts.Add(5000);
             Param.udpPorts.Add(5000);
             Param.protocolVersion = new Nettention.Proud.Guid(version);

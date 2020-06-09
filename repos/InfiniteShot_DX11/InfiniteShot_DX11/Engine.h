@@ -50,6 +50,7 @@ public:
 	void UpdateScene();
 	void DrawScene();
 	void RenderText(std::wstring text, int inInt);
+	void RenderPlayerInfo();
 	void ReleaseObject();
 	static HRESULT CompileShader(const LPCWSTR shaderFileName, LPCSTR entryPointName, LPCSTR shaderModelName, ID3DBlob** shaderBlob);
 
@@ -60,6 +61,7 @@ public:
 	ID3D11RasterizerState* GetCWcullMode() const { return mCWcullMode; }
 	ID3D11RasterizerState* GetCCWcullMode() const { return mCCWcullMode; }
 	ID3D11RasterizerState* GetNoCullMode() const { return mNoCullMode; }
+	ID3D11RasterizerState* GetWireFrameCWMode() const { return mWireFrameCWMode; }
 	void SetPercent(int percent) { mPercent = percent; }
 	void AddPercent(int percent) { mPercent += percent; }
 	ID3D11InputLayout* GetBaseInputLayout() const { return mBaseVertLayout; }
@@ -104,6 +106,7 @@ private:
 	ID3D11RasterizerState*		mCCWcullMode				= nullptr;
 	ID3D11RasterizerState*		mCWcullMode					= nullptr;
 	ID3D11RasterizerState*		mNoCullMode					= nullptr;
+	ID3D11RasterizerState*		mWireFrameCWMode			= nullptr;
 
 	// Shaders
 	ID3D11InputLayout*			mBaseVertLayout				= nullptr;

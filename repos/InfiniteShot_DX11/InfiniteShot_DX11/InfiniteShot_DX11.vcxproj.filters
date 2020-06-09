@@ -98,5 +98,8 @@
     <ClInclude Include="Monster.h">
       <Filter>Header Files\Objects</Filter>
     </ClInclude>
+    <ClInclude Include="MonsterInfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -2,6 +2,7 @@
 #include "ErrorLogger.h"
 #include "Engine.h"
 #include "Monster.h"
+#include "MonsterInfo.h"
 #include "Object.h"
 #include <WICTextureLoader.h>
 
@@ -55,77 +56,9 @@ void Camera::Init(HINSTANCE hInstance, HWND hwnd, Engine* engine)
 	mEngine = engine;
 
 
-	std::wfstream weaponInfo;
-	weaponInfo.open(L"Settings\\Objects\\Weapons\\" + mWeaponName + L".txt");
+	InitWeapon();
 
-	weaponInfo >> mWeaponX >> mWeaponY >> mWeaponZ;
-	weaponInfo >> mWeaponScale;
-
-	std::wstring shaderFileName;
-	std::wstring modelFileNameW;
-	std::wstring textureFileName;
-	std::vector<std::wstring> textureFileNames;
-
-	weaponInfo >> shaderFileName;
-	weaponInfo >> modelFileNameW;
-
-	std::string modelFileName;
-	modelFileName.assign(modelFileNameW.begin(), modelFileNameW.end());
-
-	while (true)
-	{
-		if (!(weaponInfo >> textureFileName))
-		{
-			break;
-		}
-
-		textureFileNames.push_back(textureFileName);
-	}
-
-	weaponInfo.close();
-
-
-	for (auto iter = mEngine->GetObjects().begin(); iter != mEngine->GetObjects().end(); ++iter)
-	{
-		if ((*iter)->GetName().find(L"Monster") != std::wstring::npos)
-		{
-			mMonsters.push_back(reinterpret_cast<Monster*>(*iter));
-		}
-	}
-
-
-	mWeapon = new Object();
-	mWeapon->Setup(engine->GetD3d11Deivce(), engine->GetD3d11DevCon(), engine);
-	mWeapon->ImportModel(modelFileName.c_str());
-	mWeapon->SetTextureFileNamesVector(textureFileNames);
-	mWeapon->Initalize(shaderFileName.c_str());
-	mWeapon->SetName(mWeaponName);
-	textureFileName.clear();
-	mWeapon->ImportTextures();
-
-
-	std::wfstream aimSetting;
-	aimSetting.open("Settings\\Objects\\Weapons\\Aim.txt");
-	aimSetting >> textureFileName;
-	aimSetting.close();
-
-
-	hr = CreateWICTextureFromFile(mEngine->GetD3d11Deivce(), textureFileName.c_str(), nullptr, &mTexAim, 0);
-	AssertInitialization(hr, "Direct 3D Create WIC Texture From File - Failed");
-
-	mWorldAim = XMMatrixScaling(0.1f, 0.1f, 0.1f);
-
-
-	D3D11_BUFFER_DESC bdDesc;
-	ZeroMemory(&bdDesc, sizeof(bdDesc));
-	bdDesc.ByteWidth = sizeof(CBPerObject);
-	bdDesc.Usage = D3D11_USAGE_DEFAULT;
-	bdDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	bdDesc.CPUAccessFlags = 0;
-	bdDesc.MiscFlags = 0;
-
-	hr = mEngine->GetD3d11Deivce()->CreateBuffer(&bdDesc, nullptr, &mCBAim);
-	AssertInitialization(hr, "Direct 3D Create Buffer - Failed");
+	InitMonster();
 }
 
 void Camera::UpdateCamera()
@@ -224,6 +157,83 @@ void Camera::ConvertMouseToRay(int mouseX, int mouseY, XMVECTOR* pos, XMVECTOR* 
 	*dir = XMVector3TransformNormal(pickRayInViewSpaceDir, pickRayToWorldSpaceMatrix);
 }
 
+void Camera::InitWeapon()
+{
+	std::wfstream weaponInfo;
+	weaponInfo.open(L"Settings\\Objects\\Weapons\\" + mWeaponName + L".txt");
+
+	weaponInfo >> mWeaponX >> mWeaponY >> mWeaponZ;
+	weaponInfo >> mWeaponScale;
+
+	std::wstring shaderFileName;
+	std::wstring modelFileNameW;
+	std::wstring textureFileName;
+	std::vector<std::wstring> textureFileNames;
+
+	weaponInfo >> shaderFileName;
+	weaponInfo >> modelFileNameW;
+
+	std::string modelFileName;
+	modelFileName.assign(modelFileNameW.begin(), modelFileNameW.end());
+
+	while (true)
+	{
+		if (!(weaponInfo >> textureFileName))
+		{
+			break;
+		}
+
+		textureFileNames.push_back(textureFileName);
+	}
+
+	weaponInfo.close();
+
+
+	mWeapon = new Object();
+	mWeapon->Setup(mEngine->GetD3d11Deivce(), mEngine->GetD3d11DevCon(), mEngine);
+	mWeapon->ImportModel(modelFileName.c_str());
+	mWeapon->SetTextureFileNamesVector(textureFileNames);
+	mWeapon->Initalize(shaderFileName.c_str());
+	mWeapon->SetName(mWeaponName);
+	textureFileName.clear();
+	mWeapon->ImportTextures();
+	
+	
+	std::wfstream aimSetting;
+	aimSetting.open("Settings\\Objects\\Weapons\\Aim.txt");
+	aimSetting >> textureFileName;
+	aimSetting.close();
+
+
+	HRESULT hr = CreateWICTextureFromFile(mEngine->GetD3d11Deivce(), textureFileName.c_str(), nullptr, &mTexAim, 0);
+	AssertInitialization(hr, "Direct 3D Create WIC Texture From File - Failed");
+
+	mWorldAim = XMMatrixScaling(0.1f, 0.1f, 0.1f);
+
+
+	D3D11_BUFFER_DESC bdDesc;
+	ZeroMemory(&bdDesc, sizeof(bdDesc));
+	bdDesc.ByteWidth = sizeof(CBPerObject);
+	bdDesc.Usage = D3D11_USAGE_DEFAULT;
+	bdDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	bdDesc.CPUAccessFlags = 0;
+	bdDesc.MiscFlags = 0;
+
+	hr = mEngine->GetD3d11Deivce()->CreateBuffer(&bdDesc, nullptr, &mCBAim);
+	AssertInitialization(hr, "Direct 3D Create Buffer - Failed");
+}
+
+void Camera::InitMonster()
+{
+	for (auto iter = mEngine->GetObjects().begin(); iter != mEngine->GetObjects().end(); ++iter)
+	{
+		if ((*iter)->GetName().find(L"Monster") != std::wstring::npos)
+		{
+			mMonsters.push_back(reinterpret_cast<Monster*>(*iter));
+		}
+	}
+}
+
 void Camera::CleanUp()
 {
 	mDIKeyboard->Release();
@@ -290,21 +300,24 @@ void Camera::DetectInput(double deltaTime)
 		weaponPos.close();
 	}
 
-	if (mouseCurrState.rgbButtons[0])
+	if (mouseCurrState.rgbButtons[0] & 0x80)
 	{
 		if (!bIsShoot)
 		{
-			POINT mousePos;
-
-			GetCursorPos(&mousePos);
-			ScreenToClient(mEngine->GetHanleer(), &mousePos);
-
 			float tempDist;
 			float closestDist = FLT_MAX;
 			int hitIndex;
 
+			const int pointX = mEngine->GetClientWidth() / 2;
+			const int pointY = mEngine->GetClientHeight() / 2;
+
 			XMVECTOR prwsPos, prwsDir;
-			ConvertMouseToRay(mousePos.x, mousePos.y, &prwsPos, &prwsDir);
+			
+			ConvertMouseToRay(pointX, pointY, &prwsPos, &prwsDir);
+
+			XMFLOAT3 pos, dir;
+			XMStoreFloat3(&pos, prwsPos);
+			XMStoreFloat3(&dir, prwsDir);
 
 			for (auto iter = mMonsters.begin(); iter != mMonsters.end(); ++iter)
 			{
@@ -323,19 +336,21 @@ void Camera::DetectInput(double deltaTime)
 
 				if (closestDist < FLT_MAX)
 				{
-					(*iter)->SetMonsterHit(1, hitIndex);
-					//pickedDist = closestDist;
-					//++mScore;
+					(*iter)->SetMonsterHit(hitIndex, 1);
+					mPickedDist = closestDist;
+					++mScore;
+
+					break;
 				}
 			}
 
 			bIsShoot = true;
 		}
+	}
 
-		if (!mouseCurrState.rgbButtons[0])
-		{
-			bIsShoot = false;
-		}
+	if (!(mouseCurrState.rgbButtons[0] & 0x80))
+	{
+		bIsShoot = false;
 	}
 
 	if (mouseCurrState.lX != mMouseLastState.lX || mouseCurrState.lY != mMouseLastState.lY)
