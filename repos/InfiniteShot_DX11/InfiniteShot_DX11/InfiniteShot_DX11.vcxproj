@@ -27,7 +27,9 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Monster.cpp" />
     <ClCompile Include="Object.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="Skymap.cpp" />
+    <ClCompile Include="Sound.cpp" />
     <ClCompile Include="StringConverter.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="WindowManager.cpp" />
@@ -41,7 +43,9 @@
     <ClInclude Include="Monster.h" />
     <ClInclude Include="MonsterInfo.h" />
     <ClInclude Include="Object.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="Skymap.h" />
+    <ClInclude Include="Sound.h" />
     <ClInclude Include="StringConverter.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="WindowManager.h" />

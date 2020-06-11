@@ -44,11 +44,12 @@ public:
 	virtual void CleanUp();
 
 public:
-	void SetName(std::wstring name) { mName = name; }
 	std::wstring GetName() const { return mName; }
+	void SetName(std::wstring name) { mName = name; }
 	void SetTextureFileNamesVector(std::vector<std::wstring> const& textureFileNames) { mTextureFileNames = textureFileNames; }
 	void SetMatWorld(DirectX::XMMATRIX& worldMat) { mWorld = worldMat; };
 	void SetBoxCollider(float width, float height, float depth);
+	void SetColliWorld(DirectX::XMMATRIX& colliWorld) { mColliWorld = colliWorld; }
 
 public:
 	/*void* operator new(size_t i);
@@ -61,6 +62,7 @@ protected:
 	ID3D11Buffer*				mColliVertBuf				= nullptr;
 	ID3D11Buffer*				mColliIndexBuf				= nullptr;
 	ID3D11InputLayout*			mColliVertLayout			= nullptr;
+	DirectX::XMMATRIX			mColliWorld;
 
 	// Transform
 	DirectX::XMMATRIX			mWorld;

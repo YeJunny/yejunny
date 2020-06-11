@@ -1,17 +1,36 @@
 #include <iostream>
+#include <string>
+#include <unordered_map>
+#include <vector>
 using namespace std;
 
-void print_binary(int number)
+int main()
 {
-    if (number) {
-        print_binary(number >> 1);
-        putc((number & 1) ? '1' : '0', stdout);
-    }
-}
+    vector<string> participant, completion;
 
-int main(int argc, char** argv)
-{
-    float real = 0b11111111111111111111111111111111;
-    printf("%f\n", real);
-	return 0;
+    participant.push_back("korean");
+    completion.push_back("korean2");
+
+    unordered_map<string, int> partMap;
+
+    for (auto iter = participant.begin(); iter != participant.end(); ++iter)
+    {
+        ++partMap[*iter];
+    }
+
+    string inCom;
+    for (auto iter = completion.begin(); iter != completion.end(); ++iter)
+    {
+        if (partMap[*iter] > 1)
+        {
+            --partMap[*iter];
+        }
+        else
+        {
+            inCom = *iter;
+            break;
+        }
+    }
+
+    cout << inCom << endl;
 }

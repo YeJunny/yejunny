@@ -1,6 +1,9 @@
 #include "Camera.h"
 #include "Engine.h"
 #include "Monster.h"
+#include <stdlib.h>
+#include <time.h>
+#include <WICTextureLoader.h>
 using namespace DirectX;
 
 bool Monster::Initalize(const int numMonster, const WCHAR shaderFileName[])
@@ -9,14 +12,51 @@ bool Monster::Initalize(const int numMonster, const WCHAR shaderFileName[])
 
 
 	mNumMonster = numMonster;
-
     mWorlds = new DirectX::XMMATRIX[mNumMonster];
+    mWorldHP = new DirectX::XMMATRIX[mNumMonster];
+    mMonsterHP = new int[mNumMonster];
+
+    std::wstring textureFileName;
+    int hp;
+
+    std::wfstream monsterSetting;
+    monsterSetting.open("Settings\\Objects\\Monsters\\Monster.txt");
+    monsterSetting >> hp >> textureFileName;
+    monsterSetting.close();
+
+    HRESULT hr = CreateWICTextureFromFile(mEngine->GetD3d11Deivce(), textureFileName.c_str(), nullptr, &mTexHP, 0);
+    AssertInitialization(hr, "Direct 3D Create WIC Texture From File - Failed");
+    
+    textureFileName.clear();
+    for (int i = 0; i < mNumMonster; ++i)
+    {
+        mMonsterHP[i] = hp;
+    }
 
 
-    float bottleXPos = -1.0f;
-    float bottleZPos = 1.0f;
-    float bxadd = 0.0f;
-    float bzadd = 0.0f;
+    std::vector<int> randomsX;
+    
+    srand(time(null));
+
+    for (int num = 0; num < mNumMonster; ++num)
+    {
+        while (true)
+        {
+            int randomX = rand() % 8 - 4;
+
+            for (auto iter = randomsX.begin(); iter != randomsX.end(); ++iter)
+            {
+                if (randomX == *iter)
+                {
+                    continue;
+                }
+            }
+
+            randomsX.push_back(randomX);
+
+            break;
+        }
+    }
 
     for (int i = 0; i < mNumMonster; i++)
     {
@@ -25,19 +65,19 @@ bool Monster::Initalize(const int numMonster, const WCHAR shaderFileName[])
         //set the loaded bottles world space
         mWorlds[i] = XMMatrixIdentity();
 
-        bxadd++;
-
-        if (bxadd == 10)
-        {
-            bzadd -= 1.0f;
-            bxadd = 0;
-        }
+        int randomX = randomsX.back();
+        randomsX.pop_back();
+        
+        int randomZ = rand() % 8 - 4;
 
         XMMATRIX Rotation = XMMatrixRotationY(3.14f);
         XMMATRIX Scale = XMMatrixScaling(0.3f, 0.3f, 0.3f);
-        XMMATRIX Translation = XMMatrixTranslation(bottleXPos + bxadd * 2.0f, 2.0f, bottleZPos + bzadd * 2.0f);
+        XMMATRIX Translation = XMMatrixTranslation(randomX, 2.0f, randomZ * 1.0f);
 
         mWorlds[i] = Rotation * Scale * Translation;
+
+        Scale = XMMatrixScaling(mMonsterHP[i] / 10.0f * 1.5f, 0.3f, 1.0f);
+        mWorldHP[i] = Rotation * Scale * Translation;
     }
 
 
@@ -48,12 +88,29 @@ void Monster::Update(double deltaTime)
 {
 	Object::Update(deltaTime);
 
+    for (int i = 0; i < mNumMonster; ++i)
+    {
+        if (mMonsterHP[i] > 0)
+        {
+            XMMATRIX Rotation = XMMatrixRotationY(0);
+            XMMATRIX Scale = XMMatrixScaling(0.3f, 0.3f, 0.3f);
+            XMMATRIX Translation = XMMatrixTranslation(0.0f, 0.01f, 0.0f);
+            //mWorlds[i] = Rotation * Scale * Translation;
+            mWorlds[i] *= Translation;
 
+            mWorldHP[i] *= Translation;
+        }
+    }
 }
 
 void Monster::CleanUp()
 {
 	Object::CleanUp();
+
+    mTexHP->Release();
+
+    delete[] mMonsterHP;
+    delete[] mWorldHP;
 
 	mMonsterHit.clear();
 	delete[] mWorlds;
@@ -73,7 +130,7 @@ void Monster::Draw()
 
     for (int numMon = 0; numMon < mNumMonster; ++numMon)
     {
-        if (mMonsterHit[numMon] == 0)
+        if (mMonsterHP[numMon] > 0)
         {
             UINT stride = sizeof(Model_::Vertex);
             mD3d11DevCon->IASetInputLayout(mVertLayout);
@@ -86,6 +143,7 @@ void Monster::Draw()
             mD3d11DevCon->VSSetConstantBuffers(0, 1, &mCBPerObjectBuffer);
 
 
+            // Set animation
             if (mModel.GetHasAnim())
             {
                 CBAnimMat cbAnimMat;
@@ -99,12 +157,12 @@ void Monster::Draw()
             }
 
 
+            // Draw Monster
             mD3d11DevCon->PSSetSamplers(0, 1, &mObjectSamplerState);
             mD3d11DevCon->RSSetState(mEngine->GetNoCullMode());
 
             mD3d11DevCon->VSSetShader(mVS, nullptr, 0);
             mD3d11DevCon->PSSetShader(mPS, nullptr, 0);
-
 
             for (int num = 0; num < mModel.GetVertices().size(); ++num)
             {
@@ -113,6 +171,8 @@ void Monster::Draw()
                 mD3d11DevCon->Draw(mModel.GetVertices()[num].size(), 0);
             }
 
+
+            // Draw box collider
             if (mVertLayout)
             {
                 mD3d11DevCon->RSSetState(mEngine->GetWireFrameCWMode());
@@ -126,6 +186,21 @@ void Monster::Draw()
 
                 mD3d11DevCon->DrawIndexed(36, 0, 0);
             }
+
+
+            // Draw hp bar
+            WVP = mWorldHP[numMon] * mEngine->GetCamera()->GetViewMat() * mEngine->GetCamera()->GetProjMat();
+            cbPerObj.World = XMMatrixTranspose(mWorldHP[numMon]);
+            cbPerObj.WVP = XMMatrixTranspose(WVP);
+            mD3d11DevCon->UpdateSubresource(mCBPerObjectBuffer, 0, nullptr, &cbPerObj, 0, 0);
+            mD3d11DevCon->VSSetConstantBuffers(0, 1, &mCBPerObjectBuffer);
+
+            stride = sizeof(Vertex);
+            mD3d11DevCon->IASetVertexBuffers(0, 1, mEngine->GetSquareVertBuffer(), &stride, &offset);
+            mD3d11DevCon->IASetIndexBuffer(*mEngine->GetSquareIdxBuffer(), DXGI_FORMAT_R32_UINT, 0);
+            mD3d11DevCon->RSSetState(mEngine->GetNoCullMode());
+            mD3d11DevCon->PSSetShaderResources(0, 1, &mTexHP);
+            mD3d11DevCon->DrawIndexed(6, 0, 0);
         }
     }
 }

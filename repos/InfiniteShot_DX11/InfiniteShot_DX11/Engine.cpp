@@ -1,6 +1,7 @@
 #include "Engine.h"
 #include "Camera.h"
 #include "Monster.h"
+#include "Player.h"
 #include "Skymap.h"
 #include <thread>
 #include <wincodec.h>
@@ -182,8 +183,8 @@ void Engine::ImportAllModelThread(bool* bIsEnd)
 					mObjects.push_back(object);
 					object->Setup(mD3d11Device, mD3d11DevCon, this);
 					object->ImportModel(modelFileName.c_str());
-					object->SetTextureFileNamesVector(texturesFileNames); 
-					object->SetBoxCollider(2.5f, 2.0f, 1.0f);
+					object->SetTextureFileNamesVector(texturesFileNames);
+					object->SetBoxCollider(2.5f, 3.0f, 1.0f);
 					reinterpret_cast<Monster*>(object)->Initalize(10, shaderFileNameW.c_str());
 				}
 				else
@@ -627,6 +628,11 @@ HRESULT Engine::LoadResource()
 	allModelThread.join();
 
 
+	// Create player
+	mPlayer = new Player();
+	mPlayer->Init(this);
+
+
 	// Create camera
 	mCamera = new Camera();
 	mCamera->Init(mInstance, mHwnd, this);
@@ -636,7 +642,7 @@ HRESULT Engine::LoadResource()
 	mSkymap = new Skymap();
 	mSkymap->CreateSpere(10, 10, this);
 
-
+	
 	return S_OK;
 }
 
@@ -645,6 +651,8 @@ void Engine::UpdateScene()
 	mCamera->DetectInput(mFrameTime);
 
 	mSkymap->Update(mFrameTime);
+
+	mPlayer->Update(mFrameTime);
 
 	for (size_t i = 0; i < mObjects.size(); ++i)
 	{
@@ -672,7 +680,7 @@ void Engine::DrawScene()
 
 	mSkymap->Draw();
 
-	mCamera->DrawWeapon();
+	mPlayer->Draw();
 
 
 	RenderPlayerInfo();
@@ -821,8 +829,10 @@ void Engine::RenderPlayerInfo()
 	std::wostringstream outputString;
 	outputString
 		<< L"FPS : " << mFps << "\n"
-		<< L"Score : " << mCamera->GetScore() << "\n"
-		<< L"Distance : " << mCamera->GetPickedDist();
+		<< L"X : " << mPlayer->GetPos().x << " , Y : " << mPlayer->GetPos().y << " , Z : " << mPlayer->GetPos().z << "\n"
+		<< L"HP : " << mPlayer->GetHP() << "\n"
+		<< L"Score : " << mPlayer->GetScore() << "\n"
+		<< L"Distance : " << mPlayer->GetPickedDist();
 	std::wstring outputText = outputString.str();
 
 	// Set the font color

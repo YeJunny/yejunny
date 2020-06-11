@@ -213,7 +213,7 @@ void Skymap::Update(double deltaTime)
     mSphereWorld = DirectX::XMMatrixIdentity();
 
     DirectX::XMMATRIX scale = DirectX::XMMatrixScaling(5.0f, 5.0f, 5.0f);
-    XMVECTOR camPos = mEngine->GetCamera()->GetPosMat();
+    XMVECTOR camPos = mEngine->GetCamera()->GetCamPos();
     XMMATRIX translation = DirectX::XMMatrixTranslation(XMVectorGetX(camPos), XMVectorGetY(camPos), XMVectorGetZ(camPos));
 
     mSphereWorld = scale * translation;

@@ -21,6 +21,7 @@
 #include "WindowManager.h"
 
 class Camera;
+class Player;
 class Skymap;
 
 struct Vertex
@@ -58,6 +59,7 @@ public:
 	ID3D11Device* GetD3d11Deivce() const { return mD3d11Device; }
 	ID3D11DeviceContext* GetD3d11DevCon() const { return mD3d11DevCon; }
 	Camera* GetCamera() const { return mCamera; }
+	Player* GetPlayer() const { return mPlayer; }
 	ID3D11RasterizerState* GetCWcullMode() const { return mCWcullMode; }
 	ID3D11RasterizerState* GetCCWcullMode() const { return mCCWcullMode; }
 	ID3D11RasterizerState* GetNoCullMode() const { return mNoCullMode; }
@@ -118,6 +120,7 @@ private:
 	// Objects
 	Skymap*						mSkymap;
 	Camera*						mCamera;
+	Player*						mPlayer;
 	std::vector<Object*>		mObjects;
 
 	// Temp

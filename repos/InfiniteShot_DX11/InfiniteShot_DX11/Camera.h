@@ -22,17 +22,16 @@ public:
 	void Init(HINSTANCE hInstance, HWND hwnd, Engine* engine);
 	void DetectInput(double deltaTime);
 	void CleanUp();
-	void DrawWeapon() const;
 
 private:
 	void UpdateCamera();
-	void DrawAim() const;
-	void ConvertMouseToRay(int mouseX, int mouseY, XMVECTOR* pos, XMVECTOR* dir);
-	void InitWeapon();
-	void InitMonster();
 
 public:
-	XMVECTOR const& GetPosMat() const { return mCamPosition; }
+	float GetCamYaw() const { return mCamYaw; }
+	float GetCamPitch() const { return mCamPitch; }
+	XMVECTOR const& GetCamRight() { return mCamRight; }
+	XMVECTOR const& GetCamForward() { return mCamForward; }
+	XMVECTOR const& GetCamPos() const { return mCamPosition; }
 	XMMATRIX const& GetViewMat() const { return mCamView; }
 	XMMATRIX const& GetProjMat() const { return mCamProjection; }
 	XMINT3 GetLastCursorPos() const
@@ -40,32 +39,10 @@ public:
 		XMINT3 pos = { mMouseLastState.lX, mMouseLastState.lY, mMouseLastState.lZ };
 		return pos;
 	}
-	int GetScore() const { return mScore; }
-	int GetPickedDist() const { return mPickedDist; }
 
 private:
 	const XMVECTOR				DEFAULT_FORWARD				= XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
 	const XMVECTOR				DEFAULT_RIGHT				= XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
-
-	int							mScore						= 0;
-
-	// Attack
-	std::vector<Monster*>		mMonsters;
-	float						mPickedDist					= 0;
-
-	// Aim
-	ID3D11ShaderResourceView*	mTexAim;
-	ID3D11Buffer*				mCBAim;
-	DirectX::XMMATRIX			mWorldAim;
-
-	// Weapon
-	Object*						mWeapon;
-	XMMATRIX					mWorldWeapon;
-	float						mWeaponY					= 0.6f;
-	float						mWeaponX					= 0.3f;
-	float						mWeaponZ					= 0.4f;
-	float						mWeaponScale				= 0.015f;
-	std::wstring				mWeaponName;
 
 	// Input Hardware
 	IDirectInputDevice8*		mDIKeyboard					= nullptr;
