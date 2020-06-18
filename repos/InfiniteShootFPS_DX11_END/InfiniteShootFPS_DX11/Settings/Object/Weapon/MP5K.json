@@ -1,0 +1,26 @@
+{
+    "Weapon": {
+        "Position" : [ 0.3, 0.6, 0.4 ],
+        "Scale" : 0.015,
+        "ShaderPath" : "Shaders\/BaseEffects.fx",
+        "ModelPath" : "Models\/Weapons\/MP5K.FBX",
+        "TexturesPath" : [
+            "Textures\/Weapons\/MP5K.png"
+        ],
+        "SoundPath" : {
+            "Shoot" : "Sounds\/Weapons\/MP5K\/Shoot.wav"
+        }
+    },
+    "Muzzleflash" : {
+        "Position": [ 0.4, 2.5, 1.0 ],
+        "Scale" : 0.2,
+        "TexturesPath" : [
+            "Textures\/Weapons\/MuzzleFlash.png"
+        ]
+    },
+    "Aim" : {
+        "TexturesPath" : [
+            "Textures\/Weapons\/Aim.png"
+        ]
+    }
+}
