@@ -1,0 +1,21 @@
+{
+    "Castle" : {
+        "Type" : "Structure",
+        "ModelPath" : "Models\/Castle\/Castle.FBX",
+        "ShaderPath" : "Shaders\/BaseEffects.fx",
+        "Textures" : [
+            "Textures\/Castle\/Castle_Interior_Texture.jpg",
+            "Textures\/Castle\/Castle_Ground_Fountain_Texture.jpg",
+            "Textures\/Castle\/Castle_TowersDoors_Windows_Texture.jpg",
+            "Textures\/Castle\/Castle_Exterior_Texture.jpg"
+        ]
+    },
+    "Golem" : {
+        "Type" : "Monster",
+        "ModelPath" : "Models\/Golem\/StoneGolem_anim_fbx.fbx",
+        "ShaderPath" : "Shaders\/AnimEffects.fx",
+        "Textures" : [
+            "Textures\/Golem\/GolemTexture.png"
+        ]
+    }
+}

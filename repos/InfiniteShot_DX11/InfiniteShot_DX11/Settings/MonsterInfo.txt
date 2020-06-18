@@ -1,4 +1,0 @@
-Golem(Monster)
-10
-1
-End

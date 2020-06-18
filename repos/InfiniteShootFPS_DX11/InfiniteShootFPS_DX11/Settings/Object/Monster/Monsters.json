@@ -1,0 +1,11 @@
+{
+    "Golem" : {
+        "ColliderOffset" : [ 0.1, -0.5, 0.2 ],
+        "ColliderScale" : [ 0.6, 0.7, 0.8 ],
+        "AnimTime": {
+            "Attack" : 300.0
+        },
+        "HP" : 10,
+        "HPTexture" : "Textures/HP.png"
+    }
+}

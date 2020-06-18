@@ -1,0 +1,10 @@
+global ServerPIDL 2000  //PIDL로 작성된 소스는 SendText 네임스페이스로 포함되며, 함수 구분 아이디는 2000 번 부터 생성된다.
+{
+	RegisterRequest([in] string id, [in] string pw, [in] string name);
+	RegisterResponse([in] string id, [in] bool bIsRegister);
+	LoginRequest([in] string id, [in] string pw);
+	LoginResponse([in] string id, [in] bool bIsLogin);
+	CreatePlayer([in] string id, [in] string tag);
+	GetPlayerRequest([in] string id, [in] string tag);
+	GetPlayerResponse([in] string id, [in] string tag, [in] int bullet, [in] int hp, [in] int life, [in] bool bIsSucess);
+}

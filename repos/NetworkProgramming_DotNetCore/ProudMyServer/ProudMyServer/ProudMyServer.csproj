@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MySqlConnector" Version="0.69.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="ProudDotNetClient">
       <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Nettention\ProudNet\lib\DotNet\ProudDotNetClient.dll</HintPath>
     </Reference>
