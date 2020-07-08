@@ -1,67 +1,79 @@
+#include <chrono>
 #include <iostream>
 #include <string>
 #include <vector>
 #include <fstream>
-#include "nlohmann/json.hpp"
+#include "MergeSort.h"
+#include "SelectionSort.h"
+#include "QuickSort.h"
 using namespace std;
-using json = nlohmann::json;
+
+int max(int a, int b)
+{
+	if (a > b)
+	{
+		return a;
+	}
+	else
+	{
+		return b;
+	}
+}
+
+int min(int a, int b)
+{
+	if (a > b)
+	{
+		return b;
+	}
+	else
+	{
+		return a;
+	}
+}
+
+int gcd(int num1, int num2)
+{
+	int a = max(num1, num2);
+	int b = min(num1, num2);
+
+	while (b > 0)
+	{
+		int rem = a % b;
+		a = b;
+		b = rem;
+	}
+
+	return a;
+}
+
+class Parent
+{
+public:
+	Parent() : mX(1) { cout << "Parent Class Created!\n"; }
+	~Parent() { cout << "Parent Class Deleted!\n"; }
+	int GetX() const { return mX; }
+
+private:
+	int mX;
+};
+
+class Child : public Parent
+{
+public:
+	Child(int x, int y) : mY(y) { cout << "Child Class Created!\n"; }
+	~Child() { cout << "Child Class Deleted!\n"; }
+	int GetY() const { return mY; }
+
+private:
+	int mY;
+};
 
 int main()
 {
-	std::ifstream modelsInit("ModelsInitialization.json");
+	Child* child = new Child(1, 2);
 
-	modelsInit.seekg(0, modelsInit.end);
-	int fileSize = modelsInit.tellg();
-	modelsInit.seekg(0, modelsInit.beg);
-
-	char* msg = new char[fileSize];
-	modelsInit.read(msg, fileSize);
-	modelsInit.close();
-
-	for (int size = fileSize - 1; size >= 0; --size)
-	{
-		if (msg[size] == '}')
-		{
-			msg[size + 1] = 0;
-			break;
-		}
-	}
-
-	json parsingModel;
-
-	try
-	{
-		parsingModel = json::parse(msg);
-	}
-	catch (json::parse_error& e) 
-	{
-		cout << "message: " << e.what() << '\n'
-			<< "exception id: " << e.id << '\n'
-			<< "byte position of error: " << e.byte << std::endl;
-	}
-	delete[] msg;
-
-
-	/////////////
-
-	auto objects = parsingModel.items();
-
-	for (auto iter = objects.begin(); iter != objects.end(); ++iter)
-	{
-		string objName = (*iter).key();
-		json objValue = (*iter).value();
-
-		string modelPath = objValue["ModelPath"];
-		string shaderPath = objValue["ShaderPath"];
-		vector<string> textures = objValue["Textures"].get<vector<string>>();
-
-
-		for (auto iter2 = textures.begin(); iter2 != textures.end(); ++iter2)
-		{
-			cout << (*iter2).c_str() << endl;
-		}
-	}
-
+	delete child;
 
 	return 0;
 }

@@ -15,6 +15,7 @@ public:
 	bool ProcessMessage();
 	double GetFps() const { return mFps; }
 	HWND GetHanleer() const { return mHwnd; }
+	HWND GetSecondHandler() const { return mHwndSetting; }
 	int GetClientWidth() const { return mWidth; }
 	int GetClientHeight() const { return mHeight; }
 

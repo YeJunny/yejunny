@@ -1,4 +1,5 @@
 #include "Engine.h"
+#include "SecondWindow.h"
 #pragma comment(lib, "DirectXTK.lib")
 
 int WINAPI wWinMain(_In_ HINSTANCE hInstance,
@@ -7,6 +8,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
 	_In_ int		nCmdShow)
 {
 	Engine engine;
+	SecondWindow secondWindow;
 
 	HRESULT hr = engine.InitializeWindow(hInstance, nCmdShow, true, L"Infinite Shoot FPS!", L"InfiniteShotClass", 800, 600);
 	AssertInitialization(hr, "Window Initialization");
@@ -19,9 +21,13 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
 
 	hr = engine.LoadResource();
 	AssertInitialization(hr, "Load Resource - Failed");
+
+	secondWindow.Init(engine.GetSecondHandler(), &engine);
 	
 	while (engine.ProcessMessage())
 	{
+		secondWindow.Update();
+		secondWindow.Draw();
 		engine.UpdateScene();
 		engine.DrawScene();
 	}

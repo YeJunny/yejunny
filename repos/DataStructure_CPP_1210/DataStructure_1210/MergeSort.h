@@ -4,56 +4,52 @@ template <typename T>
 class MergeSort
 {
 public:
-	static void Sort(T mergeArray[], size_t leftIndex, size_t rightIndex)
+	static void Sort(T arr[], int l, int r)
 	{
-		if (leftIndex < rightIndex)
+		if (l < r)
 		{
-			size_t midIndex = (leftIndex + rightIndex) / 2;
-
-			Sort(mergeArray, leftIndex, midIndex);
-			Sort(mergeArray, midIndex + 1, rightIndex);
-
-			int diffIndex = rightIndex - leftIndex;
-			T* sortArray = new T[diffIndex + 1];
-
-			size_t nodeLeftIndex = leftIndex;
-			size_t nodeRightIndex = midIndex + 1;
-			size_t index = 0;
-
-			while (nodeLeftIndex <= midIndex && nodeRightIndex <= rightIndex)
-			{
-				if (mergeArray[nodeLeftIndex] < mergeArray[nodeRightIndex])
-				{
-					sortArray[index++] = mergeArray[nodeLeftIndex++];
-				}
-				else
-				{
-					sortArray[index++] = mergeArray[nodeRightIndex++];
-				}
-			}
-			
-			while (nodeLeftIndex <= midIndex)
-			{
-				sortArray[index++] = mergeArray[nodeLeftIndex++];
-			}
-
-			while (nodeRightIndex <= rightIndex)
-			{
-				sortArray[index++] = mergeArray[nodeRightIndex++];
-			}
-
-			/*for (int i = 0; i <= diffIndex; ++i)
-			{
-				std::cout << sortArray[i] << " ";
-			}
-			std::cout << std::endl;*/
-
-			for (int i = 0; i <= diffIndex; ++i)
-			{
-				mergeArray[leftIndex + i] = sortArray[i];
-			}
-
-			delete[] sortArray;
+			int mid = (l + r) / 2;
+			Sort(arr, l, mid);
+			Sort(arr, mid + 1, r);
+			Merge(arr, l, mid, r);
 		}
+	}
+
+private:
+	static void Merge(T arr[], int l, int m, int r)
+	{
+		const int num = r - l + 1;
+
+		int i = l, j = m + 1, k = 0;
+		T* temp = new T[num];
+
+		while (i <= m && j <= r)
+		{
+			if (arr[i] < arr[j])
+			{
+				temp[k++] = arr[i++];
+			}
+			else
+			{
+				temp[k++] = arr[j++];
+			}
+		}
+
+		while (i <= m)
+		{
+			temp[k++] = arr[i++];
+		}
+
+		while (j <= r)
+		{
+			temp[k++] = arr[j++];
+		}
+
+		for (int n = 0; n < num; ++n)
+		{
+			arr[l + n] = temp[n];
+		}
+
+		delete[] temp;
 	}
 };

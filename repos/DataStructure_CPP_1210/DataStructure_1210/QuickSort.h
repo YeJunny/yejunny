@@ -4,63 +4,81 @@ template <typename T>
 class QuickSort
 {
 public:
-	static void Sort(T quickArray[], int leftIndex, int rightIndex)
+	static void SortMid(T arr[], int low, int high)
 	{
-		if (leftIndex >= rightIndex)
+		if (low < high)
 		{
-			return;
-		}
-
-		int indexArray[] = { leftIndex, (leftIndex + rightIndex) / 2, rightIndex };
-
-		if (quickArray[indexArray[0]] > quickArray[indexArray[1]])
-		{
-			Swap(indexArray, 0, 1);
-		}
-		if (quickArray[indexArray[1]] > quickArray[indexArray[2]])
-		{
-			Swap(indexArray, 1, 2);
-		}
-		if (quickArray[indexArray[0]] > quickArray[indexArray[1]])
-		{
-			Swap(indexArray, 0, 1);
-		}
-
-		Swap(quickArray, indexArray[1], leftIndex);
-
-		T pivot = quickArray[leftIndex];
-		int low = leftIndex + 1;
-		int high = rightIndex;
-
-		while (low <= high)
-		{
-			while (quickArray[low] <= pivot && low <= rightIndex)
+			int pi = PartitionMid(arr, low, high);
+			if (low < pi - 1)
 			{
-				low++;
+				SortMid(arr, low, pi - 1);
 			}
-
-			while (quickArray[high] >= pivot && high >= leftIndex + 1)
+			else if (high > pi)
 			{
-				high--;
-			}
-
-			if (low <= high)
-			{
-				Swap(quickArray, low, high);
+				SortMid(arr, pi, high);
 			}
 		}
+	}
 
-		Swap(quickArray, leftIndex, high);
-
-		Sort(quickArray, leftIndex, high - 1);
-		Sort(quickArray, high + 1, rightIndex);
+	static void SortLast(T arr[], int low, int high)
+	{
+		if (low < high)
+		{
+			int pi = PartitionLast(arr, low, high);
+			SortLast(arr, low, pi - 1);
+			SortLast(arr, pi + 1, high);
+		}
 	}
 
 private:
-	static void Swap(T quickArray[], size_t index1, size_t index2)
+	static int PartitionLast(T arr[], int low, int high)
 	{
-		T tempValue = quickArray[index1];
-		quickArray[index1] = quickArray[index2];
-		quickArray[index2] = tempValue;
+		int i = -1;
+
+		for (int j = 0; j < high; ++j)
+		{
+			if (arr[j] < arr[high])
+			{
+				++i;
+				Swap(&arr[i], &arr[j]);
+			}
+		}
+
+		Swap(&arr[i + 1], &arr[high]);
+
+		return i + 1;
+	}
+	
+	static int PartitionMid(T arr[], int low, int high)
+	{
+		T pivot = arr[(low + high) / 2];
+
+		while (low < high)
+		{
+			while (arr[low] < pivot)
+			{
+				++low;
+			}
+
+			while (arr[high] > pivot)
+			{
+				--high;
+			}
+
+			if (low < high)
+			{
+				Swap(&arr[low], &arr[high]);
+				++low;
+				--high;
+			}
+		}
+		return low;
+	}
+
+	static void Swap(int* a, int* b)
+	{
+		T temp = *a;
+		*a = *b;
+		*b = temp;
 	}
 };

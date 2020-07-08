@@ -45,7 +45,7 @@ private:
 	const float					BOUND_TIME					= 0.1f;
 
 	int							mScore						= 0;
-	int							mHP							= 50;
+	int							mHP							= 10;
 	bool						mbIsDead					= false;
 	XMFLOAT3					mSpawnPos;
 

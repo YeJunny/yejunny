@@ -10,104 +10,70 @@
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 
-#define BUF_SIZE (1024)
+#define BUF_SIZE (30)
 
 using namespace std;
 
-void error_handling(const char message[]);
+void ErrorHandling(const char* message);
 
 int main(int argc, char* argv[])
 {
-    if (argc != 2)
-    {
-        puts("Usage : <port>");
-        return -1;
-    }
+	WSADATA wsaData;
+	SOCKET hAcptSock, hRecvSock;
 
-    wchar_t name[] = L"Hello, World!";
-    char name2[] = "Hello, World!";
-    cout << name << " " << name2 << endl;
-    cout << wcslen(name) << " " << strlen(name2) << endl;
+	SOCKADDR_IN recvAdr;
+	SOCKADDR_IN sendAdr;
+	int sendAdrSize, strLen;
+	char buf[BUF_SIZE];
+	int result;
 
-    WSADATA wsaData;
-    if (WSAStartup(MAKEWORD(2, 2), &wsaData))
-    {
-        error_handling("WSAStartup() error");
-    }
+	fd_set read, except, readCopy, exceptCopy;
+	struct timeval timeout;
 
-    SOCKET servSocket;
-    servSocket = socket(PF_INET, SOCK_STREAM, 0);
-    if (servSocket == INVALID_SOCKET)
-    {
-        error_handling("socket() error");
-    }
+	if (argc != 2) {
+		printf("Usage : %s <port>\n", argv[0]);
+		exit(1);
+	}
 
-    sockaddr_in servAddr;
-    memset(&servAddr, 0, sizeof(sockaddr_in));
-    servAddr.sin_family = AF_INET;
-    servAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    servAddr.sin_port = htons(atoi(argv[1]));
-    if (bind(servSocket, (sockaddr*)&servAddr, sizeof(servAddr)) == SOCKET_ERROR)
-    {
-        error_handling("bind() error");
-    }
+	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
+		ErrorHandling("WSAStartup() error!");
 
-    if (listen(servSocket, 5) == SOCKET_ERROR)
-    {
-        error_handling("listen() error");
-    }
-    
-    sockaddr_in clntAddr;
-    int clntAddrSize = sizeof(clntAddr);
-    SOCKET clntSocket = accept(servSocket, (sockaddr*)&clntAddr, &clntAddrSize);
-    if (clntSocket == SOCKET_ERROR)
-    {
-        error_handling("accept() error");
-    }
-    else
-    {
-        cout << "Connected client\n";
-    }
+	hAcptSock = socket(PF_INET, SOCK_STREAM, 0);
+	memset(&recvAdr, 0, sizeof(recvAdr));
+	recvAdr.sin_family = AF_INET;
+	recvAdr.sin_addr.s_addr = htonl(INADDR_ANY);
+	recvAdr.sin_port = htons(atoi(argv[1]));
 
-    char fileName[30];
-    int fileNameLen = recv(clntSocket, fileName, 30, 0);
-    fileName[fileNameLen] = 0;
+	if (bind(hAcptSock, (SOCKADDR*)&recvAdr, sizeof(recvAdr)) == SOCKET_ERROR)
+		ErrorHandling("bind() error");
+	if (listen(hAcptSock, 5) == SOCKET_ERROR)
+		ErrorHandling("listen() error");
 
-    FILE* fp = fopen(fileName, "rb");
-    if (fp == NULL)
-    {
-        error_handling("fopen() error");
-    }
+	sendAdrSize = sizeof(sendAdr);
 
-    char message[BUF_SIZE];
-    int read_len;
-    while ((read_len = fread(message, 1, BUF_SIZE, fp)) != 0)
-    {
-        if (read_len < BUF_SIZE)
-        {
-            send(clntSocket, message, read_len, 0);
-            break;
-        }
 
-        send(clntSocket, message, BUF_SIZE, 0);
-    }
-    puts("Send Complete!");
+	while (true)
+	{
+		hRecvSock = accept(hAcptSock, (SOCKADDR*)&sendAdr, &sendAdrSize);
 
-    shutdown(clntSocket, SD_SEND);
-    recv(clntSocket, message, BUF_SIZE, 0);
-    printf("Message from Client : %s \n", message);
 
-    fclose(fp);
-    closesocket(clntSocket);
-    closesocket(servSocket);
+		send(hRecvSock, "abcde", 5, 0);
 
-    WSACleanup();
+		send(hRecvSock, "Hello, Last Message!\n", 21, 0);
 
-    return 0;
+		//shutdown(hRecvSock, 1);
+
+		closesocket(hRecvSock);
+	}
+
+	closesocket(hAcptSock);
+	WSACleanup();
+	return 0;
 }
 
-void error_handling(const char message[])
+void ErrorHandling(const char* message)
 {
-    puts(message);
-    exit(1);
+	fputs(message, stderr);
+	fputc('\n', stderr);
+	exit(1);
 }

@@ -45,9 +45,6 @@
     <ClCompile Include="Model.cpp">
       <Filter>Source Files\Model</Filter>
     </ClCompile>
-    <ClCompile Include="Loading.cpp">
-      <Filter>Source Files\Objects</Filter>
-    </ClCompile>
     <ClCompile Include="Object.cpp">
       <Filter>Source Files\Objects</Filter>
     </ClCompile>
@@ -81,6 +78,9 @@
     <ClCompile Include="SoundManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SecondWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ErrorLogger.h">
@@ -97,9 +97,6 @@
     </ClInclude>
     <ClInclude Include="Model.h">
       <Filter>Header Files\Model</Filter>
-    </ClInclude>
-    <ClInclude Include="Loading.h">
-      <Filter>Header Files\Objects</Filter>
     </ClInclude>
     <ClInclude Include="Object.h">
       <Filter>Header Files\Objects</Filter>
@@ -132,6 +129,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SoundManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SecondWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
